@@ -21,7 +21,7 @@ public class FoodsController {
 	private FoodsService foodsService;
 
 	@PostMapping("/food")
-	public ResponseEntity<FoodCreateResponseDto> createFood(@RequestBody FoodCreateRequestDto requestDto) {
+	public ResponseEntity<ApiResponse<FoodCreateResponseDto>> createFood(@RequestBody FoodCreateRequestDto requestDto) {
 
 		return null;
 	}
