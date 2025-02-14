@@ -38,4 +38,10 @@ public class FoodsController {
 
 		return null;
 	}
+
+	@GetMapping("/food/{foodId}")
+	public ResponseEntity<ApiResponse<FoodResponseDto>> getFood(@PathVariable String foodId) {
+
+		return null;
+	}
 }
