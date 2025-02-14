@@ -2,7 +2,6 @@ package com.sparta.first.project.eighteen.domain.orders.dtos;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +14,7 @@ public class OrderRequestDto {
 	private String noteToDelivery;
 	private List<OrderDetailsRequestDto> orderDetails;
 
-	// mock 데이터를 위한 임시 생성자
+	//TODO: DELETE MOCKDATA
 	public OrderRequestDto(String id) {
 		this.storeId = "1";
 		this.isStoreOrder = false;
