@@ -3,7 +3,8 @@ name: Test_pull_request
 on:
   pull_request:
     branches:
-      - 'feat/**', 'dev'
+      - 'feat/**'
+      - 'dev'
     paths:
       - 'src/**'
 
