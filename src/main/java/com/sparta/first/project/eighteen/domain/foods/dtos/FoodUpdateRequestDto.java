@@ -11,9 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class FoodCreateRequestDto {
-
-	private String storeId;
+public class FoodUpdateRequestDto {
 
 	@NotBlank(message = "메뉴 이름은 필수입니다.")
 	private String foodName;
