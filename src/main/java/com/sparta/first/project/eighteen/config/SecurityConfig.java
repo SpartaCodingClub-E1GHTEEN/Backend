@@ -29,8 +29,8 @@ public class SecurityConfig {
 		http
 			.authorizeHttpRequests((auth) -> auth
 				.requestMatchers("api/v1/auth/**").permitAll()  // swagger나 rest docs 넣는다면 추가
-				.requestMatchers("/owner/v1/**").hasRole("ROLE_OWNER")
-				.requestMatchers("/admin/v1/**").hasAnyRole("ROLE_MANAGER", "ROLE_MASTER")
+				.requestMatchers("/owner/v1/**").hasRole("OWNER")
+				.requestMatchers("/admin/v1/**").hasAnyRole("MANAGER", "MASTER")
 				.anyRequest().authenticated());
 
 		return http.build();
