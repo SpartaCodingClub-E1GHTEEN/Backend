@@ -24,31 +24,30 @@ public class OrderController {
 
 	@PostMapping
 	public ResponseEntity<ApiResponse<OrderResponseDto>> createOrder(@RequestBody OrderRequestDto requestDto) {
-		return ResponseEntity.ok(ApiResponse.ok("메시지", new OrderResponseDto(requestDto)));
+		return ResponseEntity.ok(ApiResponse.ok("주문이 완료되었습니다.", new OrderResponseDto(requestDto)));
 	}
 
 	@GetMapping("/{id}")
-	public OrderResponseDto getOrder(@PathVariable String id){
-		return new OrderResponseDto(new OrderRequestDto(id));
+	public ResponseEntity<ApiResponse<OrderResponseDto>> getOrder(@PathVariable String id){
+		return ResponseEntity.ok(ApiResponse.ok( "주문을 조회했습니다.",new OrderResponseDto(new OrderRequestDto(id))));
 	}
 
 	@GetMapping
-	public PagedModel<OrderResponseDto> getOrder(@ModelAttribute OrderSearchRequestDto requestDto){
-		return null;
+	public ResponseEntity<ApiResponse<PagedModel<OrderResponseDto>>> getOrder(@ModelAttribute OrderSearchRequestDto requestDto){
+		return  ResponseEntity.ok(ApiResponse.ok("주문 목록을 조회했습니다", null));
 	}
 
 	@PatchMapping("/{id}")
-	public OrderResponseDto updateOrder(@PathVariable String id, @RequestBody OrderUpdateRequestDto requestDto){
+	public ResponseEntity<ApiResponse<OrderResponseDto>> updateOrder(@PathVariable String id, @RequestBody OrderUpdateRequestDto requestDto){
 		OrderResponseDto responseDto = new OrderResponseDto(requestDto);
 		responseDto.setId(id);
-		return responseDto;
+		return ResponseEntity.ok(ApiResponse.ok("주문 목록을 조회했습니다", responseDto));
 	}
 
 	@DeleteMapping("/{id}")
-	public OrderResponseDto cancelOrder(@PathVariable String id){
-		OrderResponseDto responseDTO = new OrderResponseDto(new OrderRequestDto(id));
-		responseDTO.setStatus(OrderStatus.CANCELED);
-		return responseDTO;
+	public ResponseEntity<ApiResponse<OrderResponseDto>> cancelOrder(@PathVariable String id){
+		OrderResponseDto responseDto = new OrderResponseDto(new OrderRequestDto(id));
+		responseDto.setStatus(OrderStatus.CANCELED);
+		return ResponseEntity.ok(ApiResponse.ok("주문 목록을 조회했습니다", responseDto));
 	}
-
 }
