@@ -3,10 +3,10 @@ package com.sparta.first.project.eighteen.domain.orders.dtos;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
 @Setter
-public class OrderDetailsRequestDto {
+@Getter
+public class OrderDetailsUpdateRequestDto {
+	private String orderDetailsId;
 	private String productId;
 	private String[] optionIds;
 }
-
