@@ -1,0 +1,65 @@
+name: Test_pull_request
+
+on:
+  pull_request:
+    branches:
+      - 'feat/**'
+      - 'dev'
+    paths:
+      - 'src/**'
+
+jobs:
+  Test:
+    permissions:
+      checks: write
+      pull-requests: write
+
+    runs-on: ubuntu-latest
+
+    services:
+      # Docker image pull & setting
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: eighteen
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Check access
+        if: ${{ github.event.pull_request.author_association != 'COLLABORATOR' && github.event.pull_request.author_association != 'MEMBER' && github.event.pull_request.author_association != 'CONTRIBUTOR' }}
+        run: |
+          echo "Event not triggered by a collaborator."
+          exit 1
+
+      - name: Fetching updates
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Check log
+        run: git log --oneline -5 # 5개만 체크
+
+      - name: Set up Java
+        uses: actions/setup-java@v4.5.0
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Grant execution permission to gradle
+        run: chmod +x gradlew
+
+      - name: Start test
+        run: ./gradlew test -i
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: '**/build/test-results/test/TEST-*.xml'
