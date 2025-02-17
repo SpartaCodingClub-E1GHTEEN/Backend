@@ -16,6 +16,7 @@ import com.sparta.first.project.eighteen.domain.foods.dtos.FoodCreateRequestDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodGetResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodSearchRequestDto;
+import com.sparta.first.project.eighteen.domain.foods.dtos.FoodUpdateRequestDto;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -45,7 +46,7 @@ public class FoodsController {
 
 	@PutMapping("/foods/{foodId}")
 	public ResponseEntity<ApiResponse<FoodResponseDto>> updateFood(@PathVariable String foodId,
-		@RequestBody FoodCreateRequestDto requestDto) {
+		@RequestBody FoodUpdateRequestDto requestDto) {
 
 		return null;
 	}
