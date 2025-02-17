@@ -9,6 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -21,7 +23,7 @@ import lombok.NoArgsConstructor;
 @Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "reviews")
+@Table(name = "p_reviews")
 public class Review extends BaseEntity {
 
 	// 리뷰 ID
@@ -39,17 +41,19 @@ public class Review extends BaseEntity {
 
 	// 주문 ID (해당 주문에 대한 리뷰)
 	// 연관 관계
-	// @Column(name = "order_id")
+	// @OneToOne
+	// @JoinColumn(name = "orderId", referencedColumnName = "id")
 	// private Order orderId;
 
 	// 식당 ID (식당에 대한 리뷰)
 	// 연관 관계
-	// @Column(name = "store_id")
+	// @ManyToOne
+	// @JoinColumn(name = "storeId", referencedColumnName = "id")
 	// private Store storeId;
 
 	// 회원 ID (리뷰 작성자)
-	// 연관 관계
-	// @Column(name = "user_id")
+	// @ManyToOne
+	// @JoinColumn(name = "userId", referencedColumnName = "id")
 	// private User userId;
 
 }

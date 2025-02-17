@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "stores")
+@Table(name = "p_stores")
 public class Store extends BaseEntity {
 
 	// 가게 ID
@@ -54,7 +54,8 @@ public class Store extends BaseEntity {
 
 	// 회원 ID (식당 주인)
 	// 연관 관계
-	// @Column(name = "user_id")
+	// @ManyToOne
+	// @JoinColumn(name = "userId", referencedColumnName = "id")
 	// private User userId;
 
 }
