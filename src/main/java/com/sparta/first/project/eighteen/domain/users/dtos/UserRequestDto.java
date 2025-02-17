@@ -1,9 +1,12 @@
 package com.sparta.first.project.eighteen.domain.users.dtos;
 
+import java.util.UUID;
+
 import org.hibernate.validator.constraints.Length;
 
 import com.sparta.first.project.eighteen.model.users.Role;
 import com.sparta.first.project.eighteen.model.users.SignUpType;
+import com.sparta.first.project.eighteen.model.users.Users;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
@@ -39,4 +42,30 @@ public class UserRequestDto {
 
 	private String address;
 
+	public static Users toEntity(UserRequestDto requestDto) {
+		return Users.builder()
+			.username(requestDto.username)
+			.userPassword(requestDto.password)
+			.userNickname(requestDto.nickname)
+			.userPhone(requestDto.phone)
+			.userAddress(requestDto.address)
+			.email(requestDto.email)
+			.role(requestDto.role)
+			.createdBy("50ce7d0a-4ae2-4c47-9842-56bdc29c060d")
+			.build();
+	}
+
+	public static Users toEntityWithUUID(UserRequestDto requestDto, UUID userId) {
+		return Users.builder()
+			.userId(userId)
+			.username(requestDto.username)
+			.userPassword(requestDto.password)
+			.userNickname(requestDto.nickname)
+			.userPhone(requestDto.phone)
+			.userAddress(requestDto.address)
+			.email(requestDto.email)
+			.role(requestDto.role)
+			.createdBy("50ce7d0a-4ae2-4c47-9842-56bdc29c060d")
+			.build();
+	}
 }
