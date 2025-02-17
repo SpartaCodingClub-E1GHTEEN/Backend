@@ -76,7 +76,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			.userRole(User.Role.OWNER)
 			.build();
 
+		User admin = User.builder()
+			.username("admin")
+			.password(passwordEncoder.encode("admin"))
+			.userId("admin")
+			.userRole(User.Role.MANAGER)
+			.build();
+
 		userRepository.put("customer", customer);
 		userRepository.put("owner", owner);
+		userRepository.put("admin", admin);
 	}
 }
