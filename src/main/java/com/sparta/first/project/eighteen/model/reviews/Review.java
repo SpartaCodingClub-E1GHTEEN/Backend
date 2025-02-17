@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "reviews")
+@Table(name = "p_reviews")
 public class Review extends BaseEntity {
 
 	// 리뷰 ID

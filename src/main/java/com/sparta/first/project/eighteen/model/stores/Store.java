@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "stores")
+@Table(name = "p_stores")
 public class Store extends BaseEntity {
 
 	// 가게 ID
