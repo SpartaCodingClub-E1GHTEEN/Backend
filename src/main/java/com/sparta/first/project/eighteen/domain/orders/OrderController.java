@@ -19,7 +19,7 @@ import com.sparta.first.project.eighteen.domain.orders.dtos.OrderSearchRequestDt
 import com.sparta.first.project.eighteen.domain.orders.dtos.OrderUpdateRequestDto;
 import com.sparta.first.project.eighteen.model.orders.OrderStatus;
 
-@RequestMapping("/api/v1/order")
+@RequestMapping("/api/v1/orders")
 @RestController
 public class OrderController {
 
