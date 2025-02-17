@@ -35,7 +35,7 @@ public class LoginTest {
 	@MockitoBean
 	JwtUtil jwtUtil;
 
-	@MockitoBean
+	@Autowired
 	PasswordEncoder passwordEncoder;
 
 	ObjectMapper objectMapper = new ObjectMapper();
@@ -43,14 +43,14 @@ public class LoginTest {
 	@ParameterizedTest
 	@DisplayName("로그인 성공 테스트")
 	@CsvSource(value = {
-		"owner:owner:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvd25lciIsImF1dGgiOiJST0xFX09XTkVSIiwiaXNzIjoiZWlnaHRlZW4iLCJpYXQiOjE3NDA5MTAwMTR9.4nxOJmZjF-074SeufD6VGQCeXfrZ-x55lsyEAX7VgdmkpWj0E3W__6rwPW8ex5W2xdF85hG00H7rVDSwZaIf-Q",
-		"customer:customer:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjdXN0b21lciIsImF1dGgiOiJST0xFX0NVU1RPTUVSIiwiaXNzIjoiZWlnaHRlZW4iLCJpYXQiOjE3NDA5MTAwNDR9.sPsfOyKfz2NkHhXR8y9dkpJnl0DVyMgUmIHKkGNOgw9wEyQe0WsYiopHFmrtayhhNSahKG-uzrq-p_cC69-mIg"
+		"customer:customer:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJmY2NmMzQ0OC0wM2M3LTQ3YTQtYTEwOC1jZTZjMzk4MTVhMzciLCJhdXRoIjoiUk9MRV9DVVNUT01FUiIsImlzcyI6ImVpZ2h0ZWVuIiwiaWF0IjoxNzQxMDA5NTYzfQ.DFavV8v-1o3wyui2W8tnASsRU-DpT9FRc6yImHVWD7pem0SWmnuRL5gOfWky51WiDXZ0aN2WT8J24UngPABxpQ",
+		"owner:owner:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIzYTUwM2NkOS04M2IyLTQzNzQtOTQwNS1lMmRlZThjNTZiMWMiLCJhdXRoIjoiUk9MRV9PV05FUiIsImlzcyI6ImVpZ2h0ZWVuIiwiaWF0IjoxNzQxMDA5NTk1fQ.y7cTaynw75ksi2vuPMQpg2TCobPMVW1YYhdIYGZxauLnRohRnFjxx03_7ZFOotSLQa7VX78jto-1QxctrD02gQ",
+		"manager:manager:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJmYWUwNzZlMy01ODQyLTQyMWYtYTExOS1iNjQ2NjYwM2I5NjQiLCJhdXRoIjoiUk9MRV9NQU5BR0VSIiwiaXNzIjoiZWlnaHRlZW4iLCJpYXQiOjE3NDEwMDk1MDV9.Hv0871zRgqaOMofrlaxJ8agxOCPSQ5J_g8dLba8yI0sNB5GxYxU7n8dTURnlXOnUezNRPsXfYbhus79XsY_inA"
 	}, delimiter = ':')
 	public void loginSuccessTest(String username, String password, String accToken) throws Exception {
 		// given
 		LoginRequestDto requestDto = new LoginRequestDto(username, password);
 		ApiResponse<Map<String, String>> apiResponse = ApiResponse.ok("로그인 성공", Map.of("token", accToken));
-
 		given(jwtUtil.generateAccessToken(anyString(), anyString())).willReturn(accToken);
 
 		// when
