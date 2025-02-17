@@ -11,30 +11,42 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import lombok.Getter;
 
+@Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity {
 
 	@CreatedDate
-	@Column(nullable = false)
-	private LocalDateTime createdAt;
+	@Column(nullable = false, updatable = false)
+	@Temporal(value = TemporalType.TIMESTAMP)
+	protected LocalDateTime createdAt;
 
-	// User / String
 	@CreatedBy
-	@Column(nullable = false)
-	private String createdBy;
+	@Column(nullable = false, updatable = false)
+	protected String createdBy;
 
 	@LastModifiedDate
-	private LocalDateTime modifiedAt;
+	@Temporal(value = TemporalType.TIMESTAMP)
+	protected LocalDateTime modifiedAt;
 
 	@LastModifiedBy
-	private String modifiedBy;
+	protected String modifiedBy;
 
 	// 소프트 삭제가 되었는지 (isSoftDeleted?)
 	// True - False
-	private Boolean isDeleted;
+	protected Boolean isDeleted;
 	// 소프트 삭제가 된 날짜 (Null - Not Null)
-	private LocalDateTime deletedAt;
-	private String deletedBy;
+	@Temporal(value = TemporalType.TIMESTAMP)
+	protected LocalDateTime deletedAt;
+	protected String deletedBy;
+
+	public void delete(boolean flag, String userId) {
+		this.deletedAt = LocalDateTime.now();
+		this.isDeleted = flag;
+		this.deletedBy = userId;
+	}
 }

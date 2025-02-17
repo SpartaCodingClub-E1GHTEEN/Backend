@@ -27,6 +27,9 @@ public class ReviewResponseDto {
 	// 리뷰 별점
 	private int reviewRating;
 
+	// 리뷰 이미지
+	private String reviewImgUrl;
+
 	// 테스트를 위한 임시 생성자
 	public ReviewResponseDto(ReviewCreateRequestDto reviewRequestDto) {
 		this.id = "1";
@@ -35,6 +38,7 @@ public class ReviewResponseDto {
 		this.reviewOrders = "김밥, 떡볶이, 등등 ..";
 		this.reviewContent = reviewRequestDto.getReviewContent();
 		this.reviewRating = reviewRequestDto.getReviewRating();
+		this.reviewImgUrl = reviewRequestDto.getReviewImgUrl();
 	}
 
 	// 테스트를 위한 임시 생성자
@@ -44,6 +48,7 @@ public class ReviewResponseDto {
 		this.reviewOrders = "김밥, 떡볶이, 순대";
 		this.reviewContent = reviewRequestDto.getReviewContent();
 		this.reviewRating = reviewRequestDto.getReviewRating();
+		this.reviewImgUrl = reviewRequestDto.getReviewImgUrl();
 	}
 
 }

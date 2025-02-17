@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.sparta.first.project.eighteen.model.users.User;
+import com.sparta.first.project.eighteen.model.users.Users;
 
-public interface UserRepository extends JpaRepository<User, UUID> {
+public interface UserRepository extends JpaRepository<Users, UUID> {
 }

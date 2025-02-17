@@ -56,7 +56,7 @@ public class UserController {
 	@PreAuthorize("hasAnyRole('ROLE_OWNER', 'ROLE_CUSTOMER')")
 	@DeleteMapping
 	public ResponseEntity<ApiResponse<Void>> deleteUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-		String userId = userDetails.getUser().getUserId().toString();
+		String userId = userDetails.getUsers().getUserId().toString();
 		return ResponseEntity.ok(ApiResponse.ok("삭제 성공", null));
 	}
 

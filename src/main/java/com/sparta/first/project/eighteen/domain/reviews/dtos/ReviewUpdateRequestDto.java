@@ -2,7 +2,6 @@ package com.sparta.first.project.eighteen.domain.reviews.dtos;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,5 +20,8 @@ public class ReviewUpdateRequestDto {
 	@Min(1)
 	@Max(5)
 	private int reviewRating;
+
+	// 리뷰 이미지
+	private String reviewImgUrl;
 
 }

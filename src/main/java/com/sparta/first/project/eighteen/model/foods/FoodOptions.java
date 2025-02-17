@@ -9,6 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,7 +22,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "p_food_option")
+@Table(name = "p_food_options")
 public class FoodOptions extends BaseEntity {
 
 	@Id
@@ -28,11 +30,13 @@ public class FoodOptions extends BaseEntity {
 	private UUID id;
 
 	@Column
-	private UUID foodId;
-
-	@Column
 	private String optionName;
 
 	@Column
 	private int optionPrice;
+
+	@ManyToOne
+	@JoinColumn(name = "food_id", referencedColumnName = "id")
+	private Foods foodId;
+
 }
