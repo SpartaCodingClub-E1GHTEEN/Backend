@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.first.project.eighteen.common.dto.ApiResponse;
-import com.sparta.first.project.eighteen.domain.orders.dtos.OrderRequestDto;
+import com.sparta.first.project.eighteen.domain.orders.dtos.OrderCreateRequestDto;
 import com.sparta.first.project.eighteen.domain.orders.dtos.OrderResponseDto;
 import com.sparta.first.project.eighteen.domain.orders.dtos.OrderSearchRequestDto;
 import com.sparta.first.project.eighteen.domain.orders.dtos.OrderUpdateRequestDto;
@@ -24,13 +24,13 @@ import com.sparta.first.project.eighteen.model.orders.OrderStatus;
 public class OrderController {
 
 	@PostMapping
-	public ResponseEntity<ApiResponse<OrderResponseDto>> createOrder(@RequestBody OrderRequestDto requestDto) {
+	public ResponseEntity<ApiResponse<OrderResponseDto>> createOrder(@RequestBody OrderCreateRequestDto requestDto) {
 		return ResponseEntity.ok(ApiResponse.ok("주문이 완료되었습니다.", new OrderResponseDto(requestDto)));
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<ApiResponse<OrderResponseDto>> readOrder(@PathVariable String id) {
-		return ResponseEntity.ok(ApiResponse.ok("주문을 조회했습니다.", new OrderResponseDto(new OrderRequestDto(id))));
+		return ResponseEntity.ok(ApiResponse.ok("주문을 조회했습니다.", new OrderResponseDto(new OrderCreateRequestDto(id))));
 	}
 
 	@GetMapping
@@ -49,7 +49,7 @@ public class OrderController {
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ApiResponse<OrderResponseDto>> cancelOrder(@PathVariable String id) {
-		OrderResponseDto responseDto = new OrderResponseDto(new OrderRequestDto(id));
+		OrderResponseDto responseDto = new OrderResponseDto(new OrderCreateRequestDto(id));
 		responseDto.setStatus(OrderStatus.CANCELED);
 		return ResponseEntity.ok(ApiResponse.ok("주문 목록을 조회했습니다", responseDto));
 	}

@@ -3,7 +3,9 @@ package com.sparta.first.project.eighteen.domain.orders.dtos;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import com.sparta.first.project.eighteen.model.orders.OrderStatus;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,7 +25,7 @@ public class OrderResponseDto {
 	List<OrderDetailsResponseDto> orderDetails;
 
 	//TODO: DELETE MOCKDATA
-	public OrderResponseDto(OrderRequestDto requestDto) {
+	public OrderResponseDto(OrderCreateRequestDto requestDto) {
 		this.id = "1";
 		this.storeId = requestDto.getStoreId();
 		this.storeName = "콩콩반점";
