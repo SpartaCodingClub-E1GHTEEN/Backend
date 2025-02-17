@@ -18,23 +18,22 @@ public abstract class BaseEntity {
 
 	@CreatedDate
 	@Column(nullable = false)
-	private LocalDateTime createdAt;
+	protected LocalDateTime createdAt;
 
-	// User / String
 	@CreatedBy
 	@Column(nullable = false)
-	private String createdBy;
+	protected String createdBy;
 
 	@LastModifiedDate
-	private LocalDateTime modifiedAt;
+	protected LocalDateTime modifiedAt;
 
 	@LastModifiedBy
-	private String modifiedBy;
+	protected String modifiedBy;
 
 	// 소프트 삭제가 되었는지 (isSoftDeleted?)
 	// True - False
-	private Boolean isDeleted;
+	protected Boolean isDeleted;
 	// 소프트 삭제가 된 날짜 (Null - Not Null)
-	private LocalDateTime deletedAt;
-	private String deletedBy;
+	protected LocalDateTime deletedAt;
+	protected String deletedBy;
 }

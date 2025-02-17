@@ -7,32 +7,32 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.sparta.first.project.eighteen.model.users.User;
+import com.sparta.first.project.eighteen.model.users.Users;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class UserDetailsImpl implements UserDetails {
 
-	private final User user;
+	private final Users users;
 
-	public User getUser() {
-		return user;
+	public Users getUsers() {
+		return users;
 	}
 
 	@Override
 	public String getUsername() {
-		return user.getUsername();
+		return users.getUsername();
 	}
 
 	@Override
 	public String getPassword() {
-		return user.getUserPassword();
+		return users.getUserPassword();
 	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return List.of(new SimpleGrantedAuthority(user.getRole().getAuthority()));
+		return List.of(new SimpleGrantedAuthority(users.getRole().getAuthority()));
 	}
 
 	@Override

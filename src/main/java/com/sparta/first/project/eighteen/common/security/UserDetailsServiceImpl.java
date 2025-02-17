@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.sparta.first.project.eighteen.common.exception.BaseException;
 import com.sparta.first.project.eighteen.domain.users.UserRepository;
-import com.sparta.first.project.eighteen.model.users.User;
+import com.sparta.first.project.eighteen.model.users.Users;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,9 +25,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		User user = userRepository.findById(UUID.fromString(username))
+		Users users = userRepository.findById(UUID.fromString(username))
 			.orElseThrow(() -> new BaseException("다시 로그인해주세요.", -1, HttpStatus.UNAUTHORIZED));
 
-		return new UserDetailsImpl(user);
+		return new UserDetailsImpl(users);
 	}
 }

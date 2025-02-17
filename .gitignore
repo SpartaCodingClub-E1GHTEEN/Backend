@@ -47,4 +47,6 @@ out/
 /src/main/resources/application.yml
 /src/main/resources/application-**.yml
 
+# Qclass
+src/main/generated
 

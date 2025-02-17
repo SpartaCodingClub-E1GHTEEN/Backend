@@ -1,7 +1,10 @@
 package com.sparta.first.project.eighteen.config;
 
+import java.util.UUID;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -18,5 +21,10 @@ public class JpaConfig {
 	@Bean
 	JPAQueryFactory jpaQueryFactory() {
 		return new JPAQueryFactory(em);
+	}
+
+	@Bean
+	public AuditorAware<UUID> auditorAware() {
+		return new AuditorAwareImpl();
 	}
 }
