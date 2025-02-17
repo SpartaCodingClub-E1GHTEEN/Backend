@@ -15,24 +15,21 @@ import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 import com.sparta.first.project.eighteen.domain.users.dtos.UserResponseDto;
 import com.sparta.first.project.eighteen.domain.users.dtos.UserUpdateRequestDto;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/users")
+@RequiredArgsConstructor
 public class UserController {
+	private final UserService userService;
 
 	@GetMapping
 	public ResponseEntity<ApiResponse<UserResponseDto>> findUser(
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
-		UserResponseDto mockData = UserResponseDto.builder()
-			.username("testUser")
-			.nickname("테스트회원")
-			.phone("012-3456-7890")
-			.email("test@test.io")
-			.address("서울시 광화문구")
-			.build();
-		return ResponseEntity.ok(ApiResponse.ok("유저 조회 성공", mockData));
+		UserResponseDto response = userService.findUser(userDetails.getUserUUID());
+		return ResponseEntity.ok(ApiResponse.ok("유저 조회 성공", response));
 	}
 
 	@PutMapping

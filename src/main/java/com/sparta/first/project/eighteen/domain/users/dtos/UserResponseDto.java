@@ -1,5 +1,7 @@
 package com.sparta.first.project.eighteen.domain.users.dtos;
 
+import com.sparta.first.project.eighteen.model.users.Users;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,4 +19,14 @@ public class UserResponseDto {
 	private String email;
 
 	private String address;
+
+	public static UserResponseDto from(Users users) {
+		return UserResponseDto.builder()
+			.username(users.getUsername())
+			.nickname(users.getUserNickname())
+			.phone(users.getUserPhone())
+			.email(users.getEmail())
+			.address(users.getUserAddress())
+			.build();
+	}
 }
