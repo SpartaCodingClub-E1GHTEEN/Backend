@@ -6,6 +6,8 @@ import com.sparta.first.project.eighteen.common.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,7 +35,7 @@ public class Store extends BaseEntity {
 	@Column
 	private String storeName;
 
-	// 식당 소개(설명) -> 글자 수 제한 ?
+	// 식당 소개(설명)
 	@Column
 	private String storeDesc;
 
@@ -43,9 +45,10 @@ public class Store extends BaseEntity {
 
 	// 식당 카테고리
 	@Column
+	@Enumerated(EnumType.STRING)
 	private StoreCategory storeCategory;
 
-	// 식당 평점 -> 계산을 미리 할지, 노출 시마다 계산할지 (근데 계속 계산할거면 cnt 필드도 해두면 되지 않나 ..?)
+	// 식당 평점 -> 계산을 미리 할지, 계산해서 넣어둘 지
 	@Column
 	private double storeRating;
 
