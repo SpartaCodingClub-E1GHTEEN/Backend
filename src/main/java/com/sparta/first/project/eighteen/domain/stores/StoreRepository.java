@@ -1,4 +1,4 @@
-package com.sparta.first.project.eighteen.domain.store;
+package com.sparta.first.project.eighteen.domain.stores;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
