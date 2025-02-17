@@ -1,6 +1,5 @@
 package com.sparta.first.project.eighteen.model.stores;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.sparta.first.project.eighteen.common.BaseEntity;
@@ -68,11 +67,4 @@ public class Stores extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
 	private Users userId;
-
-	public void delete(boolean flag, String userId) {
-		super.isDeleted = flag;
-		super.deletedAt = LocalDateTime.now();
-		super.deletedBy = userId;
-	}
-
 }
