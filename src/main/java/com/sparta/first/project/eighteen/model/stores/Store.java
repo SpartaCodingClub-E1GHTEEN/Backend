@@ -54,7 +54,8 @@ public class Store extends BaseEntity {
 
 	// 회원 ID (식당 주인)
 	// 연관 관계
-	// @Column(name = "user_id")
+	// @ManyToOne
+	// @JoinColumn(name = "userId", referencedColumnName = "id")
 	// private User userId;
 
 }
