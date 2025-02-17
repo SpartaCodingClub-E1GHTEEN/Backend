@@ -63,8 +63,9 @@ public class SecurityConfig {
 		// 요청 필터링
 		http
 			.authorizeHttpRequests((auth) -> auth
-				.requestMatchers("api/v1/auth/**").permitAll()  // swagger나 rest docs 넣는다면 추가
-				.anyRequest().authenticated() // 모든 경로 JWT 인증 필요
+					.requestMatchers("api/v1/auth/**").permitAll()  // swagger나 rest docs 넣는다면 추가
+					.anyRequest().permitAll()
+				// .anyRequest().authenticated() // 모든 경로 JWT 인증 필요
 			);
 
 		return http.build();

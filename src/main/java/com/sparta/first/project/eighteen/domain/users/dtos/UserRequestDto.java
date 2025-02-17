@@ -2,7 +2,8 @@ package com.sparta.first.project.eighteen.domain.users.dtos;
 
 import org.hibernate.validator.constraints.Length;
 
-import com.sparta.first.project.eighteen.common.security.UserDetailsServiceImpl;
+import com.sparta.first.project.eighteen.model.users.Role;
+import com.sparta.first.project.eighteen.model.users.SignUpType;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
@@ -31,27 +32,11 @@ public class UserRequestDto {
 
 	private SignUpType signUpType; // 회원 가입 타입( 자체 서비스 | 소셜 로그인)
 
-	private UserDetailsServiceImpl.User.Role role; // 회원 타입 (고객 | 가게 주인)
+	private Role role; // 회원 타입 (고객 | 가게 주인)
 
 	@Email
 	private String email;
 
 	private String address;
 
-	enum SignUpType {
-		SERVICE("SERVICE"),
-		KAKAO("KAKAO"),
-		GOOGLE("GOOGLE"),
-		NAVER("NAVER");
-
-		private final String client;
-
-		SignUpType(String client) {
-			this.client = client;
-		}
-
-		public String getClient() {
-			return client;
-		}
-	}
 }
