@@ -53,13 +53,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 		Authentication authResult) throws IOException, ServletException {
 		// 아이디와 권한으로 JWT 생성
-		String username = ((UserDetailsImpl)authResult.getPrincipal()).getUsername();
+		String userUUID = ((UserDetailsImpl)authResult.getPrincipal()).getUserUUID().toString();
 		String authorities = ((UserDetailsImpl)authResult.getPrincipal()).getAuthorities()
 			.stream()
 			.map(GrantedAuthority::getAuthority)
 			.collect(Collectors.joining(","));
 
-		String token = jwtUtil.generateAccessToken(username, authorities);
+		String token = jwtUtil.generateAccessToken(userUUID, authorities);
 		ApiResponse<Map<String, String>> tokenResponse = ApiResponse.ok("로그인 성공",
 			Collections.singletonMap("token", token));
 
