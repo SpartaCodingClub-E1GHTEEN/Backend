@@ -42,29 +42,29 @@ public class UserRequestDto {
 
 	private String address;
 
-	public static Users toEntity(UserRequestDto requestDto) {
+	public Users toEntity() {
 		return Users.builder()
-			.username(requestDto.username)
-			.userPassword(requestDto.password)
-			.userNickname(requestDto.nickname)
-			.userPhone(requestDto.phone)
-			.userAddress(requestDto.address)
-			.email(requestDto.email)
-			.role(requestDto.role)
-			.createdBy("50ce7d0a-4ae2-4c47-9842-56bdc29c060d")
+			.userId(UUID.randomUUID())
+			.username(this.username)
+			.userPassword(this.password)
+			.userNickname(this.nickname)
+			.userPhone(this.phone)
+			.userAddress(this.address)
+			.email(this.email)
+			.role(this.role)
 			.build();
 	}
 
-	public static Users toEntityWithUUID(UserRequestDto requestDto, UUID userId) {
+	public Users toEntityWithUUID(UUID userId) {
 		return Users.builder()
 			.userId(userId)
-			.username(requestDto.username)
-			.userPassword(requestDto.password)
-			.userNickname(requestDto.nickname)
-			.userPhone(requestDto.phone)
-			.userAddress(requestDto.address)
-			.email(requestDto.email)
-			.role(requestDto.role)
+			.username(this.username)
+			.userPassword(this.password)
+			.userNickname(this.nickname)
+			.userPhone(this.phone)
+			.userAddress(this.address)
+			.email(this.email)
+			.role(this.role)
 			.createdBy("50ce7d0a-4ae2-4c47-9842-56bdc29c060d")
 			.build();
 	}
