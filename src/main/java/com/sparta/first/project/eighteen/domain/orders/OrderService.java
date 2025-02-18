@@ -2,15 +2,20 @@ package com.sparta.first.project.eighteen.domain.orders;
 
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.first.project.eighteen.common.exception.FoodException;
+import com.sparta.first.project.eighteen.common.exception.OrderException;
 import com.sparta.first.project.eighteen.common.exception.StoreException;
 import com.sparta.first.project.eighteen.common.exception.UserException;
 import com.sparta.first.project.eighteen.domain.foods.FoodsRepository;
 import com.sparta.first.project.eighteen.domain.orders.dtos.OrderCreateRequestDto;
 import com.sparta.first.project.eighteen.domain.orders.dtos.OrderDetailsRequestDto;
+import com.sparta.first.project.eighteen.domain.orders.dtos.OrderResponseDto;
+import com.sparta.first.project.eighteen.domain.orders.dtos.OrderSearchRequestDto;
+import com.sparta.first.project.eighteen.domain.orders.dtos.OrderUpdateRequestDto;
 import com.sparta.first.project.eighteen.domain.stores.StoreRepository;
 import com.sparta.first.project.eighteen.domain.users.UserRepository;
 import com.sparta.first.project.eighteen.model.foods.FoodOptions;
@@ -82,6 +87,25 @@ public class OrderService {
 		Page<OrderResponseDto> orders = ordersRepository.findAllBySearchParam(requestDto);
 
 		return orders;
+	}
+
+	@Transactional
+	public OrderResponseDto updateOrder(OrderUpdateRequestDto requestDto, String id) {
+		Orders orders = ordersRepository.findById(UUID.fromString(id))
+			.orElseThrow(() -> new OrderException.OrderNotFound());
+		
+		orders.update(requestDto);
+		return OrderResponseDto.fromEntity(orders);
+	}
+
+	@Transactional
+	public OrderResponseDto cancelOrder(String id) {
+		Orders orders = ordersRepository.findById(UUID.fromString(id))
+			.orElseThrow(() -> new OrderException.OrderNotFound());
+
+		orders.cancel();
+
+		return OrderResponseDto.fromEntity(orders);
 	}
 
 }

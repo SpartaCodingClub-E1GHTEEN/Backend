@@ -8,5 +8,6 @@ import lombok.Setter;
 public class OrderDetailsUpdateRequestDto {
 	private String orderDetailsId;
 	private String productId;
+	private int amount;
 	private String[] optionIds;
 }

@@ -52,15 +52,13 @@ public class OrderController {
 	@PatchMapping("/{id}")
 	public ResponseEntity<ApiResponse<OrderResponseDto>> updateOrder(@PathVariable String id,
 		@RequestBody OrderUpdateRequestDto requestDto) {
-		OrderResponseDto responseDto = new OrderResponseDto(requestDto);
-		responseDto.setId(id);
-		return ResponseEntity.ok(ApiResponse.ok("주문 목록을 조회했습니다", responseDto));
+		OrderResponseDto responseDto = orderService.updateOrder(requestDto, id);
+		return ResponseEntity.ok(ApiResponse.ok("주문을 취소했습니다.", responseDto));
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ApiResponse<OrderResponseDto>> cancelOrder(@PathVariable String id) {
-		OrderResponseDto responseDto = new OrderResponseDto(new OrderCreateRequestDto(id));
-		responseDto.setStatus(OrderStatus.CANCELED);
+		OrderResponseDto responseDto = orderService.cancelOrder(id);
 		return ResponseEntity.ok(ApiResponse.ok("주문 목록을 조회했습니다", responseDto));
 	}
 }
