@@ -3,6 +3,7 @@ package com.sparta.first.project.eighteen.domain.users.dtos;
 import java.util.UUID;
 
 import org.hibernate.validator.constraints.Length;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.sparta.first.project.eighteen.model.users.Role;
 import com.sparta.first.project.eighteen.model.users.SignUpType;
@@ -42,11 +43,11 @@ public class UserRequestDto {
 
 	private String address;
 
-	public Users toEntity() {
+	public Users toEntity(PasswordEncoder passwordEncoder) {
 		return Users.builder()
-			.userId(UUID.randomUUID())
+			.userId(UUID.randomUUID())// 임시로 UUID 생성 후 주입
 			.username(this.username)
-			.userPassword(this.password)
+			.userPassword(passwordEncoder.encode(this.password))
 			.userNickname(this.nickname)
 			.userPhone(this.phone)
 			.userAddress(this.address)
