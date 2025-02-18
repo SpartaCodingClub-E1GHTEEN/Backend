@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.first.project.eighteen.domain.users.dtos.UserRequestDto;
 import com.sparta.first.project.eighteen.model.users.Role;
+import com.sparta.first.project.eighteen.model.users.SignUpType;
 import com.sparta.first.project.eighteen.model.users.Users;
 
 import jakarta.annotation.PostConstruct;
@@ -34,6 +35,7 @@ public class UserDataInitializer {
 			.email("test@test.io")
 			.address("서울시 광화문구")
 			.role(Role.CUSTOMER)
+			.signUpType(SignUpType.SERVICE)
 			.build()
 			.toEntityWithUUID(customerUUID);
 
@@ -45,6 +47,7 @@ public class UserDataInitializer {
 			.email("test1@test.io")
 			.address("서울시 강서구")
 			.role(Role.OWNER)
+			.signUpType(SignUpType.SERVICE)
 			.build()
 			.toEntityWithUUID(ownerUUID);
 
@@ -56,6 +59,7 @@ public class UserDataInitializer {
 			.email("test2@test.io")
 			.address("인천시 부평구")
 			.role(Role.MANAGER)
+			.signUpType(SignUpType.SERVICE)
 			.build()
 			.toEntityWithUUID(adminUUID);
 

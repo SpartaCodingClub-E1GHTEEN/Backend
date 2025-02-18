@@ -35,7 +35,7 @@ public class Users extends BaseEntity {
 	@Column(nullable = false)
 	private String userPassword; // 유저 비밀번호
 
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String userNickname;
 
 	@Column(nullable = false)
@@ -51,9 +51,9 @@ public class Users extends BaseEntity {
 	@Column(nullable = false)
 	private Role role; // 권한
 
-	// @Enumerated(EnumType.STRING)
-	// @Column(nullable = false, updatable = false)
-	// private SignUpType signUpType;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, updatable = false)
+	private SignUpType signUpType;
 
 	/**
 	 * 비밀번호, 이메일, 닉네임, 핸드폰번호, 주소 중
