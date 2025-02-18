@@ -50,4 +50,22 @@ public class OrderResponseDto {
 			)
 			.build();
 	}
+
+	//JPA criteria에서 객체 변환용 생성자
+	public OrderResponseDto(Orders orders) {
+		this.id = orders.getId().toString();
+		this.storeId = orders.getStore().getId().toString();
+		this.storeName = orders.getStore().getStoreName();
+		this.userId = orders.getUser().getUserId().toString();
+		this.userName = orders.getUser().getUsername();
+		this.orderTime = orders.getOrderTime();
+		this.isStoreOrder = orders.isStoreOrder();
+		this.status = orders.getStatus();
+		this.noteToStore = orders.getNoteToStore();
+		this.noteToDelivery = orders.getNoteToDelivery();
+		this.orderDetails = orders.getOrderDetails()
+			.stream()
+			.map(orderdetail -> new OrderDetailsResponseDto(orderdetail))
+			.collect(Collectors.toList());
+	}
 }

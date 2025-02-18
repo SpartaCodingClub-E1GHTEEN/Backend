@@ -1,7 +1,8 @@
 package com.sparta.first.project.eighteen.domain.orders;
 
-import org.springframework.data.web.PagedModel;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -37,13 +38,15 @@ public class OrderController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<ApiResponse<OrderResponseDto>> readOrder(@PathVariable String id) {
-		return ResponseEntity.ok(ApiResponse.ok("주문을 조회했습니다.", new OrderResponseDto(new OrderCreateRequestDto(id))));
+		OrderResponseDto responseDto = orderService.readOrder(id);
+		return ResponseEntity.ok(ApiResponse.ok("주문을 조회했습니다.", responseDto));
 	}
 
 	@GetMapping
-	public ResponseEntity<ApiResponse<PagedModel<OrderResponseDto>>> searchOrder(
+	public ResponseEntity<ApiResponse<Page<OrderResponseDto>>> searchOrder(
 		@ModelAttribute OrderSearchRequestDto requestDto) {
-		return ResponseEntity.ok(ApiResponse.ok("주문 목록을 조회했습니다", null));
+		Page<OrderResponseDto> responseDto = orderService.searchOrder(requestDto);
+		return ResponseEntity.ok(ApiResponse.ok("주문 목록을 조회했습니다", responseDto));
 	}
 
 	@PatchMapping("/{id}")

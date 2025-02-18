@@ -68,4 +68,20 @@ public class OrderService {
 			}
 		}
 	}
+
+	@Transactional(readOnly = true)
+	public OrderResponseDto readOrder(String id) {
+		Orders orders = ordersRepository.findById(UUID.fromString(id))
+			.orElseThrow(() -> new OrderException.OrderNotFound());
+
+		return OrderResponseDto.fromEntity(orders);
+	}
+
+	@Transactional(readOnly = true)
+	public Page<OrderResponseDto> searchOrder(OrderSearchRequestDto requestDto) {
+		Page<OrderResponseDto> orders = ordersRepository.findAllBySearchParam(requestDto);
+
+		return orders;
+	}
+
 }
