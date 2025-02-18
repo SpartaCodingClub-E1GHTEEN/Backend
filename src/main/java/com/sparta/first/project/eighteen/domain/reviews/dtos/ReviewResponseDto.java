@@ -1,12 +1,18 @@
 package com.sparta.first.project.eighteen.domain.reviews.dtos;
 
+import com.sparta.first.project.eighteen.model.reviews.Reviews;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class ReviewResponseDto {
 
 	// 리뷰 ID
@@ -49,6 +55,17 @@ public class ReviewResponseDto {
 		this.reviewContent = reviewRequestDto.getReviewContent();
 		this.reviewRating = reviewRequestDto.getReviewRating();
 		this.reviewImgUrl = reviewRequestDto.getReviewImgUrl();
+	}
+
+	public static ReviewResponseDto fromEntity(Reviews review) {
+		return ReviewResponseDto.builder()
+			.id(review.getId().toString())
+			.reviewNickname(review.getUsersId().getUsername())
+			// .reviewOrders(review.getOrderId().getOrderDetails().toString())
+			.reviewContent(review.getReviewContent())
+			.reviewRating(review.getReviewRating())
+			.reviewImgUrl(review.getReviewImgUrl())
+			.build();
 	}
 
 }
