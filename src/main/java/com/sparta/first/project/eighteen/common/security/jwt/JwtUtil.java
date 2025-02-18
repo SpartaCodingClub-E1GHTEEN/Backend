@@ -87,7 +87,7 @@ public class JwtUtil {
 	}
 
 	// userUUID 추출
-	public String getUserId(String accessToken) {
+	public String getUserUUID(String accessToken) {
 		return parseClaims(accessToken).getSubject();
 	}
 

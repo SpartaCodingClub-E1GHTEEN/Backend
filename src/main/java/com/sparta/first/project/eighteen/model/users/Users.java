@@ -8,24 +8,23 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Table(name = "p_users")
 @Entity
-@Builder
-@NoArgsConstructor
+@SuperBuilder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Users extends BaseEntity {
 	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
+	// @GeneratedValue(strategy = GenerationType.UUID)
 	@Column(name = "id")
 	private UUID userId; // 유저 식별자
 
@@ -34,6 +33,9 @@ public class Users extends BaseEntity {
 
 	@Column(nullable = false)
 	private String userPassword; // 유저 비밀번호
+
+	@Column(nullable = false)
+	private String userNickname;
 
 	@Column(nullable = false)
 	private String userPhone;

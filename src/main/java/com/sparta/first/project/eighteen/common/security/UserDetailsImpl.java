@@ -2,6 +2,7 @@ package com.sparta.first.project.eighteen.common.security;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -28,6 +29,10 @@ public class UserDetailsImpl implements UserDetails {
 	@Override
 	public String getPassword() {
 		return users.getUserPassword();
+	}
+
+	public UUID getUserUUID() {
+		return users.getUserId();
 	}
 
 	@Override

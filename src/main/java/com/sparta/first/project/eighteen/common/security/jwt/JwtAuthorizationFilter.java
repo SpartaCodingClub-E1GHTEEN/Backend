@@ -51,7 +51,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 		jwtUtil.validateAccessToken(token);
 
 		// 2. JWT에서 아이디 추출
-		String userId = jwtUtil.getUserId(token);
+		String userId = jwtUtil.getUserUUID(token);
 
 		setAuthentication(userId);
 		filterChain.doFilter(request, response);
@@ -68,7 +68,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
 	// 3. 인가해줄 Authentication 생성
 	private UsernamePasswordAuthenticationToken createAuthentication(String userId) {
-		UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+		UserDetails userDetails = userDetailsService.loadUserByUserUUID(userId);
 		return new UsernamePasswordAuthenticationToken(
 			userDetails,
 			null,
