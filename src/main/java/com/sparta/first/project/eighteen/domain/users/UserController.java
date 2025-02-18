@@ -15,13 +15,16 @@ import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 import com.sparta.first.project.eighteen.domain.users.dtos.UserResponseDto;
 import com.sparta.first.project.eighteen.domain.users.dtos.UserUpdateRequestDto;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
+@ToString
 public class UserController {
 	private final UserService userService;
 
@@ -33,16 +36,13 @@ public class UserController {
 	}
 
 	@PutMapping
-	public ResponseEntity<ApiResponse<UserResponseDto>> modifyUser(@RequestBody UserUpdateRequestDto requestDto,
-		@AuthenticationPrincipal UserDetailsImpl userDetails) {
-		UserResponseDto mockData = UserResponseDto.builder()
-			.username("testUser")
-			.nickname("테스트회원")
-			.phone("012-3456-7890")
-			.email("test@test.io")
-			.address("서울시 광화문구")
-			.build();
-		return ResponseEntity.ok(ApiResponse.ok("수정 성공", mockData));
+	public ResponseEntity<ApiResponse<UserResponseDto>> modifyUser(
+		@Valid @RequestBody UserUpdateRequestDto requestDto,
+		@AuthenticationPrincipal UserDetailsImpl userDetails
+	) {
+		log.info("{}", requestDto);
+		UserResponseDto responseDto = userService.modifyUser(userDetails.getUserUUID(), requestDto);
+		return ResponseEntity.ok(ApiResponse.ok("수정 성공", responseDto));
 	}
 
 	/**
