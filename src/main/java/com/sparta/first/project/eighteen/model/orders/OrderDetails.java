@@ -3,6 +3,8 @@ package com.sparta.first.project.eighteen.model.orders;
 import java.util.List;
 import java.util.UUID;
 
+import com.sparta.first.project.eighteen.model.foods.Foods;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,7 +21,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Builder(access = AccessLevel.PRIVATE)
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_order_details")
@@ -33,16 +35,23 @@ public class OrderDetails {
 	@JoinColumn(name = "order_id", referencedColumnName = "id")
 	private Orders order;
 
-	// @ManyToOne
-	// @JoinColumn(name = "food_id", referencedColumnName = "id")
-	// private Foods food;
-	private UUID foodId;
+	@ManyToOne
+	@JoinColumn(name = "food_id", referencedColumnName = "id")
+	private Foods food;
 
 	private String foodName;
 
 	private int foodPrice;
 
-	@OneToMany
+	private int amount;
+
+	@OneToMany(mappedBy = "orderDetail")
 	private List<OrderDetailsOptions> orderDetailsOptions;
 
+	public void update(int amount, Foods food) {
+		this.food = food;
+		this.foodName = food.getFoodName();
+		this.foodPrice = food.getFoodPrice();
+		this.amount = amount;
+	}
 }

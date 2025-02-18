@@ -1,5 +1,7 @@
 package com.sparta.first.project.eighteen.domain.orders.dtos;
 
+import com.sparta.first.project.eighteen.model.orders.OrderDetailsOptions;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,10 +12,9 @@ public class OrderDetailsOptionResponseDto {
 	private String optionName;
 	private int price;
 
-	//TODO: DELETE MOCKDATA
-	public OrderDetailsOptionResponseDto(String optionId) {
-		this.optionId = optionId;
-		this.optionName = "옵션" + optionId;
-		this.price = 100;
+	public OrderDetailsOptionResponseDto(OrderDetailsOptions options) {
+		this.optionId = options.getId().toString();
+		this.optionName = options.getOptionName();
+		this.price = options.getOptionPrice();
 	}
 }

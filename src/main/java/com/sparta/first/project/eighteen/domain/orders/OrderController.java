@@ -17,15 +17,22 @@ import com.sparta.first.project.eighteen.domain.orders.dtos.OrderCreateRequestDt
 import com.sparta.first.project.eighteen.domain.orders.dtos.OrderResponseDto;
 import com.sparta.first.project.eighteen.domain.orders.dtos.OrderSearchRequestDto;
 import com.sparta.first.project.eighteen.domain.orders.dtos.OrderUpdateRequestDto;
-import com.sparta.first.project.eighteen.model.orders.OrderStatus;
+import com.sparta.first.project.eighteen.model.users.Users;
 
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 @RequestMapping("/api/v1/order")
 @RestController
 public class OrderController {
 
+	private final OrderService orderService;
+
 	@PostMapping
-	public ResponseEntity<ApiResponse<OrderResponseDto>> createOrder(@RequestBody OrderCreateRequestDto requestDto) {
-		return ResponseEntity.ok(ApiResponse.ok("주문이 완료되었습니다.", new OrderResponseDto(requestDto)));
+	public ResponseEntity<ApiResponse<Void>> createOrder(@RequestBody OrderCreateRequestDto requestDto,
+		@AuthenticationPrincipal Users user) {
+		orderService.createOrder(requestDto, user);
+		return ResponseEntity.ok(ApiResponse.ok("주문이 완료되었습니다.", null));
 	}
 
 	@GetMapping("/{id}")
