@@ -1,15 +1,20 @@
 package com.sparta.first.project.eighteen.domain.stores.dtos;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 
+import com.sparta.first.project.eighteen.model.stores.StoreCategory;
+import com.sparta.first.project.eighteen.model.stores.Stores;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class StoreResponseDto {
 
 	// 식당 ID
@@ -28,16 +33,13 @@ public class StoreResponseDto {
 	private String storeRegion;
 
 	// 식당 카테고리
-	private String storeCategory;
+	private StoreCategory storeCategory;
 
 	// 식당 평점
 	private double storeRating;
 
 	// 식당 리뷰 개수
 	private int storeReviewCnt;
-	
-	// 식당에 판매하는 음식 리스트 -> FoodResponseDto 리스트로 변환
-	List<?> foodList; 
 
 	// 테스트를 위한 임시 생성자
 	public StoreResponseDto(StoreRequestDto storeRequestDto) {
@@ -49,8 +51,18 @@ public class StoreResponseDto {
 		this.storeCategory = storeRequestDto.getStoreCategory();
 		this.storeRating = 4.3;
 		this.storeReviewCnt = 100;
-		// FoodResponseDto 리스트로 변환
-		this.foodList = new ArrayList<>();
+	}
+
+	public StoreResponseDto fromEntity(Stores stores) {
+		return StoreResponseDto.builder()
+			.id(stores.getId().toString())
+			.userName(stores.getUserId().getUsername())
+			.storeName(stores.getStoreName())
+			.storeDesc(stores.getStoreDesc())
+			.storeRegion(stores.getStoreRegion())
+			.storeCategory(stores.getStoreCategory())
+			.storeRating(stores.getStoreRating())
+			.build();
 	}
 
 }
