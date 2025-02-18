@@ -1,7 +1,5 @@
 package com.sparta.first.project.eighteen.config;
 
-import java.util.UUID;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -24,7 +22,7 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public AuditorAware<UUID> auditorAware() {
+	public AuditorAware<String> auditorAware() {
 		return new AuditorAwareImpl();
 	}
 }
