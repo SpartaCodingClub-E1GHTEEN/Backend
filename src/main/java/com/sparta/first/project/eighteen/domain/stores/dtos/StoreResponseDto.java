@@ -53,7 +53,7 @@ public class StoreResponseDto {
 		this.storeReviewCnt = 100;
 	}
 
-	public StoreResponseDto fromEntity(Stores stores) {
+	public static StoreResponseDto fromEntity(Stores stores) {
 		return StoreResponseDto.builder()
 			.id(stores.getId().toString())
 			.userName(stores.getUserId().getUsername())

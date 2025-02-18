@@ -57,7 +57,7 @@ public class ReviewResponseDto {
 		this.reviewImgUrl = reviewRequestDto.getReviewImgUrl();
 	}
 
-	public ReviewResponseDto fromEntity(Reviews review) {
+	public static ReviewResponseDto fromEntity(Reviews review) {
 		return ReviewResponseDto.builder()
 			.id(review.getId().toString())
 			.reviewNickname(review.getUsersId().getUsername())

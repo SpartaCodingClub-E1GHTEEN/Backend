@@ -42,7 +42,7 @@ public class StoreListResponseDto {
 		this.storeRating = 4.3;
 	}
 
-	public StoreListResponseDto fromEntity(Stores store) {
+	public static StoreListResponseDto fromEntity(Stores store) {
 		return StoreListResponseDto.builder()
 			.id(store.getId().toString())
 			.storeName(store.getStoreName())
