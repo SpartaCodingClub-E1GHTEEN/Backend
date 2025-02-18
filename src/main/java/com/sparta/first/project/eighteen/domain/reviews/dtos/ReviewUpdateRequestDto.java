@@ -1,5 +1,7 @@
 package com.sparta.first.project.eighteen.domain.reviews.dtos;
 
+import com.sparta.first.project.eighteen.model.reviews.Reviews;
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
@@ -23,5 +25,18 @@ public class ReviewUpdateRequestDto {
 
 	// 리뷰 이미지
 	private String reviewImgUrl;
+
+	public Reviews updateEntity(Reviews review) {
+		return Reviews.builder()
+			.id(review.getId())
+			.reviewContent(this.reviewContent != null ? this.reviewContent : review.getReviewContent())
+			// 애초에 null일 수 없는 값이라 조건문 필요 X (@Min, @Max 사용 중)
+			.reviewRating(this.reviewRating)
+			.reviewImgUrl(this.reviewImgUrl != null ? this.reviewImgUrl : review.getReviewImgUrl())
+			.usersId(review.getUsersId())
+			.storeId(review.getStoreId())
+			.orderId(review.getOrderId())
+			.build();
+	}
 
 }
