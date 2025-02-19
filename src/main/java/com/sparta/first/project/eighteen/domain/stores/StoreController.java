@@ -2,6 +2,7 @@ package com.sparta.first.project.eighteen.domain.stores;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,37 +22,49 @@ import com.sparta.first.project.eighteen.common.dto.ApiResponse;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreListResponseDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreRequestDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreResponseDto;
+import com.sparta.first.project.eighteen.model.users.Role;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/stores")
+@RequiredArgsConstructor
 public class StoreController {
+
+	private final StoreService storeService;
 
 	/**
 	 * 식당 생성
-	 // * @param userDetails : 현재 로그인한 사용자 (권한 확인)
+	 * @param userDetails : 현재 로그인한 사용자 (권한 확인)
 	 * @param storeRequestDto : 식당 정보
 	 * @return : 생성한 식당의 내용
 	 */
 	@PostMapping
 	public ResponseEntity<ApiResponse<StoreResponseDto>> createStore (
-		// @AuthenticationPrincipal UserDetails userDetails,
+		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestBody StoreRequestDto storeRequestDto) {
 
-		// 권한 확인하기
-		// userDetails.getAuthorities();
-		return ResponseEntity.ok(ApiResponse.ok("성공", new StoreResponseDto(storeRequestDto)));
+		// userDetails 담긴 유저는 MASTER 이어야만 함
+		// MASTER 만 가게 생성 가능 (가게 생성 시 OWNER를 넣어주는 방식으로 진행)
+		if (storeService.findUserRole(userDetails.getUsername()) != Role.MANAGER) {
+			log.info("MANAGER가 아닌 사용자");
+			throw new IllegalArgumentException("해당 사용자는 식당을 생성할 수 없습니다.");
+		}
+
+		StoreResponseDto responseDto = storeService.createStore(storeRequestDto);
+		return ResponseEntity.ok(ApiResponse.ok("성공", responseDto));
 	}
 
 	/**
-	 * 식당 목록 조회
-	 * @return : 식당 목록 반환 (Searching 기능 제공)
+	 * 식당 목록 조회 (+서칭 기능)
+	 * @return : 식당 목록 반환
 	 */
 	@GetMapping
 	public ResponseEntity<ApiResponse<Page<StoreListResponseDto>>> getStores(Pageable pageable){
-		return ResponseEntity.ok(ApiResponse.ok("성공", null));
+		Page<StoreListResponseDto> responseDtos = storeService.getStores(pageable);
+		return ResponseEntity.ok(ApiResponse.ok("성공", responseDtos));
 	}
 
 	/**
@@ -60,44 +73,54 @@ public class StoreController {
 	 * @return : 조회한 식당의 내용
 	 */
 	@GetMapping("/{storeId}")
-	public ResponseEntity<ApiResponse<StoreResponseDto>> getOneStore(@PathVariable String storeId){
-		return ResponseEntity.ok(ApiResponse.ok("성공", new StoreResponseDto()));
+	public ResponseEntity<ApiResponse<StoreResponseDto>> getOneStore(@PathVariable UUID storeId){
+		log.info("storeId: " + storeId.toString());
+		StoreResponseDto responseDto = storeService.getOneStore(storeId);
+		return ResponseEntity.ok(ApiResponse.ok("성공", responseDto));
 	}
 
 	/**
 	 * 식당 수정
 	 * @param storeId : 수정할 식당의 ID
-	 // * @param userDetails : 현재 로그인한 사용자 (권한 확인)
+	 * @param userDetails : 현재 로그인한 사용자 (권한 확인)
 	 * @param storeRequestDto : 수정할 식당 내용
 	 * @return : 수정한 식당 내용
 	 */
 	@PutMapping("/{storeId}")
 	public ResponseEntity<ApiResponse<StoreResponseDto>> updateStore (
-		@PathVariable String storeId,
-		// @AuthenticationPrincipal UserDetails userDetails,
+		@PathVariable UUID storeId,
+		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestBody StoreRequestDto storeRequestDto) {
 
-		// 권한 확인하기
-		// userDetails.getAuthorities();
+		if (storeService.findUserRole(userDetails.getUsername()) == Role.CUSTOMER) {
+			log.info("CUSTOMER인 사용자가 수정하려고 함");
+			throw new IllegalArgumentException("고객은 식당의 정보를 수정할 수 없습니다.");
+		}
+
 		log.info("storeId: " + storeId);
-		return ResponseEntity.ok(ApiResponse.ok("성공", new StoreResponseDto(storeRequestDto)));
+		StoreResponseDto responseDto = storeService.updateStore(storeId, userDetails.getUsername(), storeRequestDto);
+		return ResponseEntity.ok(ApiResponse.ok("성공", responseDto));
 	}
 
 	/**
 	 * 식당 삭제
 	 * @param storeId : 삭제할 식당의 ID
-	 // * @param userDetails : 현재 로그인한 사용자 (권한 확인)
+	 * @param userDetails : 현재 로그인한 사용자 (권한 확인)
 	 * @return : 상태코드 및 메시지 반환
 	 */
 	@DeleteMapping("/{storeId}")
 	public ResponseEntity<ApiResponse> deleteStore (
-		// @AuthenticationPrincipal UserDetails userDetails,
-		@PathVariable String storeId){
+		@AuthenticationPrincipal UserDetails userDetails,
+		@PathVariable UUID storeId){
 
-		// 권한 확인하기
-		// userDetails.getAuthorities();
+		if (storeService.findUserRole(userDetails.getUsername()) == Role.CUSTOMER) {
+			log.info("CUSTOMER인 사용자가 삭제하려고 함");
+			throw new IllegalArgumentException("고객은 식당을 삭제할 수 없습니다.");
+		}
+
 		log.info("storeId: " + storeId);
-		return ResponseEntity.ok(ApiResponse.ok("성공", null));
+		ApiResponse apiResponse = storeService.deleteStore(storeId, userDetails.getUsername());
+		return ResponseEntity.ok(apiResponse);
 	}
 
 }

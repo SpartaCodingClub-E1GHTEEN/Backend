@@ -2,9 +2,12 @@ package com.sparta.first.project.eighteen.domain.stores;
 
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.sparta.first.project.eighteen.model.stores.Stores;
 
-public interface StoreRepository extends JpaRepository<Stores, UUID> {
+public interface StoreRepository extends JpaRepository<Stores, UUID> /*, StoreRepositoryCustom */ {
+	Page<Stores> findByIsDeletedIsNull(Pageable pageable);
 }

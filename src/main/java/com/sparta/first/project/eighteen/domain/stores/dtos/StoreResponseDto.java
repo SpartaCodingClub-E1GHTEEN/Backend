@@ -41,19 +41,27 @@ public class StoreResponseDto {
 	// 식당 리뷰 개수
 	private int storeReviewCnt;
 
-	// 테스트를 위한 임시 생성자
-	public StoreResponseDto(StoreRequestDto storeRequestDto) {
-		this.id = "1";
-		this.userName = "김사장";
-		this.storeName = storeRequestDto.getStoreName();
-		this.storeDesc = storeRequestDto.getStoreDesc();
-		this.storeRegion = storeRequestDto.getStoreRegion();
-		this.storeCategory = storeRequestDto.getStoreCategory();
-		this.storeRating = 4.3;
-		this.storeReviewCnt = 100;
-	}
+	// 식당 배달 팁
+	private int storeDeliveryPrice;
+
+	// 식당 생성일자
+	private String createdAt;
 
 	public static StoreResponseDto fromEntity(Stores stores) {
+		return StoreResponseDto.builder()
+			// .id(stores.getId().toString())
+			.userName(stores.getUserId().getUsername())
+			.storeName(stores.getStoreName())
+			.storeDesc(stores.getStoreDesc())
+			.storeRegion(stores.getStoreRegion())
+			.storeCategory(stores.getStoreCategory())
+			.storeRating(stores.getStoreRating())
+			.storeDeliveryPrice(stores.getStoreDeliveryPrice())
+			// .createdAt(stores.getCreatedAt().toString())
+			.build();
+	}
+
+	public static StoreResponseDto fromEntityReview(Stores stores, int storeReviewCnt, double storeRating) {
 		return StoreResponseDto.builder()
 			.id(stores.getId().toString())
 			.userName(stores.getUserId().getUsername())
@@ -62,6 +70,10 @@ public class StoreResponseDto {
 			.storeRegion(stores.getStoreRegion())
 			.storeCategory(stores.getStoreCategory())
 			.storeRating(stores.getStoreRating())
+			.storeDeliveryPrice(stores.getStoreDeliveryPrice())
+			.storeReviewCnt(storeReviewCnt)
+			.storeRating(storeRating)
+			.createdAt(stores.getCreatedAt().toString())
 			.build();
 	}
 
