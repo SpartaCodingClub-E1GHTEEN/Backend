@@ -1,5 +1,7 @@
 package com.sparta.first.project.eighteen.domain.users;
 
+import java.util.UUID;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -53,7 +55,8 @@ public class UserController {
 	@PreAuthorize("hasAnyRole('ROLE_OWNER', 'ROLE_CUSTOMER')")
 	@DeleteMapping
 	public ResponseEntity<ApiResponse<Void>> deleteUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-		String userId = userDetails.getUsers().getUserId().toString();
+		UUID userId = userDetails.getUsers().getUserId();
+		userService.deleteUser(userId);
 		return ResponseEntity.ok(ApiResponse.ok("삭제 성공", null));
 	}
 

@@ -54,6 +54,7 @@ public class UserRequestDto {
 			.signUpType(this.signUpType)
 			.email(this.email)
 			.role(this.role)
+			.isDeleted(false)
 			.build();
 	}
 
@@ -68,6 +69,7 @@ public class UserRequestDto {
 			.email(this.email)
 			.signUpType(this.signUpType)
 			.role(this.role)
+			.isDeleted(false)
 			.createdBy("50ce7d0a-4ae2-4c47-9842-56bdc29c060d")
 			.build();
 	}

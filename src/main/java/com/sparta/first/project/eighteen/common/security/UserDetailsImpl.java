@@ -47,7 +47,7 @@ public class UserDetailsImpl implements UserDetails {
 
 	@Override
 	public boolean isAccountNonLocked() {
-		return true;
+		return !users.getIsDeleted();
 	}
 
 	@Override

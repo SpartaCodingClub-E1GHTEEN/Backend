@@ -42,6 +42,12 @@ public class UserService {
 		return UserResponseDto.from(users);
 	}
 
+	@Transactional
+	public void deleteUser(UUID userId) {
+		Users users = findUsers(userId);
+		users.delete(true, userId.toString());
+	}
+
 	private Users findUsers(UUID userId) {
 		return userRepository.findById(userId)
 			.orElseThrow(() -> new BaseException("회원을 찾을 수 없습니다.", -1, HttpStatus.NOT_FOUND));
