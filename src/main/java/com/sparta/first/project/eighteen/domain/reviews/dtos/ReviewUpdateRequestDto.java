@@ -5,13 +5,17 @@ import com.sparta.first.project.eighteen.model.reviews.Reviews;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class ReviewUpdateRequestDto {
 
 	// 리뷰 내용
@@ -26,16 +30,11 @@ public class ReviewUpdateRequestDto {
 	// 리뷰 이미지
 	private String reviewImgUrl;
 
-	public Reviews updateEntity(Reviews review) {
+	public Reviews toEntity() {
 		return Reviews.builder()
-			.id(review.getId())
-			.reviewContent(this.reviewContent != null ? this.reviewContent : review.getReviewContent())
-			// 애초에 null일 수 없는 값이라 조건문 필요 X (@Min, @Max 사용 중)
 			.reviewRating(this.reviewRating)
-			.reviewImgUrl(this.reviewImgUrl != null ? this.reviewImgUrl : review.getReviewImgUrl())
-			.usersId(review.getUsersId())
-			.storeId(review.getStoreId())
-			.orderId(review.getOrderId())
+			.reviewContent(this.reviewContent)
+			.reviewImgUrl(this.reviewImgUrl)
 			.build();
 	}
 

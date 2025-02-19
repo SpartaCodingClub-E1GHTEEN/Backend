@@ -1,5 +1,7 @@
 package com.sparta.first.project.eighteen.domain.reviews.dtos;
 
+import java.util.UUID;
+
 import com.sparta.first.project.eighteen.model.orders.Orders;
 import com.sparta.first.project.eighteen.model.reviews.Reviews;
 import com.sparta.first.project.eighteen.model.stores.Stores;
@@ -18,7 +20,7 @@ import lombok.Setter;
 public class ReviewCreateRequestDto {
 
 	// 리뷰를 작성할 주문 ID
-	private String orderId;
+	private UUID orderId;
 
 	// 리뷰 내용
 	@Size(min = 5, max = 500, message = "최소 5자 이상, 500자 이하의 리뷰를 작성해주세요")
