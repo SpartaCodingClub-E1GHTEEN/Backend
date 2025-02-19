@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sparta.first.project.eighteen.common.BaseEntity;
+import com.sparta.first.project.eighteen.domain.orders.dtos.OrderUpdateRequestDto;
 import com.sparta.first.project.eighteen.model.stores.Stores;
 import com.sparta.first.project.eighteen.model.users.Users;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,7 +20,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,9 +27,9 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Builder(access = AccessLevel.PRIVATE)
+@Builder
 @NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Table(name = "p_orders")
 public class Orders extends BaseEntity {
 
@@ -36,17 +37,17 @@ public class Orders extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID id;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "store_id", referencedColumnName = "id")
-	private Stores storeId;
+	private Stores store;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
-	private Users userId;
+	private Users user;
 
 	private LocalDateTime orderTime;
 
-	private boolean iStoreOrder;
+	private boolean isStoreOrder;
 
 	@Enumerated(value = EnumType.STRING)
 	private OrderStatus status;
@@ -57,6 +58,16 @@ public class Orders extends BaseEntity {
 
 	private int totalPrice;
 
-	@OneToMany
+	@OneToMany(mappedBy = "order")
 	private List<OrderDetails> orderDetails;
+
+	public void update(OrderUpdateRequestDto requestDto) {
+		this.status = OrderStatus.valueOf(requestDto.getStatus());
+		this.noteToStore = requestDto.getNoteToStore();
+		this.noteToDelivery = requestDto.getNoteToDelivery();
+	}
+
+	public void cancel() {
+		this.status = OrderStatus.CANCELED;
+	}
 }

@@ -1,8 +1,10 @@
 package com.sparta.first.project.eighteen.domain.orders.dtos;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.sparta.first.project.eighteen.model.orders.OrderDetails;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,25 +17,15 @@ public class OrderDetailsResponseDto {
 	private int amount;
 	private List<OrderDetailsOptionResponseDto> options;
 
-	//TODO: DELETE MOCKDATA
-	public OrderDetailsResponseDto(OrderDetailsRequestDto requestDto) {
-		this.orderDetailsId = orderDetailsId;
-		this.productId = requestDto.getProductId();
-		this.productName = "짜장면";
-		this.amount = 1000;
-		this.options = Arrays.asList(requestDto.getOptionIds()).stream()
-			.map(option -> new OrderDetailsOptionResponseDto(option))
-			.collect(Collectors.toList());
-	}
-
-	//TODO: DELETE MOCKDATA
-	public OrderDetailsResponseDto(OrderDetailsUpdateRequestDto requestDto) {
-		this.orderDetailsId = orderDetailsId;
-		this.productId = requestDto.getProductId();
-		this.productName = "짜장면";
-		this.amount = 1000;
-		this.options = Arrays.asList(requestDto.getOptionIds()).stream()
-			.map(option -> new OrderDetailsOptionResponseDto(option))
-			.collect(Collectors.toList());
+	public OrderDetailsResponseDto(OrderDetails orderDetails) {
+		this.orderDetailsId = orderDetails.getId().toString();
+		this.productId = orderDetails.getFood().getId().toString();
+		this.productName = orderDetails.getFoodName();
+		this.amount = orderDetails.getAmount();
+		this.options = orderDetails.getOrderDetailsOptions()
+			.stream()
+			.map(orderDetailsOptions -> new OrderDetailsOptionResponseDto(orderDetailsOptions))
+			.collect(Collectors.toList()
+			);
 	}
 }
