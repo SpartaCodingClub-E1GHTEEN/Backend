@@ -36,31 +36,11 @@ public class ReviewResponseDto {
 	// 리뷰 이미지
 	private String reviewImgUrl;
 
-	// 테스트를 위한 임시 생성자
-	public ReviewResponseDto(ReviewCreateRequestDto reviewRequestDto) {
-		this.id = "1";
-		this.reviewNickname = "김손님";
-		this.orderId = reviewRequestDto.getOrderId();
-		this.reviewOrders = "김밥, 떡볶이, 등등 ..";
-		this.reviewContent = reviewRequestDto.getReviewContent();
-		this.reviewRating = reviewRequestDto.getReviewRating();
-		this.reviewImgUrl = reviewRequestDto.getReviewImgUrl();
-	}
-
-	// 테스트를 위한 임시 생성자
-	public ReviewResponseDto(ReviewUpdateRequestDto reviewRequestDto) {
-		this.id = "1";
-		this.reviewNickname = "이손님";
-		this.reviewOrders = "김밥, 떡볶이, 순대";
-		this.reviewContent = reviewRequestDto.getReviewContent();
-		this.reviewRating = reviewRequestDto.getReviewRating();
-		this.reviewImgUrl = reviewRequestDto.getReviewImgUrl();
-	}
-
 	public static ReviewResponseDto fromEntity(Reviews review) {
 		return ReviewResponseDto.builder()
 			.id(review.getId().toString())
 			.reviewNickname(review.getUsersId().getUsername())
+			.orderId(review.getOrderId().toString())
 			// .reviewOrders(review.getOrderId().getOrderDetails().toString())
 			.reviewContent(review.getReviewContent())
 			.reviewRating(review.getReviewRating())
