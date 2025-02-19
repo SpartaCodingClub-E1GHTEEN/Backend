@@ -1,6 +1,5 @@
 package com.sparta.first.project.eighteen.domain.stores;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,9 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.first.project.eighteen.common.dto.ApiResponse;
+import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreListResponseDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreRequestDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreResponseDto;
+import com.sparta.first.project.eighteen.domain.stores.dtos.StoreUpdateRequestDto;
 import com.sparta.first.project.eighteen.model.users.Role;
 
 import lombok.RequiredArgsConstructor;
@@ -43,13 +43,13 @@ public class StoreController {
 	 */
 	@PostMapping
 	public ResponseEntity<ApiResponse<StoreResponseDto>> createStore (
-		@AuthenticationPrincipal UserDetails userDetails,
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestBody StoreRequestDto storeRequestDto) {
 
 		// userDetails 담긴 유저는 MASTER 이어야만 함
 		// MASTER 만 가게 생성 가능 (가게 생성 시 OWNER를 넣어주는 방식으로 진행)
-		if (storeService.findUserRole(userDetails.getUsername()) != Role.MANAGER) {
-			log.info("MANAGER가 아닌 사용자");
+		if (storeService.findUserRole(userDetails.getUsername()) != Role.MASTER) {
+			log.info("MASTER가 아닌 사용자");
 			throw new IllegalArgumentException("해당 사용자는 식당을 생성할 수 없습니다.");
 		}
 
@@ -63,6 +63,7 @@ public class StoreController {
 	 */
 	@GetMapping
 	public ResponseEntity<ApiResponse<Page<StoreListResponseDto>>> getStores(Pageable pageable){
+		log.info("getAllStoreList 요청 들어옴");
 		Page<StoreListResponseDto> responseDtos = storeService.getStores(pageable);
 		return ResponseEntity.ok(ApiResponse.ok("성공", responseDtos));
 	}
@@ -89,8 +90,8 @@ public class StoreController {
 	@PutMapping("/{storeId}")
 	public ResponseEntity<ApiResponse<StoreResponseDto>> updateStore (
 		@PathVariable UUID storeId,
-		@AuthenticationPrincipal UserDetails userDetails,
-		@RequestBody StoreRequestDto storeRequestDto) {
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
+		@RequestBody StoreUpdateRequestDto storeRequestDto) {
 
 		if (storeService.findUserRole(userDetails.getUsername()) == Role.CUSTOMER) {
 			log.info("CUSTOMER인 사용자가 수정하려고 함");
@@ -110,7 +111,7 @@ public class StoreController {
 	 */
 	@DeleteMapping("/{storeId}")
 	public ResponseEntity<ApiResponse> deleteStore (
-		@AuthenticationPrincipal UserDetails userDetails,
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId){
 
 		if (storeService.findUserRole(userDetails.getUsername()) == Role.CUSTOMER) {

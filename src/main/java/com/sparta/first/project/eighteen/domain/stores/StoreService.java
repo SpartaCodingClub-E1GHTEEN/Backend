@@ -2,8 +2,10 @@ package com.sparta.first.project.eighteen.domain.stores;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,8 +15,10 @@ import com.sparta.first.project.eighteen.domain.reviews.ReviewRepository;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreListResponseDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreRequestDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreResponseDto;
+import com.sparta.first.project.eighteen.domain.stores.dtos.StoreUpdateRequestDto;
 import com.sparta.first.project.eighteen.domain.users.UserRepository;
 import com.sparta.first.project.eighteen.model.stores.Stores;
+import com.sparta.first.project.eighteen.model.reviews.Reviews;
 import com.sparta.first.project.eighteen.model.users.Role;
 import com.sparta.first.project.eighteen.model.users.Users;
 
@@ -51,11 +55,15 @@ public class StoreService {
 	 * @return : 조회한 식당의 정보들을 반환
 	 */
 	public Page<StoreListResponseDto> getStores(Pageable pageable) {
-		Page<StoreListResponseDto> stores = storeRepository.findByIsDeletedIsNull(pageable)
-			.map(StoreListResponseDto::fromEntity);
-		
-		// QueryDSL 적용 필요
-		return stores;
+		log.info("Service로 getAllStore 요청 넘어옴");
+		Page<Stores> storePage = storeRepository.findAll(pageable);
+
+		List<StoreListResponseDto> filteredStores = storePage.getContent().stream()
+			.filter(s -> !s.getIsDeleted())
+			.map(StoreListResponseDto::fromEntity)
+			.toList();
+
+		return new PageImpl<>(filteredStores, pageable, filteredStores.size());
 	}
 
 	/**
@@ -78,7 +86,7 @@ public class StoreService {
 	 * @return : 수정을 완료한 식당 정보
 	 */
 	@Transactional
-	public StoreResponseDto updateStore(UUID storeId, String username, StoreRequestDto storeRequestDto) {
+	public StoreResponseDto updateStore(UUID storeId, String username, StoreUpdateRequestDto storeRequestDto) {
 		// 유저의 권한이 OWNER 라면, store에 저장된 유저와 일치하는지 확인해야 함
 		Users user = findStoreOwner(username);
 		Stores store = findStore(storeId);
@@ -91,12 +99,13 @@ public class StoreService {
 		}
 
 		// 식당 내용 update
-		Stores updatingStore = storeRequestDto.updateEntity(store, user);
-		Stores updatedStore = storeRepository.save(updatingStore);
+		Stores updateStore = storeRequestDto.toEntity();
+		store.updateStore(updateStore);
 
-		int storeReviewCnt = getStoreReviewCnt(updatedStore);
-		double storeRating = getStoreReviewSum(updatedStore, storeReviewCnt);
-		return StoreResponseDto.fromEntityReview(updatedStore, storeReviewCnt, storeRating);
+		int storeReviewCnt = getStoreReviewCnt(store);
+		double storeRating = getStoreReviewSum(store, storeReviewCnt);
+
+		return StoreResponseDto.fromEntityReview(store, storeReviewCnt, storeRating);
 	}
 
 	/**
@@ -139,9 +148,13 @@ public class StoreService {
 	 * @return : 식당의 리뷰 평점
 	 */
 	private double getStoreReviewSum(Stores store, int storeReviewCnt) {
-		List<Integer> list = reviewRepository.findReviewRatingByStoreId(store);
+		List<Integer> list = reviewRepository.findReviewRatingByStoreId(store)
+			.stream()
+			.map(Reviews::getReviewRating)
+			.collect(Collectors.toList());
+
 		if (list.isEmpty() || list == null || storeReviewCnt == 0) {
-			throw new IllegalArgumentException("잘못된 계산입니다.");
+			return 0;
 		}
 		
 		int sum = 0;
@@ -158,7 +171,7 @@ public class StoreService {
 	 * @return : 조회한 식당
 	 */
 	public Stores findStore(UUID storeId) {
-		return storeRepository.findById(storeId).filter(s -> s.getIsDeleted() == null)
+		return storeRepository.findById(storeId).filter(s -> s.getIsDeleted() == false)
 			.orElseThrow(() -> new IllegalArgumentException("존재하지 않거나 삭제된 식당"));
 	}
 
