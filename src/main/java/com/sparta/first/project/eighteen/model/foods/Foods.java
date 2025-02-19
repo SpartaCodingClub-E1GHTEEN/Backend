@@ -6,8 +6,11 @@ import java.util.UUID;
 import com.sparta.first.project.eighteen.common.BaseEntity;
 import com.sparta.first.project.eighteen.model.stores.Stores;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,35 +35,39 @@ public class Foods extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID id;
 
-	@Column
+	@Column(nullable = false)
 	private String foodName;
 
-	@Column
+	@Column(length = 255)
 	private String foodDesc;
 
-	@Column
+	@Column(nullable = false)
 	private int foodPrice;
 
-	@Column
+	@Column(length = 255)
 	private String foodImageUrl;
 
-	@Column
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
 	private FoodStatus foodStatus;
 
-	@Column
-	private boolean isRecommended;
+	@Column(nullable = false)
+	@Builder.Default
+	private boolean isRecommended = false;
+
+	@Column(nullable = false)
+	@Builder.Default
+	private int foodReviewCount = 0;
 
 	@Column
-	private int foodReviewCount;
+	@Builder.Default
+	private int foodOrderCount = 0;
 
-	@Column
-	private int foodOrderCount;
-
-	@OneToMany
+	@OneToMany(mappedBy = "food", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<FoodOptions> foodOptions;
 
 	// 식당 ID
 	@ManyToOne
-	@JoinColumn(name = "store_id", referencedColumnName = "id")
-	private Stores storeId;
+	@JoinColumn(name = "store_id", referencedColumnName = "id", nullable = false)
+	private Stores store;
 }
