@@ -14,8 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sparta.first.project.eighteen.common.dto.ApiResponse;
 import com.sparta.first.project.eighteen.domain.users.dtos.AdminUserSearchRequestDto;
 import com.sparta.first.project.eighteen.domain.users.dtos.AdminUserSearchResponseDto;
-import com.sparta.first.project.eighteen.domain.users.dtos.UserResponseDto;
-import com.sparta.first.project.eighteen.domain.users.dtos.UserUpdateRequestDto;
+import com.sparta.first.project.eighteen.domain.users.dtos.AdminUserUpdateRequestDto;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,19 +39,11 @@ public class AdminController {
 
 	@PutMapping("/users/{userId}")
 	@PreAuthorize("hasAnyRole('ROLE_MANAGER', 'ROLE_MASTER')")
-	public ResponseEntity<ApiResponse<UserResponseDto>> modifyUser(
+	public ResponseEntity<ApiResponse<AdminUserSearchResponseDto>> modifyUser(
 		@PathVariable String userId,
-		@Valid @RequestBody UserUpdateRequestDto requestDto) {
-		UserResponseDto response = adminService.modifyUser(userId, requestDto);
+		@Valid @RequestBody AdminUserUpdateRequestDto requestDto) {
 
-		log.info("수정 : {}", response);
-		UserResponseDto mockData = UserResponseDto.builder()
-			.username("testUser")
-			.nickname("테스트회원")
-			.phone("012-3456-7890")
-			.email("test@test.io")
-			.address("서울시 광화문구")
-			.build();
+		AdminUserSearchResponseDto response = adminService.modifyUser(userId, requestDto);
 
 		return ResponseEntity.ok(ApiResponse.ok("회원 정보 수정", response));
 	}

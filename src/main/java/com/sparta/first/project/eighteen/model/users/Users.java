@@ -67,4 +67,18 @@ public class Users extends BaseEntity {
 		Optional.ofNullable(update.getUserPhone()).ifPresent(phone -> this.userPhone = phone);
 		Optional.ofNullable(update.getUserAddress()).ifPresent(address -> this.userAddress = address);
 	}
+
+	/**
+	 * 관리자 권한으로 유저 수정
+	 * 이 때는 비밀번호, 권한, 이메일에 대해서 변경해줄 수 있음.
+	 *
+	 * TODO: 추후 비밀번호를 직접 입력받아서 수정하는 것이 아닌 시스템 내부적으로 생성해서 수정하도록 변경
+	 *
+	 * @param update
+	 */
+	public void adminUserUpdate(Users update) {
+		Optional.ofNullable(update.getEmail()).ifPresent(email -> this.email = email);
+		Optional.ofNullable(update.getUserPassword()).ifPresent(password -> this.userPassword = password);
+		Optional.ofNullable(update.getRole()).ifPresent(role -> this.role = role);
+	}
 }
