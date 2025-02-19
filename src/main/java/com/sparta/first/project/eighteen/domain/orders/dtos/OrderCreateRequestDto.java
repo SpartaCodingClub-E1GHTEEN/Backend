@@ -1,11 +1,18 @@
 package com.sparta.first.project.eighteen.domain.orders.dtos;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 
+import com.sparta.first.project.eighteen.model.orders.OrderStatus;
+import com.sparta.first.project.eighteen.model.orders.Orders;
+import com.sparta.first.project.eighteen.model.stores.Stores;
+import com.sparta.first.project.eighteen.model.users.Users;
+
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+@AllArgsConstructor
 @Getter
 @Setter
 public class OrderCreateRequestDto {
@@ -13,14 +20,19 @@ public class OrderCreateRequestDto {
 	private Boolean isStoreOrder;
 	private String noteToStore;
 	private String noteToDelivery;
+	private int totalPrice;
 	private List<OrderDetailsRequestDto> orderDetails;
 
-	//TODO: DELETE MOCKDATA
-	public OrderCreateRequestDto(String id) {
-		this.storeId = "1";
-		this.isStoreOrder = false;
-		this.noteToStore = "맛있게 만들어주세요";
-		this.noteToDelivery = "천천히 오세요";
-		this.orderDetails = new ArrayList<OrderDetailsRequestDto>();
+	public Orders toEntity(Stores store, Users user) {
+		return Orders.builder()
+			.store(store)
+			.user(user)
+			.orderTime(LocalDateTime.now())
+			.isStoreOrder(this.isStoreOrder)
+			.status(OrderStatus.PENDING)
+			.noteToStore(this.noteToStore)
+			.noteToDelivery(this.noteToDelivery)
+			.totalPrice(this.totalPrice)
+			.build();
 	}
 }

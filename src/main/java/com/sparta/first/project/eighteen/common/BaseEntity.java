@@ -14,6 +14,7 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -43,7 +44,8 @@ public abstract class BaseEntity {
 
 	// 소프트 삭제가 되었는지 (isSoftDeleted?)
 	// True - False
-	protected Boolean isDeleted;
+	@Builder.Default
+	protected Boolean isDeleted = false;
 	// 소프트 삭제가 된 날짜 (Null - Not Null)
 	@Temporal(value = TemporalType.TIMESTAMP)
 	protected LocalDateTime deletedAt;

@@ -26,6 +26,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		Users users = userRepository.findByUsername(username)
 			.orElseThrow(() -> new BaseException("다시 로그인해주세요.", -1, HttpStatus.UNAUTHORIZED));
 
+		checkUserDeleted(users);
+
 		return new UserDetailsImpl(users);
 	}
 
@@ -33,6 +35,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		Users users = userRepository.findById(UUID.fromString(userUUID))
 			.orElseThrow(() -> new BaseException("다시 로그인해주세요.", -1, HttpStatus.UNAUTHORIZED));
 
+		checkUserDeleted(users);
+
 		return new UserDetailsImpl(users);
+	}
+
+	private void checkUserDeleted(Users users) {
+		if (users.getIsDeleted()) {
+			throw new BaseException("삭제된 유저입니다.", -1, HttpStatus.UNAUTHORIZED);
+		}
 	}
 }

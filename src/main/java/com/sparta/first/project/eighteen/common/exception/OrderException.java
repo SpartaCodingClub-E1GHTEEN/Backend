@@ -4,8 +4,8 @@ import org.springframework.http.HttpStatus;
 
 public class OrderException {
 	public static class OrderNotFound extends BaseException {
-		public OrderNotFound(String message, int code, HttpStatus status) {
-			super(message, code, status);
+		public OrderNotFound() {
+			super("주문 정보가 없습니다", -403, HttpStatus.BAD_REQUEST);
 		}
 	}
 }

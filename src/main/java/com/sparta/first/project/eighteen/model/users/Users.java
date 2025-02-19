@@ -1,5 +1,6 @@
 package com.sparta.first.project.eighteen.model.users;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import com.sparta.first.project.eighteen.common.BaseEntity;
@@ -34,7 +35,7 @@ public class Users extends BaseEntity {
 	@Column(nullable = false)
 	private String userPassword; // 유저 비밀번호
 
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String userNickname;
 
 	@Column(nullable = false)
@@ -47,6 +48,23 @@ public class Users extends BaseEntity {
 	private String email;
 
 	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
 	private Role role; // 권한
 
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, updatable = false)
+	private SignUpType signUpType;
+
+	/**
+	 * 비밀번호, 이메일, 닉네임, 핸드폰번호, 주소 중
+	 * 존재하는 필드에 대해서만 업데이트
+	 * @param update : 사용자에게 전달받은 유저 변경 DTO
+	 */
+	public void updateUser(Users update) {
+		Optional.ofNullable(update.getUserPassword()).ifPresent(password -> this.userPassword = password);
+		Optional.ofNullable(update.getEmail()).ifPresent(email -> this.email = email);
+		Optional.ofNullable(update.getUserNickname()).ifPresent(nickname -> this.userNickname = nickname);
+		Optional.ofNullable(update.getUserPhone()).ifPresent(phone -> this.userPhone = phone);
+		Optional.ofNullable(update.getUserAddress()).ifPresent(address -> this.userAddress = address);
+	}
 }

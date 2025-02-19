@@ -1,9 +1,15 @@
 package com.sparta.first.project.eighteen.domain.foods.dtos;
 
 import java.util.List;
+import java.util.UUID;
+
+import com.sparta.first.project.eighteen.model.foods.FoodStatus;
+import com.sparta.first.project.eighteen.model.foods.Foods;
+import com.sparta.first.project.eighteen.model.stores.Stores;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,26 +19,35 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FoodCreateRequestDto {
 
-	private String storeId;
+	@NotNull
+	private UUID storeId;
 
-	@NotBlank(message = "메뉴 이름은 필수입니다.")
+	@NotBlank
 	private String foodName;
 
 	private String foodDesc;
 
-	@NotBlank(message = "메뉴 가격은 필수입니다.")
-	@Min(value = 0, message = "메뉴 가격은 0원 이상이어야 합니다.")
+	@Min(0)
 	private int foodPrice;
-
-	@NotBlank(message = "카테고리는 필수입니다.")
-	private String foodCategory;
 
 	private String foodImageUrl;
 
-	@NotBlank(message = "메뉴 판매 상태는 필수입니다.")
-	private String foodStatus;
+	@NotNull
+	private FoodStatus foodStatus;
 
 	private boolean isRecommended = false;
 
 	private List<FoodOptionRequestDto> options;
+
+	public Foods toEntity(Stores store) {
+		return Foods.builder()
+			.foodName(foodName)
+			.foodDesc(foodDesc)
+			.foodPrice(foodPrice)
+			.foodImageUrl(foodImageUrl)
+			.foodStatus(foodStatus)
+			.isRecommended(isRecommended)
+			.store(store)
+			.build();
+	}
 }
