@@ -20,9 +20,9 @@ import com.sparta.first.project.eighteen.domain.orders.dtos.OrderSearchRequestDt
 import com.sparta.first.project.eighteen.domain.orders.dtos.OrderUpdateRequestDto;
 import com.sparta.first.project.eighteen.model.users.Users;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/order")
 @RestController
 public class OrderController {
