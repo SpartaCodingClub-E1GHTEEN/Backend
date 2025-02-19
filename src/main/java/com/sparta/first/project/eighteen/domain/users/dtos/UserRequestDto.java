@@ -3,6 +3,7 @@ package com.sparta.first.project.eighteen.domain.users.dtos;
 import java.util.UUID;
 
 import org.hibernate.validator.constraints.Length;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.sparta.first.project.eighteen.model.users.Role;
 import com.sparta.first.project.eighteen.model.users.SignUpType;
@@ -42,29 +43,31 @@ public class UserRequestDto {
 
 	private String address;
 
-	public static Users toEntity(UserRequestDto requestDto) {
+	public Users toEntity(PasswordEncoder passwordEncoder) {
 		return Users.builder()
-			.username(requestDto.username)
-			.userPassword(requestDto.password)
-			.userNickname(requestDto.nickname)
-			.userPhone(requestDto.phone)
-			.userAddress(requestDto.address)
-			.email(requestDto.email)
-			.role(requestDto.role)
-			.createdBy("50ce7d0a-4ae2-4c47-9842-56bdc29c060d")
+			.userId(UUID.randomUUID())// 임시로 UUID 생성 후 주입
+			.username(this.username)
+			.userPassword(passwordEncoder.encode(this.password))
+			.userNickname(this.nickname)
+			.userPhone(this.phone)
+			.userAddress(this.address)
+			.signUpType(this.signUpType)
+			.email(this.email)
+			.role(this.role)
 			.build();
 	}
 
-	public static Users toEntityWithUUID(UserRequestDto requestDto, UUID userId) {
+	public Users toEntityWithUUID(UUID userId) {
 		return Users.builder()
 			.userId(userId)
-			.username(requestDto.username)
-			.userPassword(requestDto.password)
-			.userNickname(requestDto.nickname)
-			.userPhone(requestDto.phone)
-			.userAddress(requestDto.address)
-			.email(requestDto.email)
-			.role(requestDto.role)
+			.username(this.username)
+			.userPassword(this.password)
+			.userNickname(this.nickname)
+			.userPhone(this.phone)
+			.userAddress(this.address)
+			.email(this.email)
+			.signUpType(this.signUpType)
+			.role(this.role)
 			.createdBy("50ce7d0a-4ae2-4c47-9842-56bdc29c060d")
 			.build();
 	}

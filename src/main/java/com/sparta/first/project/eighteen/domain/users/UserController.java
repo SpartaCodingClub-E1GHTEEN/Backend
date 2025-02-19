@@ -1,5 +1,7 @@
 package com.sparta.first.project.eighteen.domain.users;
 
+import java.util.UUID;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,37 +17,34 @@ import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 import com.sparta.first.project.eighteen.domain.users.dtos.UserResponseDto;
 import com.sparta.first.project.eighteen.domain.users.dtos.UserUpdateRequestDto;
 
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/users")
+@RequiredArgsConstructor
+@ToString
 public class UserController {
+	private final UserService userService;
 
 	@GetMapping
 	public ResponseEntity<ApiResponse<UserResponseDto>> findUser(
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
-		UserResponseDto mockData = UserResponseDto.builder()
-			.username("testUser")
-			.nickname("테스트회원")
-			.phone("012-3456-7890")
-			.email("test@test.io")
-			.address("서울시 광화문구")
-			.build();
-		return ResponseEntity.ok(ApiResponse.ok("유저 조회 성공", mockData));
+		UserResponseDto response = userService.findUser(userDetails.getUserUUID());
+		return ResponseEntity.ok(ApiResponse.ok("유저 조회 성공", response));
 	}
 
 	@PutMapping
-	public ResponseEntity<ApiResponse<UserResponseDto>> modifyUser(@RequestBody UserUpdateRequestDto requestDto,
-		@AuthenticationPrincipal UserDetailsImpl userDetails) {
-		UserResponseDto mockData = UserResponseDto.builder()
-			.username("testUser")
-			.nickname("테스트회원")
-			.phone("012-3456-7890")
-			.email("test@test.io")
-			.address("서울시 광화문구")
-			.build();
-		return ResponseEntity.ok(ApiResponse.ok("수정 성공", mockData));
+	public ResponseEntity<ApiResponse<UserResponseDto>> modifyUser(
+		@Valid @RequestBody UserUpdateRequestDto requestDto,
+		@AuthenticationPrincipal UserDetailsImpl userDetails
+	) {
+		log.info("{}", requestDto);
+		UserResponseDto responseDto = userService.modifyUser(userDetails.getUserUUID(), requestDto);
+		return ResponseEntity.ok(ApiResponse.ok("수정 성공", responseDto));
 	}
 
 	/**
@@ -56,7 +55,8 @@ public class UserController {
 	@PreAuthorize("hasAnyRole('ROLE_OWNER', 'ROLE_CUSTOMER')")
 	@DeleteMapping
 	public ResponseEntity<ApiResponse<Void>> deleteUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-		String userId = userDetails.getUsers().getUserId().toString();
+		UUID userId = userDetails.getUsers().getUserId();
+		userService.deleteUser(userId);
 		return ResponseEntity.ok(ApiResponse.ok("삭제 성공", null));
 	}
 
