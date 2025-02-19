@@ -1,14 +1,13 @@
 package com.sparta.first.project.eighteen.domain.stores;
 
-import java.util.List;
 import java.util.UUID;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,6 +20,7 @@ import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreListResponseDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreRequestDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreResponseDto;
+import com.sparta.first.project.eighteen.domain.stores.dtos.StoreSearchDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreUpdateRequestDto;
 import com.sparta.first.project.eighteen.model.users.Role;
 
@@ -62,9 +62,11 @@ public class StoreController {
 	 * @return : 식당 목록 반환
 	 */
 	@GetMapping
-	public ResponseEntity<ApiResponse<Page<StoreListResponseDto>>> getStores(Pageable pageable){
-		log.info("getAllStoreList 요청 들어옴");
-		Page<StoreListResponseDto> responseDtos = storeService.getStores(pageable);
+	public ResponseEntity<ApiResponse<PagedModel<StoreListResponseDto>>> getStores(
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
+		@ModelAttribute StoreSearchDto searchDto){
+		log.info("getStores 요청 들어옴");
+		PagedModel<StoreListResponseDto> responseDtos = storeService.getStores(userDetails.getUsername(), searchDto);
 		return ResponseEntity.ok(ApiResponse.ok("성공", responseDtos));
 	}
 

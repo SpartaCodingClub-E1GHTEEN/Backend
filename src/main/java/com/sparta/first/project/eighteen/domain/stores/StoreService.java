@@ -5,8 +5,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,10 +16,11 @@ import com.sparta.first.project.eighteen.domain.reviews.ReviewRepository;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreListResponseDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreRequestDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreResponseDto;
+import com.sparta.first.project.eighteen.domain.stores.dtos.StoreSearchDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreUpdateRequestDto;
 import com.sparta.first.project.eighteen.domain.users.UserRepository;
-import com.sparta.first.project.eighteen.model.stores.Stores;
 import com.sparta.first.project.eighteen.model.reviews.Reviews;
+import com.sparta.first.project.eighteen.model.stores.Stores;
 import com.sparta.first.project.eighteen.model.users.Role;
 import com.sparta.first.project.eighteen.model.users.Users;
 
@@ -51,19 +53,23 @@ public class StoreService {
 
 	/**
 	 * 식당 전체 조회
-	 * @param pageable : 조회할 정보들
+	 * @param username : 조회할 사용자명
+	 * @param searchDto : 조회할 내용
 	 * @return : 조회한 식당의 정보들을 반환
 	 */
-	public Page<StoreListResponseDto> getStores(Pageable pageable) {
-		log.info("Service로 getAllStore 요청 넘어옴");
-		Page<Stores> storePage = storeRepository.findAll(pageable);
+	public PagedModel<StoreListResponseDto> getStores(String username, StoreSearchDto searchDto) {
+		log.info("Service로 getStores 요청 넘어옴");
+		Pageable pageable = PageRequest.of(searchDto.getPage(), searchDto.getSize());
 
-		List<StoreListResponseDto> filteredStores = storePage.getContent().stream()
-			.filter(s -> !s.getIsDeleted())
-			.map(StoreListResponseDto::fromEntity)
-			.toList();
+		Role role = Role.CUSTOMER;
+		if (username != null) {
+			role = findUserRole(username);
+		}
 
-		return new PageImpl<>(filteredStores, pageable, filteredStores.size());
+		log.info("role: " + role.toString());
+
+		Page<StoreListResponseDto> storePage = storeRepository.searchStores(searchDto, pageable, role);
+		return new PagedModel<>(storePage);
 	}
 
 	/**
