@@ -66,6 +66,6 @@ public class FoodsController {
 
 		foodsService.deleteFood(foodId);
 
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok(ApiResponse.ok("메뉴를 성공적으로 삭제했습니다.", null));
 	}
 }
