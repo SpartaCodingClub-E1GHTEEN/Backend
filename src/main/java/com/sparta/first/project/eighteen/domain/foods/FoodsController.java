@@ -1,5 +1,7 @@
 package com.sparta.first.project.eighteen.domain.foods;
 
+import java.util.UUID;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,32 +18,40 @@ import com.sparta.first.project.eighteen.domain.foods.dtos.FoodCreateRequestDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodGetResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodSearchRequestDto;
+import com.sparta.first.project.eighteen.domain.foods.dtos.FoodSingleResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodUpdateRequestDto;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1")
+@RequiredArgsConstructor
 public class FoodsController {
-	private FoodsService foodsService;
+	private final FoodsService foodsService;
 
 	@PostMapping("/foods")
 	public ResponseEntity<ApiResponse<FoodResponseDto>> createFood(@RequestBody FoodCreateRequestDto requestDto) {
 
-		return null;
+		FoodResponseDto responseDto = foodsService.createFood(requestDto);
+
+		return ResponseEntity.ok(ApiResponse.ok("메뉴가 성공적으로 생성되었습니다.", responseDto));
 	}
 
 	@GetMapping("/stores/{storeId}/foods")
-	public ResponseEntity<ApiResponse<FoodGetResponseDto>> searchFood(@PathVariable String storeId,
+	public ResponseEntity<ApiResponse<FoodGetResponseDto>> searchFood(@PathVariable UUID storeId,
 		@ModelAttribute FoodSearchRequestDto requestDto) {
 
-		FoodGetResponseDto responseDto = null;
+		FoodGetResponseDto responseDto = foodsService.searchFood(storeId, requestDto);
 
-		return null;
+		return ResponseEntity.ok(ApiResponse.ok("메뉴 검색 결과", responseDto));
 	}
 
 	@GetMapping("/foods/{foodId}")
-	public ResponseEntity<ApiResponse<FoodGetResponseDto>> getFood(@PathVariable String foodId) {
+	public ResponseEntity<ApiResponse<FoodSingleResponseDto>> getFood(@PathVariable UUID foodId) {
 
-		return null;
+		FoodSingleResponseDto responseDto = foodsService.getFood(foodId);
+
+		return ResponseEntity.ok(ApiResponse.ok("메뉴를 성공적으로 조회했습니다.", responseDto));
 	}
 
 	@PutMapping("/foods/{foodId}")
@@ -52,8 +62,10 @@ public class FoodsController {
 	}
 
 	@DeleteMapping("/foods/{foodId}")
-	public ResponseEntity<ApiResponse<Void>> deleteFood(@PathVariable String foodId) {
+	public ResponseEntity<ApiResponse<Void>> deleteFood(@PathVariable UUID foodId) {
 
-		return null;
+		foodsService.deleteFood(foodId);
+
+		return ResponseEntity.noContent().build();
 	}
 }
