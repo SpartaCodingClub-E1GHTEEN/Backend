@@ -50,17 +50,4 @@ public class StoreRequestDto {
 			.build();
 	}
 
-	public Stores updateEntity(Stores store, Users user) {
-		return Stores.builder()
-			.id(store.getId())
-			.storeName(this.storeName != null ? this.storeName : store.getStoreName())
-			.storeDesc(this.storeDesc != null ? this.storeDesc : store.getStoreDesc())
-			.storeRegion(this.storeRegion != null ? this.storeRegion : store.getStoreRegion())
-			.storeImgUrl(this.storeImgUrl != null ? this.storeImgUrl : store.getStoreImgUrl())
-			.storeDeliveryPrice(this.storeDeliveryPrice)
-			.storeCategory(this.storeCategory != null ? this.storeCategory : store.getStoreCategory())
-			.userId(user)
-			.build();
-	}
-
 }
