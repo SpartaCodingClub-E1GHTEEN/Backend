@@ -34,14 +34,6 @@ public class StoreListResponseDto {
 	// 식당 배달팁
 	private int storeDeliveryPrice;
 
-	// 테스트를 위한 임시 생성자
-	public StoreListResponseDto(StoreRequestDto storeRequestDto) {
-		this.id = "1";
-		this.storeName = "한식당";
-		this.storeRegion = "서울 광화문";
-		this.storeRating = 4.3;
-	}
-
 	public static StoreListResponseDto fromEntity(Stores store) {
 		return StoreListResponseDto.builder()
 			.id(store.getId().toString())
