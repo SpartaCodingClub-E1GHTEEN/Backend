@@ -11,5 +11,5 @@ import com.sparta.first.project.eighteen.model.stores.Stores;
 public interface ReviewRepository extends JpaRepository<Reviews, UUID> {
 	int countByStoreId(Stores storeId);
 
-	List<Integer> findReviewRatingByStoreId(Stores storeId);
+	List<Reviews> findReviewRatingByStoreId(Stores storeId);
 }
