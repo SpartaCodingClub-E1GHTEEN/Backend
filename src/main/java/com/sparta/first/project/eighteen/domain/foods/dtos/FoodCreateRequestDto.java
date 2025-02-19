@@ -39,10 +39,10 @@ public class FoodCreateRequestDto {
 
 	private List<FoodOptionRequestDto> options;
 
-	public Foods toEntity(Stores store) {
+	public Foods toEntity(Stores store, String generatedFoodDesc) {
 		return Foods.builder()
 			.foodName(foodName)
-			.foodDesc(foodDesc)
+			.foodDesc(generatedFoodDesc)
 			.foodPrice(foodPrice)
 			.foodImageUrl(foodImageUrl)
 			.foodStatus(foodStatus)

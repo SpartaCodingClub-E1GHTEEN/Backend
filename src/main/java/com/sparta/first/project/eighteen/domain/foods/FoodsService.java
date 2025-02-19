@@ -17,6 +17,7 @@ import com.sparta.first.project.eighteen.domain.stores.StoreRepository;
 import com.sparta.first.project.eighteen.model.foods.FoodOptions;
 import com.sparta.first.project.eighteen.model.foods.Foods;
 import com.sparta.first.project.eighteen.model.stores.Stores;
+import com.sparta.first.project.eighteen.utils.GeminiApiClient;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,13 +28,18 @@ public class FoodsService {
 	private final FoodsRepository foodsRepository;
 	private final FoodOptionsRepository foodOptionsRepository;
 	private final StoreRepository storesRepository;
+	private final GeminiApiClient geminiApiClient;
 
 	public FoodResponseDto createFood(FoodCreateRequestDto requestDto) {
 
 		Stores store = storesRepository.findById(requestDto.getStoreId())
 			.orElseThrow(() -> new RuntimeException("해당 가게를 찾을 수 없습니다."));
 
-		Foods food = foodsRepository.save(requestDto.toEntity(store));
+		String foodDesc = (requestDto.getFoodDesc() == null || requestDto.getFoodDesc().isEmpty())
+			? geminiApiClient.GeminiResponse(requestDto.getFoodName())
+			: requestDto.getFoodDesc();
+
+		Foods food = foodsRepository.save(requestDto.toEntity(store, foodDesc));
 
 		if (requestDto.getOptions() != null && !requestDto.getOptions().isEmpty()) {
 			List<FoodOptions> foodOptions = requestDto.getOptions()
