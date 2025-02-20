@@ -36,15 +36,19 @@ public class ReviewResponseDto {
 	// 리뷰 이미지
 	private String reviewImgUrl;
 
+	// 리뷰 생성일자
+	private String createdAt;
+
 	public static ReviewResponseDto fromEntity(Reviews review) {
 		return ReviewResponseDto.builder()
 			.id(review.getId().toString())
 			.reviewNickname(review.getUsersId().getUsername())
-			.orderId(review.getOrderId().toString())
+			.orderId(review.getOrderId().getId().toString())
 			// .reviewOrders(review.getOrderId().getOrderDetails().toString())
 			.reviewContent(review.getReviewContent())
 			.reviewRating(review.getReviewRating())
 			.reviewImgUrl(review.getReviewImgUrl())
+			.createdAt(review.getCreatedAt().toString())
 			.build();
 	}
 
