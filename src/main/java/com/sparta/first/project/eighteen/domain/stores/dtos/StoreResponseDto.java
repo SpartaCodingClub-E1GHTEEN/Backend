@@ -39,7 +39,7 @@ public class StoreResponseDto {
 	private double storeRating;
 
 	// 식당 리뷰 개수
-	private int storeReviewCnt;
+	private long storeReviewCnt;
 
 	// 식당 이미지
 	private String storeImgUrl;
