@@ -26,12 +26,14 @@ public class AdminService {
 	private final UserRepository userRepository;
 
 	public PagedModel<AdminUserSearchResponseDto> findAllUsers(AdminUserSearchRequestDto requestDto) {
-		Pageable pageable = PageRequest.of(requestDto.getPage(), requestDto.getSize());
+		Pageable pageable = PageRequest.of(requestDto.getPage(), requestDto.getSize(),
+			requestDto.getSort().toSort());
 
-		Page<AdminUserSearchResponseDto> allUsers = userRepository.findAllByRole(requestDto.getRole(), pageable)
+		Page<AdminUserSearchResponseDto> users = userRepository.searchUser(requestDto, pageable)
 			.map(AdminUserSearchResponseDto::from);
+		
+		return new PagedModel<>(users);
 
-		return new PagedModel<>(allUsers);
 	}
 
 	@Transactional

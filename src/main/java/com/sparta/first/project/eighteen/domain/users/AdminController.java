@@ -27,11 +27,18 @@ import lombok.extern.slf4j.Slf4j;
 public class AdminController {
 	private final AdminService adminService;
 
+	/**
+	 * 페이징 기본값의 경우 ()으로 표기
+	 * page(1), size(10), sort(SIGN_UP_DATE_ASC)
+	 * 조회 시작 기간, 조회 종료 기간, 가입 형태, 역할 등에 따라 검색 가능.
+	 * @param requestDto
+	 * @return
+	 */
 	@GetMapping("/users")
 	@PreAuthorize("hasAnyRole('ROLE_MANAGER', 'ROLE_MASTER')")
 	public ResponseEntity<ApiResponse<PagedModel<AdminUserSearchResponseDto>>> getAllUsers(
-		@ModelAttribute AdminUserSearchRequestDto requestDto) {
-
+		@ModelAttribute AdminUserSearchRequestDto requestDto
+	) {
 		PagedModel<AdminUserSearchResponseDto> allUsers = adminService.findAllUsers(requestDto);
 
 		return ResponseEntity.ok(ApiResponse.ok("모든 회원 조회", allUsers));

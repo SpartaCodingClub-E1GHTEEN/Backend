@@ -1,5 +1,6 @@
 package com.sparta.first.project.eighteen.domain.users.dtos;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.sparta.first.project.eighteen.model.users.Role;
@@ -22,6 +23,7 @@ public class AdminUserSearchResponseDto {
 	private String email;
 	private SignUpType signUpType;
 	private Role role;
+	private LocalDateTime createdAt;
 
 	public static AdminUserSearchResponseDto from(Users users) {
 		return AdminUserSearchResponseDto.builder()
@@ -31,6 +33,7 @@ public class AdminUserSearchResponseDto {
 			.email(users.getEmail())
 			.role(users.getRole())
 			.signUpType(users.getSignUpType())
+			.createdAt(users.getCreatedAt())
 			.build();
 	}
 }
