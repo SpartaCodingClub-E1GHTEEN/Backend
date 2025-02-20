@@ -1,5 +1,8 @@
 package com.sparta.first.project.eighteen.domain.reviews.dtos;
 
+import java.util.List;
+
+import com.sparta.first.project.eighteen.model.orders.OrderDetails;
 import com.sparta.first.project.eighteen.model.reviews.Reviews;
 
 import lombok.AllArgsConstructor;
@@ -44,12 +47,26 @@ public class ReviewResponseDto {
 			.id(review.getId().toString())
 			.reviewNickname(review.getUsersId().getUsername())
 			.orderId(review.getOrderId().getId().toString())
-			// .reviewOrders(review.getOrderId().getOrderDetails().toString())
+			.reviewOrders(getOrderFoodName(review.getOrderId().getOrderDetails()))
 			.reviewContent(review.getReviewContent())
 			.reviewRating(review.getReviewRating())
 			.reviewImgUrl(review.getReviewImgUrl())
 			.createdAt(review.getCreatedAt().toString())
 			.build();
+	}
+
+	private static String getOrderFoodName(List<OrderDetails> orderDetails) {
+		StringBuilder sb = new StringBuilder();
+
+		if (orderDetails.size() == 1) {
+			return orderDetails.get(0).getFoodName();
+		}
+
+		for (int i=0; i<orderDetails.size(); i++) {
+			sb.append(orderDetails.get(i).getFoodName()).append(", ");
+		}
+
+		return (sb.length() < 15) ? sb.toString() : sb.toString().substring(15) + "...";
 	}
 
 }
