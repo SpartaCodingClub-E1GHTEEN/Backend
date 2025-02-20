@@ -31,15 +31,15 @@ VALUES (false, 1500, 0.0, now(), NULL, NULL, 'fe0df7e9-62f4-4d4f-91f1-97ea6075cb
 
 /* 음식 생성 */
 INSERT INTO p_foods
-(food_order_count, food_price, food_review_count, food_status, is_deleted, is_recommended, created_at, deleted_at,
+(food_order_count, food_price, food_status, is_deleted, is_recommended, created_at, deleted_at,
  modified_at, id, store_id, created_by, deleted_by, food_desc, food_image_url, food_name, modified_by)
-VALUES (0, 4500, 0, 'AVAILABLE', false, false, now(), null, null, '330ba338-0b1d-48cd-93f8-5bd53046ba90',
+VALUES (0, 4500, 'AVAILABLE', false, false, now(), null, null, '330ba338-0b1d-48cd-93f8-5bd53046ba90',
         '15e584b0-8bbf-4fa6-aee2-cd14e71ec23e', '3a503cd9-83b2-4374-9405-e2dee8c56b1c', '', '음식 설명',
         'https://example.com/1', '아메리카노', '');
 INSERT INTO p_foods
-(food_order_count, food_price, food_review_count, food_status, is_deleted, is_recommended, created_at, deleted_at,
+(food_order_count, food_price, food_status, is_deleted, is_recommended, created_at, deleted_at,
  modified_at, id, store_id, created_by, deleted_by, food_desc, food_image_url, food_name, modified_by)
-VALUES (0, 5500, 0, 'AVAILABLE', false, true, now(), null, null, '2d8dda4a-5643-49cd-b146-fcb8ba482d2b',
+VALUES (0, 5500, 'AVAILABLE', false, true, now(), null, null, '2d8dda4a-5643-49cd-b146-fcb8ba482d2b',
         '15e584b0-8bbf-4fa6-aee2-cd14e71ec23e', '3a503cd9-83b2-4374-9405-e2dee8c56b1c', '', '음식 설명',
         'https://example.com/2', '카페라떼', '');
 
