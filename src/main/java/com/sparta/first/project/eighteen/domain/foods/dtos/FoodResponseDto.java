@@ -23,7 +23,6 @@ public class FoodResponseDto {
 	private String foodImageUrl;
 	private FoodStatus foodStatus;
 	private boolean isRecommended;
-	private int foodReviewCount;
 	private int foodOrderCount;
 	private List<FoodOptionResponseDto> options;
 

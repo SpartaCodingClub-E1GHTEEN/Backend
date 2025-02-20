@@ -22,7 +22,6 @@ public class FoodItemDto {
 	private String foodImageUrl;
 	private FoodStatus foodStatus;
 	private Boolean isRecommended;
-	private Integer foodReviewCount;
 	private Integer foodOrderCount;
 	private List<FoodOptionResponseDto> options;
 
@@ -36,7 +35,6 @@ public class FoodItemDto {
 			food.getFoodImageUrl(),
 			food.getFoodStatus(),
 			food.isRecommended(),
-			food.getFoodReviewCount(),
 			food.getFoodOrderCount(),
 			food.getFoodOptions().stream()
 				.map(FoodOptionResponseDto::fromEntity)
