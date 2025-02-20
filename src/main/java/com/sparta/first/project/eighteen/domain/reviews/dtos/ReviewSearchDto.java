@@ -21,9 +21,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ReviewSearchDto {
 
-	// 검색할 가게
-	private UUID storeId;
-
 	// 검색할 리뷰 내용
 	private String reviewContent;
 
