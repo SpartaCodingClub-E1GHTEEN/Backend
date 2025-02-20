@@ -59,7 +59,8 @@ public class StoreService {
 	 */
 	public PagedModel<StoreListResponseDto> getStores(String username, StoreSearchDto searchDto) {
 		log.info("Service로 getStores 요청 넘어옴");
-		Pageable pageable = PageRequest.of(searchDto.getPage(), searchDto.getSize());
+		Pageable pageable = PageRequest.of(searchDto.getPage(), searchDto.getSize(),
+			searchDto.getDirection(), searchDto.getSortBy());
 
 		Role role = Role.CUSTOMER;
 		if (username != null) {
@@ -77,11 +78,11 @@ public class StoreService {
 	 * @param storeId : 조회할 식당의 ID
 	 * @return : 조회한 식당의 정보
 	 */
+	@Transactional(readOnly = true)
 	public StoreResponseDto getOneStore(UUID storeId) {
+		// 커스텀 만들어서 사용할까 ?
 		Stores store = findStore(storeId);
-		int storeReviewCnt = getStoreReviewCnt(store);
-		double storeRating = getStoreReviewSum(store, storeReviewCnt);
-		return StoreResponseDto.fromEntityReview(store, storeReviewCnt, storeRating);
+		return storeRepository.getOneStoreById(storeId);
 	}
 
 	/**
