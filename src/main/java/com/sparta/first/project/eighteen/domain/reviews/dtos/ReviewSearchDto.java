@@ -35,7 +35,7 @@ public class ReviewSearchDto {
 	private int size = 10;
 
 	@JsonSetter(nulls = Nulls.SKIP)
-	private String sortBy;
+	private String sortBy = "createdAt";
 
 	@JsonSetter(nulls = Nulls.SKIP)
 	private Sort.Direction direction = Sort.Direction.ASC;
