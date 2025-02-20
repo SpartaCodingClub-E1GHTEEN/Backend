@@ -55,7 +55,7 @@ public class ReviewResponseDto {
 			.build();
 	}
 
-	private static String getOrderFoodName(List<OrderDetails> orderDetails) {
+	public static String getOrderFoodName(List<OrderDetails> orderDetails) {
 		StringBuilder sb = new StringBuilder();
 
 		if (orderDetails.size() == 1) {

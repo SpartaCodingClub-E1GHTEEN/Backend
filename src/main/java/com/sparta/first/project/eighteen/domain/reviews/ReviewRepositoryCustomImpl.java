@@ -46,12 +46,11 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
 	public Page<ReviewResponseDto> searchReviews(ReviewSearchDto searchDto, Pageable pageable, Role role, UUID storeId) {
 		List<OrderSpecifier<?>> orders = getAllOrderSpecifiers(pageable);
 
-		QueryResults<ReviewResponseDto> results = queryFactory
+		List<ReviewResponseDto> results = queryFactory
 			.select(Projections.fields(
 				ReviewResponseDto.class,
 				Expressions.stringTemplate("CAST({0} AS string)", reviews.id).as("id"),
 				Expressions.stringTemplate("CAST({0} AS string)", reviews.orderId.id).as("orderId"),
-				/*Expressions.stringTemplate("CAST({0} AS string)", reviews.orderId.id).as("reviewOrders"),*/
 				reviews.usersId.userNickname.as("reviewNickname"),
 				reviews.reviewContent.as("reviewContent"),
 				reviews.reviewRating.as("reviewRating"),
@@ -70,11 +69,32 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
 			.orderBy(orders.toArray(new OrderSpecifier[0]))
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
-			.fetchResults();
+			.fetch();
 
-		long total = results.getTotal();
+		long total = getAllReviewCnt(storeId, searchDto);
+		return new PageImpl<>(results, pageable, total);
+	}
 
-		return new PageImpl<>(results.getResults(), pageable, total);
+	/**
+	 * 전체 리뷰 개수 반환
+	 * @param storeId : 리뷰를 가져올 식당 ID
+	 * @param searchDto : 검색 내용
+	 * @return : 리뷰 개수 반환
+	 */
+	private long getAllReviewCnt(UUID storeId, ReviewSearchDto searchDto) {
+		return queryFactory
+			.select(reviews.count())
+			.from(reviews)
+			.leftJoin(reviews.orderId, QOrders.orders)
+			.leftJoin(reviews.usersId, QUsers.users)
+			.where(
+				whichStore(storeId),
+				reviewRating(searchDto.getReviewRatings()),
+				containContents(searchDto.getReviewContent()),
+				// 삭제되지 않은 리뷰의 개수만 반환
+				reviews.isDeleted.eq(false)
+			)
+			.fetchOne();
 	}
 
 	/**

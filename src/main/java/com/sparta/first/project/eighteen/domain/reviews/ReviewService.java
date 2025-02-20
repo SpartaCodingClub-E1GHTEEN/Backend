@@ -1,5 +1,8 @@
 package com.sparta.first.project.eighteen.domain.reviews;
 
+import static org.springframework.transaction.annotation.Propagation.*;
+
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -77,6 +80,7 @@ public class ReviewService {
 	 * @param username : 검색하는 사용자
 	 * @return : 조회한 리뷰들
 	 */
+	@Transactional(readOnly = true)
 	public PagedModel<ReviewResponseDto> getAllReviews(UUID storeId, ReviewSearchDto searchDto, String username) {
 		Role role = Role.CUSTOMER;
 
@@ -92,6 +96,10 @@ public class ReviewService {
 
 			Page<ReviewResponseDto> reviews = reviewRepository.searchReviews(
 				searchDto, pageable, role, storeId);
+
+			if (reviews.getContent().size() != 0) {
+				getReviewFoodName(reviews);
+			}
 
 			return new PagedModel<>(reviews);
 		} catch (Exception e) {
@@ -154,6 +162,22 @@ public class ReviewService {
 		reviewRepository.save(review);
 		log.info("삭제 여부 : " + review.getIsDeleted());
 		return ApiResponse.ok("삭제 성공", "식당명 : " + review.getReviewContent());
+	}
+
+	/**
+	 * 리뷰의 메뉴 이름을 반환하는 메서드
+	 * @param responseDtos : 가져온 리뷰들 내용
+	 * @return : 메뉴 이름을 넣은 리뷰 내용 반환
+	 */
+	@Transactional(propagation = REQUIRES_NEW)
+	public PagedModel<ReviewResponseDto> getReviewFoodName(Page<ReviewResponseDto> responseDtos) {
+		for (ReviewResponseDto r : responseDtos.getContent()) {
+			Orders orders = findOrders(UUID.fromString(r.getOrderId()));
+			String foodName = ReviewResponseDto.getOrderFoodName(orders.getOrderDetails());
+			r.setReviewOrders(foodName);
+		}
+
+		return new PagedModel<>(responseDtos);
 	}
 
 	/**
