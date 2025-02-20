@@ -3,6 +3,7 @@ package com.sparta.first.project.eighteen.domain.orders;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -30,7 +31,7 @@ public class OrderController {
 	private final OrderService orderService;
 
 	@PostMapping
-	public ResponseEntity<ApiResponse<Void>> createOrder(@RequestBody OrderCreateRequestDto requestDto,
+	public ResponseEntity<ApiResponse<Void>> createOrder(@Validated @RequestBody OrderCreateRequestDto requestDto,
 		@AuthenticationPrincipal UserDetailsImpl user) {
 		orderService.createOrder(requestDto, user.getUserUUID());
 		return ResponseEntity.ok(ApiResponse.ok("주문이 완료되었습니다.", null));
@@ -44,14 +45,14 @@ public class OrderController {
 
 	@GetMapping
 	public ResponseEntity<ApiResponse<PagedModel<OrderResponseDto>>> searchOrder(
-		@ModelAttribute OrderSearchRequestDto requestDto) {
+		@Validated @ModelAttribute OrderSearchRequestDto requestDto) {
 		PagedModel<OrderResponseDto> responseDto = orderService.searchOrder(requestDto);
 		return ResponseEntity.ok(ApiResponse.ok("주문 목록을 조회했습니다", responseDto));
 	}
 
 	@PatchMapping("/{id}")
 	public ResponseEntity<ApiResponse<OrderResponseDto>> updateOrder(@PathVariable String id,
-		@RequestBody OrderUpdateRequestDto requestDto) {
+		@Validated @RequestBody OrderUpdateRequestDto requestDto) {
 		OrderResponseDto responseDto = orderService.updateOrder(requestDto, id);
 		return ResponseEntity.ok(ApiResponse.ok("주문을 수정했습니다.", responseDto));
 	}
