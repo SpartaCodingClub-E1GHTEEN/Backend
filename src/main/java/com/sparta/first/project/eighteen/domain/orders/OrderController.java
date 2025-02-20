@@ -1,6 +1,6 @@
 package com.sparta.first.project.eighteen.domain.orders;
 
-import org.springframework.data.domain.Page;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.first.project.eighteen.common.dto.ApiResponse;
+import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 import com.sparta.first.project.eighteen.domain.orders.dtos.OrderCreateRequestDto;
 import com.sparta.first.project.eighteen.domain.orders.dtos.OrderResponseDto;
 import com.sparta.first.project.eighteen.domain.orders.dtos.OrderSearchRequestDto;
 import com.sparta.first.project.eighteen.domain.orders.dtos.OrderUpdateRequestDto;
-import com.sparta.first.project.eighteen.model.users.Users;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,8 +31,8 @@ public class OrderController {
 
 	@PostMapping
 	public ResponseEntity<ApiResponse<Void>> createOrder(@RequestBody OrderCreateRequestDto requestDto,
-		@AuthenticationPrincipal Users user) {
-		orderService.createOrder(requestDto, user);
+		@AuthenticationPrincipal UserDetailsImpl user) {
+		orderService.createOrder(requestDto, user.getUserUUID());
 		return ResponseEntity.ok(ApiResponse.ok("주문이 완료되었습니다.", null));
 	}
 
@@ -43,9 +43,9 @@ public class OrderController {
 	}
 
 	@GetMapping
-	public ResponseEntity<ApiResponse<Page<OrderResponseDto>>> searchOrder(
+	public ResponseEntity<ApiResponse<PagedModel<OrderResponseDto>>> searchOrder(
 		@ModelAttribute OrderSearchRequestDto requestDto) {
-		Page<OrderResponseDto> responseDto = orderService.searchOrder(requestDto);
+		PagedModel<OrderResponseDto> responseDto = orderService.searchOrder(requestDto);
 		return ResponseEntity.ok(ApiResponse.ok("주문 목록을 조회했습니다", responseDto));
 	}
 
