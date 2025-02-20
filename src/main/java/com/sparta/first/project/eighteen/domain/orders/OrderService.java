@@ -3,6 +3,7 @@ package com.sparta.first.project.eighteen.domain.orders;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,11 +41,11 @@ public class OrderService {
 	private final UserRepository userRepository;
 	private final FoodsRepository foodsRepository;
 
-	public void createOrder(OrderCreateRequestDto requestDto, Users user) {
+	public void createOrder(OrderCreateRequestDto requestDto, UUID userId) {
 		Stores store = storeRepository.findById(UUID.fromString(requestDto.getStoreId()))
 			.orElseThrow(() -> new StoreException.StoreNotFound());
 
-		Users customer = userRepository.findById(UUID.fromString("fccf3448-03c7-47a4-a108-ce6c39815a37"))
+		Users customer = userRepository.findById(userId)
 			.orElseThrow(() -> new UserException.UserNotFound());
 
 		Orders order = ordersRepository.save(requestDto.toEntity(store, customer));
@@ -83,17 +84,17 @@ public class OrderService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<OrderResponseDto> searchOrder(OrderSearchRequestDto requestDto) {
+	public PagedModel<OrderResponseDto> searchOrder(OrderSearchRequestDto requestDto) {
 		Page<OrderResponseDto> orders = ordersRepository.findAllBySearchParam(requestDto);
 
-		return orders;
+		return new PagedModel<>(orders);
 	}
 
 	@Transactional
 	public OrderResponseDto updateOrder(OrderUpdateRequestDto requestDto, String id) {
 		Orders orders = ordersRepository.findById(UUID.fromString(id))
 			.orElseThrow(() -> new OrderException.OrderNotFound());
-		
+
 		orders.update(requestDto);
 		return OrderResponseDto.fromEntity(orders);
 	}
