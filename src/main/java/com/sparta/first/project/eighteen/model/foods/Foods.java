@@ -22,12 +22,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 @Table(name = "p_foods")
 public class Foods extends BaseEntity {
 
@@ -52,17 +55,13 @@ public class Foods extends BaseEntity {
 	private FoodStatus foodStatus;
 
 	@Column(nullable = false)
-	@Builder.Default
-	private boolean isRecommended = false;
-
-	@Column(nullable = false)
-	@Builder.Default
-	private int foodReviewCount = 0;
+	private boolean isRecommended;
 
 	@Column
 	@Builder.Default
 	private int foodOrderCount = 0;
 
+	@Setter
 	@OneToMany(mappedBy = "food", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<FoodOptions> foodOptions;
 
@@ -70,4 +69,5 @@ public class Foods extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "store_id", referencedColumnName = "id", nullable = false)
 	private Stores store;
+
 }
