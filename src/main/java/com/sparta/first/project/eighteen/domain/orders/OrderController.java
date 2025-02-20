@@ -102,8 +102,9 @@ public class OrderController {
 	 * @return  :
 	 */
 	@DeleteMapping("/{id}")
-	public ResponseEntity<ApiResponse<Void>> deleteOrder(@PathVariable String id) {
-		OrderResponseDto responseDto = orderService.deleteOrder(id);
+	public ResponseEntity<ApiResponse<Void>> deleteOrder(@PathVariable String id,
+		@AuthenticationPrincipal UserDetailsImpl user) {
+		orderService.deleteOrder(id, user.getUserUUID().toString());
 		return ResponseEntity.ok(ApiResponse.ok("주문을 삭제했습니다.", null));
 	}
 

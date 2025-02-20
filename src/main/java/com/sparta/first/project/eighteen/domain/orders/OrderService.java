@@ -23,6 +23,7 @@ import com.sparta.first.project.eighteen.model.foods.FoodOptions;
 import com.sparta.first.project.eighteen.model.foods.Foods;
 import com.sparta.first.project.eighteen.model.orders.OrderDetails;
 import com.sparta.first.project.eighteen.model.orders.OrderDetailsOptions;
+import com.sparta.first.project.eighteen.model.orders.OrderStatus;
 import com.sparta.first.project.eighteen.model.orders.Orders;
 import com.sparta.first.project.eighteen.model.stores.Stores;
 import com.sparta.first.project.eighteen.model.users.Users;
@@ -109,4 +110,18 @@ public class OrderService {
 		return OrderResponseDto.fromEntity(orders);
 	}
 
+	public void deleteOrder(String id, String userId) {
+		Orders orders = ordersRepository.findById(UUID.fromString(id))
+			.orElseThrow(() -> new OrderException.OrderNotFound());
+
+		orders.delete(true, userId);
+	}
+
+	public OrderResponseDto updateOrderStatus(String id, OrderStatus status) {
+		Orders orders = ordersRepository.findById(UUID.fromString(id))
+			.orElseThrow(() -> new OrderException.OrderNotFound());
+
+		orders.changeStatus(status);
+		return OrderResponseDto.fromEntity(orders);
+	}
 }
