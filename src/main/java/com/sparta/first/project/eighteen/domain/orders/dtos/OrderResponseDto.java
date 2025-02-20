@@ -19,9 +19,13 @@ import lombok.Setter;
 @Setter
 public class OrderResponseDto {
 	String id;
+
 	String storeId;
+
 	String storeName;
+
 	String userId;
+
 	String userName;
 	LocalDateTime orderTime;
 	boolean isStoreOrder;

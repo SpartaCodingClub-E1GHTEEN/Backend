@@ -8,8 +8,11 @@ import lombok.Setter;
 @Setter
 @Getter
 public class OrderDetailsOptionResponseDto {
+	
 	private String optionId;
+
 	private String optionName;
+
 	private int price;
 
 	public OrderDetailsOptionResponseDto(OrderDetailsOptions options) {
