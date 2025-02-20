@@ -4,24 +4,28 @@ import static com.sparta.first.project.eighteen.model.stores.QStores.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.sparta.first.project.eighteen.domain.reviews.ReviewRepository;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreListResponseDto;
+import com.sparta.first.project.eighteen.domain.stores.dtos.StoreResponseDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreSearchDto;
+import com.sparta.first.project.eighteen.model.reviews.QReviews;
 import com.sparta.first.project.eighteen.model.stores.QStores;
 import com.sparta.first.project.eighteen.model.stores.StoreCategory;
-import com.sparta.first.project.eighteen.model.stores.Stores;
 import com.sparta.first.project.eighteen.model.users.Role;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,68 +34,147 @@ import lombok.extern.slf4j.Slf4j;
 public class StoreRepositoryCustomImpl implements StoreRepositoryCustom {
 
 	private final JPAQueryFactory queryFactory;
-	private final ReviewRepository reviewRepository;
 
 	/**
-	 *
-	 * @param searchDto
-	 * @param pageable
-	 * @param role
-	 * @return
+	 * 식당 전체 조회
+	 * @param searchDto : 조회할 정보
+	 * @param pageable : pagenation 객체
+	 * @param role : 사용자 역할
+	 * @return : 조회한 식당 내용
 	 */
 	@Override
-	public Page<StoreListResponseDto> searchStores
-		(StoreSearchDto searchDto, Pageable pageable, Role role) {
-
+	public Page<StoreListResponseDto> searchStores(StoreSearchDto searchDto, Pageable pageable, Role role) {
 		List<OrderSpecifier<?>> orders = getAllOrderSpecifiers(pageable);
-		log.info(searchDto.getStoreRegion());
+		log.info("pageNum : " + pageable.getOffset() + " pageSize : " + pageable.getPageSize());
 
-		QueryResults<Stores> results = queryFactory
-			.selectFrom(stores)
+		// 삭제된 리뷰는 계산에 포함되지 않음(역할에 관계없이)
+		List<StoreListResponseDto> results = queryFactory
+			.select(Projections.fields(
+				StoreListResponseDto.class,
+				Expressions.stringTemplate("CAST({0} AS string)", stores.id).as("id"),
+				stores.storeName.as("storeName"),
+				stores.storeRegion.as("storeRegion"),
+				QReviews.reviews.reviewRating.avg().coalesce(0.0).as("storeRating"),
+				stores.storeImgUrl.as("storeImgUrl"),
+				stores.storeDeliveryPrice.as("storeDeliveryPrice")
+			))
+			.from(stores)
+			.leftJoin(QReviews.reviews)
+			.on(QReviews.reviews.storeId.id.eq(stores.id)
+				.and(QReviews.reviews.isDeleted.eq(false)))
 			.where(
-				confirmDeletedByRole(role) ,
+				confirmDeletedByRole(role),
 				storeNameContains(searchDto.getStoreName()),
 				storeRegion(searchDto.getStoreRegion()),
 				storeCategory(searchDto.getStoreCategory()),
 				deliveryPriceBetween(searchDto.getMinDeliveryPrice(), searchDto.getMaxDeliveryPrice())
 			)
 			.orderBy(orders.toArray(new OrderSpecifier[0]))
+			.groupBy(stores.id)
+			.having(reviewRatingBetween(searchDto.getMinReviewRating(), searchDto.getMaxReviewRating()))
 			.offset(pageable.getOffset())
 			.limit(getPageSize(pageable.getPageSize(), pageable.getOffset()))
-			.fetchResults();
+			.fetch();
 
-		List<StoreListResponseDto> contents = invertToResponseDto(results);
-		long total = results.getTotal();
+		// 개수만 조회해서 가져오기
+		long totalCount = totalPageElementCnt(role, searchDto);
 
-		return new PageImpl<>(contents, pageable, total);
+		return new PageImpl<>(results, pageable, totalCount);
 	}
 
-	/**
-	 * 리스트로 만들어 필터링
-	 * @param results : 필터링할 쿼리 결과문
-	 */
-	private List<StoreListResponseDto> invertToResponseDto (QueryResults<Stores> results) {
-		List<StoreListResponseDto> list = new ArrayList<>();
+	@Override
+	public StoreResponseDto getOneStoreById(UUID storeId) {
+		StoreResponseDto result = queryFactory
+			.select(Projections.fields(
+				StoreResponseDto.class,
+				Expressions.stringTemplate("CAST({0} AS string)", stores.id).as("id"),
+				stores.userId.username.as("userName"),
+				stores.storeName.as("storeName"),
+				stores.storeDesc.as("storeDesc"),
+				stores.storeRegion.as("storeRegion"),
+				stores.storeCategory.as("storeCategory"),
+				QReviews.reviews.reviewRating.avg().coalesce(0.0).as("storeRating"),
+				QReviews.reviews.count().as("storeReviewCnt"),
+				stores.storeImgUrl.as("storeImgUrl"),
+				stores.storeDeliveryPrice.as("storeDeliveryPrice"),
+				Expressions.stringTemplate("CAST({0} AS string)", stores.createdAt).as("createdAt")
+			))
+			.from(stores)
+			.leftJoin(QReviews.reviews)
+			.on(QReviews.reviews.storeId.id.eq(stores.id)
+				.and(QReviews.reviews.isDeleted.eq(false)))
+			.where(stores.id.eq(storeId))
+			.groupBy(stores.id)
+			.fetchOne();
 
-		// StoreRating을 어떻게 넣을지 ?
-		for (Stores s : results.getResults()) {
-			list.add(StoreListResponseDto.fromEntity(s));
+		if (result == null) {
+			throw new EntityNotFoundException("해당 가게는 존재하지 않거나, 삭제되었습니다.");
 		}
 
-		return list;
+		return result;
 	}
 
 	/**
 	 * 페이지에 가져올 데이터의 개수
 	 * @param pageSize : 페이지에 가져올 데이터 개수
 	 * @param offset : 페이지 수
-	 * @return : 0페이지면 pagesize, 1페이지부터는 10개 반환
+	 * @return : 0페이지면 page size, 1페이지부터는 10개 반환
 	 */
 	private long getPageSize(long pageSize, long offset) {
+		// 10, 30, 50개 중 하나의 값
 		if (offset == 0) {
 			return pageSize;
 		} else {
 			return 10;
+		}
+	}
+
+	/**
+	 * 페이지의 총 데이터 개수를 반환하는 메서드
+	 * @param role : 역할
+	 * @param searchDto : 데이터 검색 내용
+	 * @return : 총 데이터 개수
+	 */
+	private long totalPageElementCnt(Role role, StoreSearchDto searchDto) {
+		return queryFactory
+			.select(stores.count())
+			.from(stores)
+			.leftJoin(QReviews.reviews)
+			.on(QReviews.reviews.storeId.id.eq(stores.id)
+				.and(QReviews.reviews.isDeleted.eq(false)))
+			.where(
+				confirmDeletedByRole(role),
+				storeNameContains(searchDto.getStoreName()),
+				storeRegion(searchDto.getStoreRegion()),
+				storeCategory(searchDto.getStoreCategory()),
+				deliveryPriceBetween(searchDto.getMinDeliveryPrice(), searchDto.getMaxDeliveryPrice())
+			)
+			.groupBy(stores.id)
+			.having(reviewRatingBetween(searchDto.getMinReviewRating(), searchDto.getMaxReviewRating()))
+			.fetchCount();
+	}
+
+	/**
+	 * 리뷰 평점 계산
+	 * @param minReviewRating : 리뷰 평점 최솟값
+	 * @param maxReviewRating : 리뷰 평점 최댓값
+	 * @return : 리뷰 평점 범위에 포함되는지 여부 반환
+	 */
+	private BooleanExpression reviewRatingBetween(Integer minReviewRating, Integer maxReviewRating) {
+		NumberExpression<Double> avgRating = QReviews.reviews.reviewRating.avg().coalesce(0.0);
+
+		if (minReviewRating != 0 && maxReviewRating != 0) {
+			log.info("조건 둘다 있음");
+			return avgRating.between(minReviewRating, maxReviewRating);
+		} else if (minReviewRating != 0) {
+			log.info("조건 최솟값만");
+			return avgRating.goe(minReviewRating);
+		} else if (maxReviewRating != 0) {
+			log.info("조건 최댓값만");
+			return avgRating.loe(maxReviewRating);
+		} else {
+			log.info("조건 없음");
+			return Expressions.TRUE; // 아무 조건이 없을 경우 전체 데이터 반환
 		}
 	}
 	
@@ -129,11 +212,11 @@ public class StoreRepositoryCustomImpl implements StoreRepositoryCustom {
 	 * @return : 최소, 최대 범위 조건이 있는지 여부 반환
 	 */
 	private BooleanExpression deliveryPriceBetween(Integer minDeliveryPrice, Integer maxDeliveryPrice) {
-		if ((minDeliveryPrice != null) && (maxDeliveryPrice != null)) {
+		if ((minDeliveryPrice != 0) && (maxDeliveryPrice != 0)) {
 			return stores.storeDeliveryPrice.between(minDeliveryPrice, maxDeliveryPrice);
-		} else if (minDeliveryPrice != null) {
+		} else if (minDeliveryPrice != 0) {
 			return stores.storeDeliveryPrice.goe(minDeliveryPrice);
-		} else if (maxDeliveryPrice != null) {
+		} else if (maxDeliveryPrice != 0) {
 			return stores.storeDeliveryPrice.loe(maxDeliveryPrice);
 		} else {
 			return null;
@@ -149,7 +232,7 @@ public class StoreRepositoryCustomImpl implements StoreRepositoryCustom {
 		if (role.equals(Role.CUSTOMER)) {
 			log.info("고객의 조회");
 			// null or false인 경우만 반환 (삭제된 식당은 보이지 않음)
-			return stores.isDeleted.isNull().or(stores.isDeleted.eq(false)); 
+			return stores.isDeleted.eq(false);
 		} else {
 			log.info("고객이 아닌 사람의 조회");
 			// 아무 조건도 추가하지 않음으로써 모든 데이터 반환
@@ -169,6 +252,7 @@ public class StoreRepositoryCustomImpl implements StoreRepositoryCustom {
 		// pageable -> 클라이언트가 요청한 페이지 정보를 담고 있는 객체, 정렬 정보도 포함
 		// sort -> 내부적으로 여러 개의 sort를 가짐
 		if (pageable.getSort() != null) {
+			log.info("정렬 조건이 있어요");
 			// 정렬 정보 한 개씩 돌림
 			for (Sort.Order sortOrder : pageable.getSort()) {
 				orderSorting(sortOrder, orders);
@@ -190,9 +274,11 @@ public class StoreRepositoryCustomImpl implements StoreRepositoryCustom {
 		// 정렬 기준의 경우에 따라
 		switch (sortOrder.getProperty()) {
 			case "createdAt" :
+				log.info("정렬 조건: createdAt / 오름차순/내림차순" + direction);
 				orders.add(new OrderSpecifier<>(direction, QStores.stores.createdAt));
 				break;
 			case "modifiedAt" :
+				log.info("정렬 조건: modifiedAt / 오름차순/내림차순" + direction);
 				orders.add(new OrderSpecifier<>(direction, QStores.stores.modifiedAt));
 				break;
 			default :
