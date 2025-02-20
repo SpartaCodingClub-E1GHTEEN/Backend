@@ -2,6 +2,7 @@ package com.sparta.first.project.eighteen.domain.orders;
 
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,12 +32,13 @@ public class OrderController {
 	private final OrderService orderService;
 
 	/**
-	 * 주문 생성(OWNER/CUSTOMER)
+	 * 주문 생성
 	 *
 	 * @param requestDto : 주문 정보
 	 * @param user : 로그인한 사용자
 	 * @return  :
 	 */
+	@PreAuthorize("hasAnyRole('OWNER','CUSTOMER')")
 	@PostMapping
 	public ResponseEntity<ApiResponse<Void>> createOrder(@RequestBody OrderCreateRequestDto requestDto,
 		@AuthenticationPrincipal UserDetailsImpl user) {
@@ -45,7 +47,7 @@ public class OrderController {
 	}
 
 	/**
-	 * 주문 조회(MASTER/MANAGER/OWNER/RIDER/CUSTOMER)
+	 * 주문 조회
 	 *
 	 * @param id : 조회할 주문 ID
 	 * @return requestDto : 주문 내용
@@ -57,11 +59,12 @@ public class OrderController {
 	}
 
 	/**
-	 * 주문 목록 조회(MASTER/MANAGER/OWNER)
+	 * 주문 목록 조회
 	 *
-	 * @param requestDto the request dto
+	 * @param requestDto : 주문 필터, 정렬, 페이징 정보
 	 * @return  : 주문 정보
 	 */
+	@PreAuthorize("hasAnyRole('MASTER','MANAGER','OWNER')")
 	@GetMapping
 	public ResponseEntity<ApiResponse<PagedModel<OrderResponseDto>>> searchOrder(
 		@ModelAttribute OrderSearchRequestDto requestDto) {
@@ -70,12 +73,13 @@ public class OrderController {
 	}
 
 	/**
-	 * 주문 수정 (MANAGER)
+	 * 주문 수정
 	 *
 	 * @param id : 조회할 주문 ID
 	 * @param requestDto : 주문 수정 내용
 	 * @return  : 주문 정보
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@PatchMapping("/{id}")
 	public ResponseEntity<ApiResponse<OrderResponseDto>> updateOrder(@PathVariable String id,
 		@RequestBody OrderUpdateRequestDto requestDto) {
@@ -84,11 +88,12 @@ public class OrderController {
 	}
 
 	/**
-	 * 주문 취소 (MANAGER/OWNER/CUSTOMER)
+	 * 주문 취소
 	 *
 	 * @param id : 조회할 주문 ID
 	 * @return  : 주문 정보
 	 */
+	@PreAuthorize("hasAnyRole('MANAGER','OWNER', 'CUSTOMER')")
 	@DeleteMapping("/{id}/cancel")
 	public ResponseEntity<ApiResponse<OrderResponseDto>> cancelOrder(@PathVariable String id) {
 		OrderResponseDto responseDto = orderService.cancelOrder(id);
@@ -101,6 +106,7 @@ public class OrderController {
 	 * @param id : 조회할 주문 ID
 	 * @return  :
 	 */
+	@PreAuthorize("hasRole('MASTER')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ApiResponse<Void>> deleteOrder(@PathVariable String id,
 		@AuthenticationPrincipal UserDetailsImpl user) {
@@ -115,6 +121,7 @@ public class OrderController {
 	 * @param status : 주문 변경 상태
 	 * @return  : 주문 정보
 	 */
+	@PreAuthorize("hasAnyRole('OWNER','RIDER')")
 	@PatchMapping("/{id}/{status}")
 	public ResponseEntity<ApiResponse<OrderResponseDto>> updateOrderStatus(@PathVariable String id,
 		@PathVariable OrderStatus status) {
