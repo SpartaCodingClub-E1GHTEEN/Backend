@@ -19,7 +19,9 @@ import com.sparta.first.project.eighteen.model.stores.Stores;
 import com.sparta.first.project.eighteen.utils.GeminiApiClient;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FoodsService {
@@ -40,15 +42,6 @@ public class FoodsService {
 			: requestDto.getFoodDesc();
 
 		Foods food = foodsRepository.save(requestDto.toEntity(store, foodDesc));
-
-		if (requestDto.getOptions() != null && !requestDto.getOptions().isEmpty()) {
-			List<FoodOptions> foodOptions = requestDto.getOptions()
-				.stream()
-				.map(optionDto -> optionDto.toEntity(food))
-				.toList();
-
-			foodOptionsRepository.saveAll(foodOptions);
-		}
 
 		return FoodResponseDto.fromEntity(food);
 	}
