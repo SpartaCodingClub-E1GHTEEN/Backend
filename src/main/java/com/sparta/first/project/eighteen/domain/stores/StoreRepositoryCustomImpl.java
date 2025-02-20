@@ -229,13 +229,11 @@ public class StoreRepositoryCustomImpl implements StoreRepositoryCustom {
 	 * @return : 권한에 따른 결과 리턴
 	 */
 	private BooleanExpression confirmDeletedByRole(Role role) {
-		if (role.equals(Role.CUSTOMER)) {
-			log.info("고객의 조회");
-			// null or false인 경우만 반환 (삭제된 식당은 보이지 않음)
+		if (role.equals(Role.CUSTOMER) || role.equals(Role.RIDER) || role.equals(Role.OWNER)) {
+			log.info("고객, 라이더, 식당 주인의 조회 - 삭제된 식당은 조회 불가");
 			return stores.isDeleted.eq(false);
 		} else {
-			log.info("고객이 아닌 사람의 조회");
-			// 아무 조건도 추가하지 않음으로써 모든 데이터 반환
+			log.info("마스터, 매니저의 조회");
 			return null; 
 		}
 	}
@@ -248,9 +246,9 @@ public class StoreRepositoryCustomImpl implements StoreRepositoryCustom {
 	private List<OrderSpecifier<?>> getAllOrderSpecifiers(Pageable pageable) {
 		List<OrderSpecifier<?>> orders = new ArrayList<>();
 
-		// 정렬 기준이 존재한다면
-		// pageable -> 클라이언트가 요청한 페이지 정보를 담고 있는 객체, 정렬 정보도 포함
-		// sort -> 내부적으로 여러 개의 sort를 가짐
+		/* 정렬 기준이 존재한다면
+		   pageable -> 클라이언트가 요청한 페이지 정보를 담고 있는 객체, 정렬 정보도 포함
+		   sort -> 내부적으로 여러 개의 sort를 가짐 */
 		if (pageable.getSort() != null) {
 			log.info("정렬 조건이 있어요");
 			// 정렬 정보 한 개씩 돌림
