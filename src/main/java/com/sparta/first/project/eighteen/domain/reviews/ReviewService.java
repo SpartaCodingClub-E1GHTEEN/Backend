@@ -6,10 +6,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sparta.first.project.eighteen.common.constants.Constant;
 import com.sparta.first.project.eighteen.common.dto.ApiResponse;
+import com.sparta.first.project.eighteen.common.exception.BaseException;
+import com.sparta.first.project.eighteen.common.exception.OrderException;
+import com.sparta.first.project.eighteen.common.exception.StoreException;
+import com.sparta.first.project.eighteen.common.exception.UserException;
 import com.sparta.first.project.eighteen.domain.orders.OrdersRepository;
 import com.sparta.first.project.eighteen.domain.reviews.dtos.ReviewCreateRequestDto;
 import com.sparta.first.project.eighteen.domain.reviews.dtos.ReviewResponseDto;
@@ -51,45 +57,46 @@ public class ReviewService {
 
 		// 주문 상태 확인
 		if (!order.getStatus().equals(OrderStatus.DELIVERED)) {
-			throw new IllegalArgumentException("완료된 주문이 아닙니다.");
+			throw new BaseException("완료된 주문이 아닙니다.", Constant.Code.REVIEW_ERROR, HttpStatus.BAD_REQUEST);
 		}
 
 		// 해당 주문건을 주문한 유저인지
 		if (!order.getUser().getUserId().equals(user.getUserId())) {
-			throw new IllegalArgumentException("사용자의 주문 내역이 아닙니다.");
+			throw new BaseException("사용자의 주문 내역이 아닙니다.", Constant.Code.REVIEW_ERROR, HttpStatus.BAD_REQUEST);
 		}
 
 		Reviews review = requestDto.toEntity(store, order, user);
-		Reviews newReview =reviewRepository.save(review);
+		Reviews newReview = reviewRepository.save(review);
 		return ReviewResponseDto.fromEntity(newReview);
 	}
 
 	/**
-	 * 식당에 있는 리뷰들 조회
-	 *
-	 * @param storeId   : 조회할 식당 ID
-	 * @param searchDto
-	 * @param username
+	 * 식당에 있는 리뷰들 전체 조회
+	 * @param storeId : 조회할 식당 ID
+	 * @param searchDto : 검색할 정보
+	 * @param username : 검색하는 사용자
 	 * @return : 조회한 리뷰들
 	 */
 	public PagedModel<ReviewResponseDto> getAllReviews(UUID storeId, ReviewSearchDto searchDto, String username) {
 		Role role = Role.CUSTOMER;
+
 		if (username != null) {
-			role = userRepository.findByUsername(username).orElseThrow().getRole();
+			role = findUserRole(username);
 		}
 
-		Pageable pageable = PageRequest.of(searchDto.getPage(), searchDto.getSize(),
-			searchDto.getDirection(), searchDto.getSortBy());
+		try {
+			log.info(searchDto.getPage() + searchDto.getSize() + searchDto.getSortBy() + searchDto.getDirection());
 
-		Page<ReviewResponseDto> reviews = reviewRepository.searchReviews(
-			searchDto, pageable, role, storeId);
+			Pageable pageable = PageRequest.of(searchDto.getPage(), searchDto.getSize(),
+				searchDto.getDirection(), searchDto.getSortBy());
 
-		return new PagedModel<>(reviews);
+			Page<ReviewResponseDto> reviews = reviewRepository.searchReviews(
+				searchDto, pageable, role, storeId);
 
-
-/*		Pageable pageable = PageRequest.of(0, 10);
-		List<ReviewResponseDto> reviews = reviewRepository.findAllByStore(storeId, pageable);
-		return reviews;*/
+			return new PagedModel<>(reviews);
+		} catch (Exception e) {
+			throw new BaseException(e.getMessage(), Constant.Code.REVIEW_ERROR, HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	/**
@@ -97,9 +104,10 @@ public class ReviewService {
 	 * @param reviewId : 조회할 리뷰 ID
 	 * @return : 조회한 리뷰
 	 */
+	@Transactional(readOnly = true)
 	public ReviewResponseDto getOneReview(UUID reviewId) {
-		ReviewResponseDto responseDto = reviewRepository.getOneReviewToDto(reviewId);
-		return responseDto;
+		Reviews review = findReview(reviewId);
+		return ReviewResponseDto.fromEntity(review);
 	}
 
 	/**
@@ -114,9 +122,10 @@ public class ReviewService {
 		Reviews review = findReview(reviewId);
 		Users user = findReviewer(username);
 
-		if (user.getUsername().equals(Role.CUSTOMER) &&
+		// 리뷰 작성자거나 마스터나 매니저만 가능
+		if (user.getRole().equals(Role.CUSTOMER) &&
 			!review.getUsersId().getUserId().equals(user.getUserId())) {
-			throw new IllegalArgumentException("리뷰 작성자가 아닙니다.");
+			throw new BaseException("리뷰 작성자가 아닙니다.", Constant.Code.REVIEW_ERROR, HttpStatus.NOT_FOUND.FORBIDDEN);
 		}
 
 		Reviews updateReview = requestDto.toEntity();
@@ -135,9 +144,10 @@ public class ReviewService {
 		Reviews review = findReview(reviewId);
 		Users user = findReviewer(username);
 
-		if (user.getUsername().equals(Role.CUSTOMER) &&
+		// 리뷰 작성자거나 마스터나 매니저만 가능
+		if (user.getRole().equals(Role.CUSTOMER) &&
 			!review.getUsersId().getUserId().equals(user.getUserId())) {
-			throw new IllegalArgumentException("리뷰 작성자가 아닙니다.");
+			throw new BaseException("리뷰 작성자가 아닙니다.", Constant.Code.REVIEW_ERROR, HttpStatus.NOT_FOUND.FORBIDDEN);
 		}
 
 		review.delete(true, user.getUserId().toString());
@@ -153,7 +163,7 @@ public class ReviewService {
 	 */
 	public Reviews findReview(UUID reviewId) {
 		return reviewRepository.findById(reviewId).filter(r -> !r.getIsDeleted())
-			.orElseThrow(() -> new IllegalArgumentException("존재하지 않거나 삭제된 리뷰"));
+			.orElseThrow(() -> new BaseException("존재하지 않거나 삭제된 리뷰", Constant.Code.REVIEW_ERROR, HttpStatus.NOT_FOUND));
 	}
 
 	/**
@@ -163,7 +173,7 @@ public class ReviewService {
 	 */
 	public Stores findStore(UUID storeId) {
 		return storeRepository.findById(storeId).filter(s -> !s.getIsDeleted())
-			.orElseThrow(() -> new IllegalArgumentException("존재하지 않거나 삭제된 식당"));
+			.orElseThrow(() -> new StoreException.StoreNotFound());
 	}
 
 	/**
@@ -173,17 +183,27 @@ public class ReviewService {
 	 */
 	public Orders findOrders(UUID orderId) {
 		return ordersRepository.findById(orderId).filter(o -> !o.getIsDeleted())
-			.orElseThrow(() -> new IllegalArgumentException("존재하지 않거나 삭제된 식당"));
+			.orElseThrow(() -> new OrderException.OrderNotFound());
 	}
 
 	/**
-	 * 식당 주인 탐색
-	 * @param username : 식당을 차릴 사용자명
+	 * 리뷰 작성자 탐색
+	 * @param username : 리뷰를 작성하거나 수정할 사용자
 	 * @return : 조회한 사용자
 	 */
 	public Users findReviewer(String username) {
 		return userRepository.findByUsername(username).orElseThrow(
-			() -> new IllegalArgumentException("존재하지 않는 유저"));
+			() -> new UserException.UserNotFound());
+	}
+
+	/**
+	 * 사용자 권한 탐색
+	 * @param username : 식당을 차릴 사용자명
+	 * @return : 조회한 사용자
+	 */
+	public Role findUserRole(String username) {
+		return userRepository.findByUsername(username).orElseThrow(
+			() -> new UserException.UserNotFound()).getRole();
 	}
 
 }

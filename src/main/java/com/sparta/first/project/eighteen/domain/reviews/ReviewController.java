@@ -3,6 +3,7 @@ package com.sparta.first.project.eighteen.domain.reviews;
 import java.util.UUID;
 
 import org.springframework.data.web.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,12 +17,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sparta.first.project.eighteen.common.constants.Constant;
 import com.sparta.first.project.eighteen.common.dto.ApiResponse;
+import com.sparta.first.project.eighteen.common.exception.BaseException;
 import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 import com.sparta.first.project.eighteen.domain.reviews.dtos.ReviewCreateRequestDto;
 import com.sparta.first.project.eighteen.domain.reviews.dtos.ReviewResponseDto;
 import com.sparta.first.project.eighteen.domain.reviews.dtos.ReviewSearchDto;
 import com.sparta.first.project.eighteen.domain.reviews.dtos.ReviewUpdateRequestDto;
+import com.sparta.first.project.eighteen.model.users.Role;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -91,6 +95,13 @@ public class ReviewController {
 		@RequestBody @Valid ReviewUpdateRequestDto requestDto) {
 
 		log.info("ReviewController - updateReview | reviewId - " + reviewId);
+
+		Role role = reviewService.findUserRole(userDetails.getUsername());
+
+		if (role.equals(Role.OWNER) || role.equals(Role.RIDER)) {
+			throw new BaseException("리뷰를 삭제 권한이 없습니다", Constant.Code.REVIEW_ERROR, HttpStatus.BAD_GATEWAY);
+		}
+
 		ReviewResponseDto responseDto = reviewService.updateReview(userDetails.getUsername(), reviewId, requestDto);
 		return ResponseEntity.ok(ApiResponse.ok("성공", responseDto));
 	}
@@ -107,6 +118,13 @@ public class ReviewController {
 		@PathVariable UUID reviewId) {
 
 		log.info("ReviewController - deleteReview | reviewId - " + reviewId);
+
+		Role role = reviewService.findUserRole(userDetails.getUsername());
+
+		if (role.equals(Role.OWNER) || role.equals(Role.RIDER)) {
+			throw new BaseException("리뷰를 삭제 권한이 없습니다", Constant.Code.REVIEW_ERROR, HttpStatus.BAD_GATEWAY);
+		}
+
 		ApiResponse apiResponse = reviewService.deleteReview(userDetails.getUsername(), reviewId);
 		return ResponseEntity.ok(ApiResponse.ok("성공", apiResponse));
 	}
