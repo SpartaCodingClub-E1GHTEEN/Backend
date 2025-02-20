@@ -36,12 +36,11 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
 
 	/**
 	 * 리뷰 검색 메서드
-	 *
 	 * @param searchDto : 검색할 내용
-	 * @param pageable  : pageable 객체
-	 * @param role      : 사용자의 역할
-	 * @param storeId
-	 * @return
+	 * @param pageable : pageable 객체
+	 * @param role : 사용자의 역할
+	 * @param storeId : 리뷰를 검색할 식당 ID
+	 * @return : 리뷰들 반환
 	 */
 	@Override
 	public Page<ReviewResponseDto> searchReviews(ReviewSearchDto searchDto, Pageable pageable, Role role, UUID storeId) {
@@ -79,58 +78,40 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
 	}
 
 	/**
-	 * 리뷰 단건 조회
-	 * @param reviewId : 단건 조회할 리뷰의 ID
-	 * @return : 조회한 리뷰 내용
+	 * 리뷰 평점 구하기 (삭제된 리뷰는 집계 X)
+	 * @param storeId : 평점을 구할 식당 ID
+	 * @return : 식당의 리뷰 평점
 	 */
 	@Override
-	public ReviewResponseDto getOneReviewToDto(UUID reviewId) {
-		return queryFactory
-			.select(Projections.fields(
-				ReviewResponseDto.class,
-				Expressions.stringTemplate("CAST({0} AS string)", reviews.id).as("id"),
-				Expressions.stringTemplate("CAST({0} AS string)", reviews.orderId.id).as("orderId"),
-				/*Expressions.stringTemplate("CAST({0} AS string)", reviews.orderId.id).as("reviewOrders"),*/
-				reviews.usersId.userNickname.as("reviewNickname"),
-				reviews.reviewContent.as("reviewContent"),
-				reviews.reviewRating.as("reviewRating"),
-				reviews.reviewImgUrl.as("reviewImgUrl")
-			))
-			.from(reviews)
-			.where(reviews.id.eq(reviewId))
-			.fetchOne();
-	}
-
-	/**
-	 * 평균 구하기
-	 * @param storeId
-	 * @return
-	 */
 	public Double getAvgReviewRatings(UUID storeId) {
 		Double averageRating = queryFactory
 			.select(reviews.reviewRating.avg())
 			.from(reviews)
-			.where(whichStore(storeId))
+			.where(
+				whichStore(storeId),
+				reviews.isDeleted.eq(false))
 			.fetchOne();
 
 		return averageRating != null ? averageRating : 0.0;
 	}
 
 	/**
-	 * 리뷰 개수 구하기
+	 * 리뷰 개수 구하기 (삭제된 리뷰는 집계 X)
 	 * @param storeId : 개수를 확인할 식당 ID
-	 * @return : 리뷰 개수 반환
+	 * @return : 식당의 리뷰 개수 반환
 	 */
+	@Override
 	public long getCntReviews(UUID storeId) {
 		long cntReviewRating = queryFactory
 			.select(reviews.reviewRating.count())
 			.from(reviews)
-			.where(whichStore(storeId))
+			.where(
+				whichStore(storeId),
+				reviews.isDeleted.eq(false))
 			.fetchOne();
 
 		return cntReviewRating;
 	}
-
 
 	/**
 	 * 어떤 식당의 리뷰인지
@@ -163,13 +144,13 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
 	}
 
 	/**
-	 * 권한에 따른 식당 리스트 확인
+	 * 권한에 따른 리뷰 리스트 확인
 	 * @param role : 사용자 권한 확인
 	 * @return : 권한에 따른 결과 리턴
 	 */
 	private BooleanExpression confirmRole(Role role) {
-		if (role.equals(Role.CUSTOMER) || role.equals(Role.OWNER) || role == null) {
-			// null or false인 경우만 반환 (삭제된 식당은 보이지 않음)
+		if (role.equals(Role.CUSTOMER) || role.equals(Role.RIDER) || role.equals(Role.OWNER) || role == null) {
+			// null or false인 경우만 반환 (삭제된 리뷰는 보이지 않음)
 			return reviews.isDeleted.isNull().or(reviews.isDeleted.eq(false));
 		} else {
 			// 아무 조건도 추가하지 않음으로써 모든 데이터 반환

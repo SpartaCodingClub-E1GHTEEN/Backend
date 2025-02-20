@@ -11,5 +11,6 @@ import com.sparta.first.project.eighteen.model.users.Role;
 
 public interface ReviewRepositoryCustom {
 	Page<ReviewResponseDto> searchReviews(ReviewSearchDto searchDto, Pageable pageable, Role role, UUID storeId);
-	ReviewResponseDto getOneReviewToDto(UUID reviewId);
+	Double getAvgReviewRatings(UUID storeId);
+	long getCntReviews(UUID storeId);
 }
