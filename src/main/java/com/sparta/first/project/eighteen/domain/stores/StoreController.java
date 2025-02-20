@@ -2,7 +2,9 @@ package com.sparta.first.project.eighteen.domain.stores;
 
 import java.util.UUID;
 
+import org.apache.tomcat.util.bcel.Const;
 import org.springframework.data.web.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sparta.first.project.eighteen.common.constants.Constant;
 import com.sparta.first.project.eighteen.common.dto.ApiResponse;
+import com.sparta.first.project.eighteen.common.exception.BaseException;
 import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreListResponseDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreRequestDto;
@@ -46,11 +50,9 @@ public class StoreController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestBody StoreRequestDto storeRequestDto) {
 
-		// userDetails 담긴 유저는 MASTER 이어야만 함
-		// MASTER 만 가게 생성 가능 (가게 생성 시 OWNER를 넣어주는 방식으로 진행)
 		if (storeService.findUserRole(userDetails.getUsername()) != Role.MASTER) {
 			log.info("MASTER가 아닌 사용자");
-			throw new IllegalArgumentException("해당 사용자는 식당을 생성할 수 없습니다.");
+			throw new BaseException("식당을 생성할 수 없는 사용자", Constant.Code.STORE_ERROR, HttpStatus.FORBIDDEN);
 		}
 
 		StoreResponseDto responseDto = storeService.createStore(storeRequestDto);
@@ -95,9 +97,11 @@ public class StoreController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestBody StoreUpdateRequestDto storeRequestDto) {
 
-		if (storeService.findUserRole(userDetails.getUsername()) == Role.CUSTOMER) {
-			log.info("CUSTOMER인 사용자가 수정하려고 함");
-			throw new IllegalArgumentException("고객은 식당의 정보를 수정할 수 없습니다.");
+		Role role = storeService.findUserRole(userDetails.getUsername());
+
+		if (role == Role.CUSTOMER || role == Role.RIDER ) {
+			log.info("권한 없는 사용자가 수정하려고 함");
+			throw new BaseException("식당을 생성할 수 없는 사용자", Constant.Code.STORE_ERROR, HttpStatus.FORBIDDEN);
 		}
 
 		log.info("storeId: " + storeId);
@@ -116,9 +120,11 @@ public class StoreController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId){
 
-		if (storeService.findUserRole(userDetails.getUsername()) == Role.CUSTOMER) {
-			log.info("CUSTOMER인 사용자가 삭제하려고 함");
-			throw new IllegalArgumentException("고객은 식당을 삭제할 수 없습니다.");
+		Role role = storeService.findUserRole(userDetails.getUsername());
+
+		if (role == Role.CUSTOMER || role == Role.RIDER ) {
+			log.info("권한 없는 사용자가 수정하려고 함");
+			throw new BaseException("식당을 생성할 수 없는 사용자", Constant.Code.STORE_ERROR, HttpStatus.FORBIDDEN);
 		}
 
 		log.info("storeId: " + storeId);

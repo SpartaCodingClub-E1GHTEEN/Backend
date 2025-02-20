@@ -8,10 +8,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sparta.first.project.eighteen.common.constants.Constant;
 import com.sparta.first.project.eighteen.common.dto.ApiResponse;
+import com.sparta.first.project.eighteen.common.exception.BaseException;
+import com.sparta.first.project.eighteen.common.exception.StoreException;
 import com.sparta.first.project.eighteen.domain.reviews.ReviewRepository;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreListResponseDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreRequestDto;
@@ -58,19 +62,23 @@ public class StoreService {
 	 * @return : 조회한 식당의 정보들을 반환
 	 */
 	public PagedModel<StoreListResponseDto> getStores(String username, StoreSearchDto searchDto) {
-		log.info("Service로 getStores 요청 넘어옴");
-		Pageable pageable = PageRequest.of(searchDto.getPage(), searchDto.getSize(),
-			searchDto.getDirection(), searchDto.getSortBy());
+		try {
+			log.info("Service로 getStores 요청 넘어옴");
+			Pageable pageable = PageRequest.of(searchDto.getPage(), searchDto.getSize(),
+				searchDto.getDirection(), searchDto.getSortBy());
 
-		Role role = Role.CUSTOMER;
-		if (username != null) {
-			role = findUserRole(username);
+			Role role = Role.CUSTOMER;
+			if (username != null) {
+				role = findUserRole(username);
+			}
+
+			log.info("role: " + role.toString());
+
+			Page<StoreListResponseDto> storePage = storeRepository.searchStores(searchDto, pageable, role);
+			return new PagedModel<>(storePage);
+		} catch (Exception e) {
+			throw new BaseException(e.getMessage(), Constant.Code.STORE_ERROR, HttpStatus.BAD_REQUEST);
 		}
-
-		log.info("role: " + role.toString());
-
-		Page<StoreListResponseDto> storePage = storeRepository.searchStores(searchDto, pageable, role);
-		return new PagedModel<>(storePage);
 	}
 
 	/**
@@ -80,9 +88,11 @@ public class StoreService {
 	 */
 	@Transactional(readOnly = true)
 	public StoreResponseDto getOneStore(UUID storeId) {
-		// 커스텀 만들어서 사용할까 ?
-		Stores store = findStore(storeId);
-		return storeRepository.getOneStoreById(storeId);
+		try {
+			return storeRepository.getOneStoreById(storeId);
+		} catch (Exception e) {
+			throw new BaseException(e.getMessage(), Constant.Code.STORE_ERROR, HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	/**
@@ -179,7 +189,7 @@ public class StoreService {
 	 */
 	public Stores findStore(UUID storeId) {
 		return storeRepository.findById(storeId).filter(s -> s.getIsDeleted() == false)
-			.orElseThrow(() -> new IllegalArgumentException("존재하지 않거나 삭제된 식당"));
+			.orElseThrow(() -> new StoreException.StoreNotFound());
 	}
 
 	/**
@@ -189,7 +199,7 @@ public class StoreService {
 	 */
 	public Users findStoreOwner(String username) {
 		return userRepository.findByUsername(username).orElseThrow(
-			() -> new IllegalArgumentException("존재하지 않는 유저"));
+			() -> new BaseException("존재하지 않는 유저", -1, HttpStatus.NOT_FOUND));
 	}
 
 	/**
@@ -199,6 +209,6 @@ public class StoreService {
 	 */
 	public Role findUserRole(String username) {
 		return userRepository.findByUsername(username).orElseThrow(
-			() -> new IllegalArgumentException("존재하지 않는 유저")).getRole();
+			() -> new BaseException("존재하지 않는 유저", -1, HttpStatus.NOT_FOUND)).getRole();
 	}
 }
