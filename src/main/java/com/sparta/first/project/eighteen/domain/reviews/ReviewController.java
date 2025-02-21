@@ -47,7 +47,7 @@ public class ReviewController {
 	 */
 	@PostMapping("/reviews")
 	public ResponseEntity<ApiResponse<ReviewResponseDto>> createReview(
-		@AuthenticationPrincipal UserDetails userDetails,
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestBody @Valid ReviewCreateRequestDto requestDto) {
 
 		ReviewResponseDto responseDto = reviewService.createReview(userDetails.getUsername(), requestDto);
@@ -90,7 +90,7 @@ public class ReviewController {
 	 */
 	@PutMapping("/reviews/{reviewId}")
 	public ResponseEntity<ApiResponse<ReviewResponseDto>> updateReview(
-		@AuthenticationPrincipal UserDetails userDetails,
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID reviewId,
 		@RequestBody @Valid ReviewUpdateRequestDto requestDto) {
 
@@ -114,7 +114,7 @@ public class ReviewController {
 	 */
 	@DeleteMapping("/reviews/{reviewId}")
 	public ResponseEntity<ApiResponse> deleteReview(
-		@AuthenticationPrincipal UserDetails userDetails,
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID reviewId) {
 
 		log.info("ReviewController - deleteReview | reviewId - " + reviewId);
