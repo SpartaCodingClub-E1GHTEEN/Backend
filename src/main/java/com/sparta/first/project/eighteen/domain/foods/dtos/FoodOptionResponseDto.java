@@ -5,12 +5,14 @@ import java.util.UUID;
 import com.sparta.first.project.eighteen.model.foods.FoodOptions;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class FoodOptionResponseDto {
 
 	private UUID id;
@@ -18,10 +20,10 @@ public class FoodOptionResponseDto {
 	private int optionPrice;
 
 	public static FoodOptionResponseDto fromEntity(FoodOptions option) {
-		return new FoodOptionResponseDto(
-			option.getId(),
-			option.getOptionName(),
-			option.getOptionPrice()
-		);
+		return FoodOptionResponseDto.builder()
+			.id(option.getId())
+			.optionName(option.getOptionName())
+			.optionPrice(option.getOptionPrice())
+			.build();
 	}
 }

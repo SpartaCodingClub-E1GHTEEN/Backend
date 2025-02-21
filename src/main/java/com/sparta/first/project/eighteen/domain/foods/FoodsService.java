@@ -1,12 +1,12 @@
 package com.sparta.first.project.eighteen.domain.foods;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodCreateRequestDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodGetResponseDto;
@@ -14,12 +14,14 @@ import com.sparta.first.project.eighteen.domain.foods.dtos.FoodResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodSearchRequestDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodSingleResponseDto;
 import com.sparta.first.project.eighteen.domain.stores.StoreRepository;
-import com.sparta.first.project.eighteen.model.foods.FoodOptions;
 import com.sparta.first.project.eighteen.model.foods.Foods;
 import com.sparta.first.project.eighteen.model.stores.Stores;
+import com.sparta.first.project.eighteen.utils.GeminiApiClient;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FoodsService {
@@ -27,26 +29,24 @@ public class FoodsService {
 	private final FoodsRepository foodsRepository;
 	private final FoodOptionsRepository foodOptionsRepository;
 	private final StoreRepository storesRepository;
+	private final GeminiApiClient geminiApiClient;
 
+	@Transactional
 	public FoodResponseDto createFood(FoodCreateRequestDto requestDto) {
 
 		Stores store = storesRepository.findById(requestDto.getStoreId())
 			.orElseThrow(() -> new RuntimeException("해당 가게를 찾을 수 없습니다."));
 
-		Foods food = foodsRepository.save(requestDto.toEntity(store));
+		String foodDesc = (requestDto.getFoodDesc() == null || requestDto.getFoodDesc().isEmpty())
+			? geminiApiClient.GeminiResponse(requestDto.getFoodName())
+			: requestDto.getFoodDesc();
 
-		if (requestDto.getOptions() != null && !requestDto.getOptions().isEmpty()) {
-			List<FoodOptions> foodOptions = requestDto.getOptions()
-				.stream()
-				.map(optionDto -> optionDto.toEntity(food))
-				.toList();
-
-			foodOptionsRepository.saveAll(foodOptions);
-		}
+		Foods food = foodsRepository.save(requestDto.toEntity(store, foodDesc));
 
 		return FoodResponseDto.fromEntity(food);
 	}
 
+	@Transactional(readOnly = true)
 	public FoodGetResponseDto searchFood(UUID storeId, FoodSearchRequestDto requestDto) {
 
 		PageRequest pageRequest = PageRequest.of(
@@ -69,6 +69,7 @@ public class FoodsService {
 		);
 	}
 
+	@Transactional(readOnly = true)
 	public FoodSingleResponseDto getFood(UUID foodId) {
 
 		Foods food = foodsRepository.findById(foodId)
