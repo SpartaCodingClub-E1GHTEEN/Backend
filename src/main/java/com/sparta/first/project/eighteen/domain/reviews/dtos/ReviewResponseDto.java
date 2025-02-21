@@ -1,5 +1,8 @@
 package com.sparta.first.project.eighteen.domain.reviews.dtos;
 
+import java.util.List;
+
+import com.sparta.first.project.eighteen.model.orders.OrderDetails;
 import com.sparta.first.project.eighteen.model.reviews.Reviews;
 
 import lombok.AllArgsConstructor;
@@ -36,36 +39,34 @@ public class ReviewResponseDto {
 	// 리뷰 이미지
 	private String reviewImgUrl;
 
-	// 테스트를 위한 임시 생성자
-	public ReviewResponseDto(ReviewCreateRequestDto reviewRequestDto) {
-		this.id = "1";
-		this.reviewNickname = "김손님";
-		this.orderId = reviewRequestDto.getOrderId();
-		this.reviewOrders = "김밥, 떡볶이, 등등 ..";
-		this.reviewContent = reviewRequestDto.getReviewContent();
-		this.reviewRating = reviewRequestDto.getReviewRating();
-		this.reviewImgUrl = reviewRequestDto.getReviewImgUrl();
-	}
-
-	// 테스트를 위한 임시 생성자
-	public ReviewResponseDto(ReviewUpdateRequestDto reviewRequestDto) {
-		this.id = "1";
-		this.reviewNickname = "이손님";
-		this.reviewOrders = "김밥, 떡볶이, 순대";
-		this.reviewContent = reviewRequestDto.getReviewContent();
-		this.reviewRating = reviewRequestDto.getReviewRating();
-		this.reviewImgUrl = reviewRequestDto.getReviewImgUrl();
-	}
+	// 리뷰 생성일자
+	private String createdAt;
 
 	public static ReviewResponseDto fromEntity(Reviews review) {
 		return ReviewResponseDto.builder()
 			.id(review.getId().toString())
 			.reviewNickname(review.getUsersId().getUsername())
-			// .reviewOrders(review.getOrderId().getOrderDetails().toString())
+			.orderId(review.getOrderId().getId().toString())
+			.reviewOrders(getOrderFoodName(review.getOrderId().getOrderDetails()))
 			.reviewContent(review.getReviewContent())
 			.reviewRating(review.getReviewRating())
 			.reviewImgUrl(review.getReviewImgUrl())
+			.createdAt(review.getCreatedAt().toString())
 			.build();
+	}
+
+	public static String getOrderFoodName(List<OrderDetails> orderDetails) {
+		StringBuilder sb = new StringBuilder();
+
+		if (orderDetails.size() == 1) {
+			return orderDetails.get(0).getFoodName();
+		}
+
+		for (int i=0; i<orderDetails.size(); i++) {
+			sb.append(orderDetails.get(i).getFoodName()).append(", ");
+		}
+
+		return (sb.length() < 15) ? sb.toString() : sb.toString().substring(15) + "...";
 	}
 
 }
