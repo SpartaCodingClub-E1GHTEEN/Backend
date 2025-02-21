@@ -14,7 +14,7 @@ import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 // @Component
 
 /**
- * Util 클래스를 static 메서드로만 구성할지?
+ * Util 클래스를 static 메서드로만 구성할지? <br>
  * 빈으로 등록해서 싱글톤으로 관리할지? <br>
  * - 이 경우 @Value 어노테이션 활용 yml 파일에서 값 주입 받을 수 있음.
  *
@@ -24,14 +24,13 @@ public class UserUtils {
 	private static final ConcurrentHashMap<UUID, LocalDateTime> isUserModified = new ConcurrentHashMap<>();
 
 	/**
-	 * 유저의 권한 변경 또는 삭제 시 해당 시간 기록 <br>
+	 * 유저의 권한 변경 또는 탈퇴 시 해당 시간 기록 <br>
+	 * @Param userUUID <br>
+	 * - 관리자가 유저 권한 변경 하는 경우 PathVariable로 전달받은 값 <br>
+	 * - 유저가 탈퇴한 경우 유저 본인의 식별자 값  <br>
 	 * 이후 인가 과정에서는 먼저 UUID로 변경 내역이 있는지 확인
 	 */
-	public static void markUserModified() {
-		UserDetailsImpl userDetails = getUserDetails();
-
-		UUID userUUID = userDetails.getUserUUID();
-
+	public static void markUserModified(UUID userUUID) {
 		LocalDateTime now = LocalDateTime.now();
 
 		// 권한 변경이나 삭제 시간 매핑
