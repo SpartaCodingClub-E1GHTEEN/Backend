@@ -19,7 +19,6 @@ import com.sparta.first.project.eighteen.domain.foods.dtos.FoodCreateRequestDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodGetResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodSearchRequestDto;
-import com.sparta.first.project.eighteen.domain.foods.dtos.FoodSingleResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodUpdateRequestDto;
 
 import lombok.RequiredArgsConstructor;
@@ -54,9 +53,9 @@ public class FoodsController {
 
 	// USER_ROLE -> ANYONE
 	@GetMapping("/foods/{foodId}")
-	public ResponseEntity<ApiResponse<FoodSingleResponseDto>> getFood(@PathVariable UUID foodId) {
+	public ResponseEntity<ApiResponse<FoodResponseDto>> getFood(@PathVariable UUID foodId) {
 
-		FoodSingleResponseDto responseDto = foodsService.getFood(foodId);
+		FoodResponseDto responseDto = foodsService.getFood(foodId);
 
 		return ResponseEntity.ok(ApiResponse.ok("메뉴를 성공적으로 조회했습니다.", responseDto));
 	}

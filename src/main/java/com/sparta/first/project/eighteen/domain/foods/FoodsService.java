@@ -12,7 +12,6 @@ import com.sparta.first.project.eighteen.domain.foods.dtos.FoodCreateRequestDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodGetResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodSearchRequestDto;
-import com.sparta.first.project.eighteen.domain.foods.dtos.FoodSingleResponseDto;
 import com.sparta.first.project.eighteen.domain.stores.StoreRepository;
 import com.sparta.first.project.eighteen.model.foods.Foods;
 import com.sparta.first.project.eighteen.model.stores.Stores;
@@ -70,12 +69,12 @@ public class FoodsService {
 	}
 
 	@Transactional(readOnly = true)
-	public FoodSingleResponseDto getFood(UUID foodId) {
+	public FoodResponseDto getFood(UUID foodId) {
 
 		Foods food = foodsRepository.findById(foodId)
 			.orElseThrow(() -> new RuntimeException("해당 음식을 찾을 수 없습니다."));
 
-		return FoodSingleResponseDto.fromEntity(food);
+		return FoodResponseDto.fromEntity(food);
 	}
 
 	public void deleteFood(UUID foodId) {
