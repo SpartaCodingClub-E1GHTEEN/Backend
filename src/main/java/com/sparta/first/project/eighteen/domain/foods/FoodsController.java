@@ -33,7 +33,7 @@ public class FoodsController {
 	private final FoodsService foodsService;
 
 	// USER_ROLE -> OWNER
-	@PreAuthorize("hasRole('MASTER') or hasRole('MANAGER') or hasRole('OWNER')")
+	@PreAuthorize("hasAnyRole('Master', 'MANAGER', 'OWNER')")
 	@PostMapping("/foods")
 	public ResponseEntity<ApiResponse<FoodResponseDto>> createFood(@RequestBody FoodCreateRequestDto requestDto) {
 
@@ -62,6 +62,7 @@ public class FoodsController {
 	}
 
 	// USER_ROLE -> OWNER
+	@PreAuthorize("hasAnyRole('Master', 'MANAGER', 'OWNER')")
 	@PutMapping("/foods/{foodId}")
 	public ResponseEntity<ApiResponse<FoodResponseDto>> updateFood(@PathVariable String foodId,
 		@RequestBody FoodUpdateRequestDto requestDto) {
@@ -70,6 +71,7 @@ public class FoodsController {
 	}
 
 	// USER_ROLE -> OWNER
+	@PreAuthorize("hasAnyRole('Master', 'MANAGER', 'OWNER')")
 	@DeleteMapping("/foods/{foodId}")
 	public ResponseEntity<ApiResponse<Void>> deleteFood(@PathVariable UUID foodId) {
 
