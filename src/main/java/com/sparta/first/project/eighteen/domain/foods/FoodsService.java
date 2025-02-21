@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodCreateRequestDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodGetResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodResponseDto;
-import com.sparta.first.project.eighteen.domain.foods.dtos.FoodSearchRequestDto;
+import com.sparta.first.project.eighteen.domain.foods.dtos.FoodUpdateRequestDto;
 import com.sparta.first.project.eighteen.domain.stores.StoreRepository;
 import com.sparta.first.project.eighteen.model.foods.Foods;
 import com.sparta.first.project.eighteen.model.stores.Stores;
@@ -77,6 +77,22 @@ public class FoodsService {
 		return FoodResponseDto.fromEntity(food);
 	}
 
+	@Transactional
+	public FoodResponseDto updateFood(UUID foodId, FoodUpdateRequestDto requestDto) {
+
+		Foods food = foodsRepository.findById(foodId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 음식은 존재하지 않습니다."));
+
+		String foodDesc = (requestDto.getFoodDesc() == null || requestDto.getFoodDesc().isEmpty())
+			? geminiApiClient.GeminiResponse(requestDto.getFoodName())
+			: requestDto.getFoodDesc();
+
+		food.updateFood(requestDto, foodDesc);
+
+		return FoodResponseDto.fromEntity(food);
+	}
+
+	@Transactional
 	public void deleteFood(UUID foodId) {
 
 		Foods food = foodsRepository.findById(foodId).orElseThrow(() -> new RuntimeException("해당 음식을 찾을 수 없습니다."));

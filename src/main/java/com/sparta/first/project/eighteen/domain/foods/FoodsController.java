@@ -63,10 +63,12 @@ public class FoodsController {
 	// USER_ROLE -> OWNER
 	@PreAuthorize("hasAnyRole('Master', 'MANAGER', 'OWNER')")
 	@PutMapping("/foods/{foodId}")
-	public ResponseEntity<ApiResponse<FoodResponseDto>> updateFood(@PathVariable String foodId,
+	public ResponseEntity<ApiResponse<FoodResponseDto>> updateFood(@PathVariable UUID foodId,
 		@RequestBody FoodUpdateRequestDto requestDto) {
 
-		return null;
+		FoodResponseDto responseDto = foodsService.updateFood(foodId, requestDto);
+
+		return ResponseEntity.ok(ApiResponse.ok("메뉴를 성공적으로 수정했습니다.", responseDto));
 	}
 
 	// USER_ROLE -> OWNER
