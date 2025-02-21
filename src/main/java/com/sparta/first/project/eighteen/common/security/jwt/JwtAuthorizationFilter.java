@@ -1,6 +1,7 @@
 package com.sparta.first.project.eighteen.common.security.jwt;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -11,7 +12,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 import com.sparta.first.project.eighteen.common.security.UserDetailsServiceImpl;
+import com.sparta.first.project.eighteen.model.users.Role;
+import com.sparta.first.project.eighteen.model.users.Users;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -50,25 +54,51 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 		token = token.substring(BEARER_PREFIX.length());
 		jwtUtil.validateAccessToken(token);
 
-		// 2. JWT에서 아이디 추출
+		// 2. JWT에서 아이디 추출 & 권한 추출
 		String userId = jwtUtil.getUserUUID(token);
+		Role userRole = jwtUtil.getUserRole(token);
 
-		setAuthentication(userId);
+		setAuthentication(userId, userRole);
 		filterChain.doFilter(request, response);
 	}
 
 	// 4. SecurityContext에 Authentication 객체 저장
-	private void setAuthentication(String userId) {
+	private void setAuthentication(String userId, Role userRole) {
 		SecurityContext context = SecurityContextHolder.getContext();
-		Authentication authentication = createAuthentication(userId);
+		Authentication authentication = createJwtAuthentication(userId, userRole);
 
 		context.setAuthentication(authentication);
 		SecurityContextHolder.setContext(context);
 	}
 
-	// 3. 인가해줄 Authentication 생성
+	/**
+	 * UserUUID로 DB에서 조회한 후 인증 주체를 만드는 메서드
+	 * @param userId
+	 * @return
+	 */
 	private UsernamePasswordAuthenticationToken createAuthentication(String userId) {
 		UserDetails userDetails = userDetailsService.loadUserByUserUUID(userId);
+		return new UsernamePasswordAuthenticationToken(
+			userDetails,
+			null,
+			userDetails.getAuthorities()
+		);
+	}
+
+	/**
+	 * Jwt 토큰을 기반으로 인증 주체를 만드는 메서드
+	 * @param userId
+	 * @param userRole
+	 * @return
+	 */
+	private UsernamePasswordAuthenticationToken createJwtAuthentication(String userId, Role userRole) {
+		Users jwtUser = Users.builder()
+			.userId(UUID.fromString(userId))
+			.role(userRole)
+			.build();
+
+		UserDetails userDetails = new UserDetailsImpl(jwtUser);
+
 		return new UsernamePasswordAuthenticationToken(
 			userDetails,
 			null,
