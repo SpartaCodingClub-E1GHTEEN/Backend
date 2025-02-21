@@ -16,7 +16,7 @@ import com.sparta.first.project.eighteen.common.exception.BaseException;
 import com.sparta.first.project.eighteen.common.exception.StoreException;
 import com.sparta.first.project.eighteen.domain.reviews.ReviewRepository;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreListResponseDto;
-import com.sparta.first.project.eighteen.domain.stores.dtos.StoreRequestDto;
+import com.sparta.first.project.eighteen.domain.stores.dtos.StoreCreateRequestDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreResponseDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreSearchDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreUpdateRequestDto;
@@ -39,14 +39,14 @@ public class StoreService {
 
 	/**
 	 * 식당 생성
-	 * @param storeRequestDto : 생성할 식당의 내용
+	 * @param storeCreateRequestDto : 생성할 식당의 내용
 	 * @return : 생성 완료한 식당의 정보
 	 */
-	public StoreResponseDto createStore(StoreRequestDto storeRequestDto) {
+	public StoreResponseDto createStore(StoreCreateRequestDto storeCreateRequestDto) {
 		// 식당을 만들 유저 검색
-		Users storeOwner = findStoreOwner(storeRequestDto.getStoreOwnerName());
+		Users storeOwner = findStoreOwner(storeCreateRequestDto.getStoreOwnerName());
 		// 식당 생성 및 저장
-		Stores store = storeRequestDto.toEntity(storeOwner);
+		Stores store = storeCreateRequestDto.toEntity(storeOwner);
 		Stores newStore = storeRepository.save(store);
 		// 식당 반환
 		return StoreResponseDto.fromEntity(newStore);
@@ -74,7 +74,8 @@ public class StoreService {
 			Page<StoreListResponseDto> storePage = storeRepository.searchStores(searchDto, pageable, role);
 			return new PagedModel<>(storePage);
 		} catch (Exception e) {
-			throw new BaseException(e.getMessage(), Constant.Code.STORE_ERROR, HttpStatus.BAD_REQUEST);
+			log.error("상태 코드 : " + Constant.Code.STORE_ERROR + " / 메시지 : " + e.getMessage());
+			throw new BaseException("식당 리스트를 가져올 수 없습니다.", Constant.Code.STORE_ERROR, HttpStatus.BAD_REQUEST);
 		}
 	}
 

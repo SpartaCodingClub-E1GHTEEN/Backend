@@ -2,7 +2,6 @@ package com.sparta.first.project.eighteen.domain.stores;
 
 import java.util.UUID;
 
-import org.apache.tomcat.util.bcel.Const;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +21,7 @@ import com.sparta.first.project.eighteen.common.dto.ApiResponse;
 import com.sparta.first.project.eighteen.common.exception.BaseException;
 import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreListResponseDto;
-import com.sparta.first.project.eighteen.domain.stores.dtos.StoreRequestDto;
+import com.sparta.first.project.eighteen.domain.stores.dtos.StoreCreateRequestDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreResponseDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreSearchDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreUpdateRequestDto;
@@ -42,20 +41,20 @@ public class StoreController {
 	/**
 	 * 식당 생성
 	 * @param userDetails : 현재 로그인한 사용자 (권한 확인)
-	 * @param storeRequestDto : 식당 정보
+	 * @param storeCreateRequestDto : 식당 정보
 	 * @return : 생성한 식당의 내용
 	 */
 	@PostMapping
 	public ResponseEntity<ApiResponse<StoreResponseDto>> createStore (
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@RequestBody StoreRequestDto storeRequestDto) {
+		@RequestBody StoreCreateRequestDto storeCreateRequestDto) {
 
 		if (storeService.findUserRole(userDetails.getUsername()) != Role.MASTER) {
 			log.info("MASTER가 아닌 사용자");
 			throw new BaseException("식당을 생성할 수 없는 사용자", Constant.Code.STORE_ERROR, HttpStatus.FORBIDDEN);
 		}
 
-		StoreResponseDto responseDto = storeService.createStore(storeRequestDto);
+		StoreResponseDto responseDto = storeService.createStore(storeCreateRequestDto);
 		return ResponseEntity.ok(ApiResponse.ok("성공", responseDto));
 	}
 
