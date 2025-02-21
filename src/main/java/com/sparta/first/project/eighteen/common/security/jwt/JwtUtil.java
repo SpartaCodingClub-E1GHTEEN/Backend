@@ -1,6 +1,7 @@
 package com.sparta.first.project.eighteen.common.security.jwt;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -53,7 +54,8 @@ public class JwtUtil {
 			.subject(userUUID)
 			.claim(AUTHORIZATION_KEY, authorities)
 			.issuer(ISSUER)
-			.issuedAt(Date.from(now.toInstant().plusMillis(accessTokenExp * 1_000L)))
+			.issuedAt(now)
+			.expiration(Date.from(now.toInstant().plusMillis(accessTokenExp * 1_000L)))
 			.signWith(secretKey, Jwts.SIG.HS512)
 			.compact();
 	}
@@ -101,8 +103,12 @@ public class JwtUtil {
 	public Role getUserRole(String accessToken) {
 		return Role.from(parseClaims(accessToken).get(AUTHORIZATION_KEY, String.class));
 	}
-	
+
 	public LocalDateTime getIssuedAt(String accessToken) {
-		return LocalDateTime.from(parseClaims(accessToken).getIssuedAt().toInstant());
+		Date issuedAt = parseClaims(accessToken).getIssuedAt();
+
+		return issuedAt.toInstant()
+			.atZone(ZoneId.systemDefault())
+			.toLocalDateTime();
 	}
 }
