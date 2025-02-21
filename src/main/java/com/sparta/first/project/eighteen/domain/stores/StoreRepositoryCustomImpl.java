@@ -151,7 +151,7 @@ public class StoreRepositoryCustomImpl implements StoreRepositoryCustom {
 			)
 			.groupBy(stores.id)
 			.having(reviewRatingBetween(searchDto.getMinReviewRating(), searchDto.getMaxReviewRating()))
-			.fetchCount();
+			.fetchOne();
 	}
 
 	/**
