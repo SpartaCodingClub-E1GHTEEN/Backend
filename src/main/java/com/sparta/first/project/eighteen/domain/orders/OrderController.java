@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.first.project.eighteen.common.dto.ApiResponse;
@@ -122,9 +123,9 @@ public class OrderController {
 	 * @return  : 주문 정보
 	 */
 	@PreAuthorize("hasAnyRole('OWNER','RIDER')")
-	@PatchMapping("/{id}/{status}")
+	@PatchMapping("/{id}")
 	public ResponseEntity<ApiResponse<OrderResponseDto>> updateOrderStatus(@PathVariable String id,
-		@PathVariable OrderStatus status) {
+		@RequestParam OrderStatus status) {
 		OrderResponseDto responseDto = orderService.updateOrderStatus(id, status);
 		return ResponseEntity.ok(ApiResponse.ok("주문 상태가 변경되었습니다.", responseDto));
 	}
