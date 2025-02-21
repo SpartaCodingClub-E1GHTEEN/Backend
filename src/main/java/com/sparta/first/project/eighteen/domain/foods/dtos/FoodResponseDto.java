@@ -26,7 +26,7 @@ public class FoodResponseDto {
 	private int foodPrice;
 	private String foodImageUrl;
 	private FoodStatus foodStatus;
-	private boolean isRecommended;
+	private Boolean isRecommended;
 	private int foodOrderCount;
 	private List<FoodOptionResponseDto> foodOptions;
 

@@ -41,7 +41,7 @@ public class FoodCreateRequestDto {
 	@NotNull
 	private FoodStatus foodStatus;
 
-	private boolean isRecommended;
+	private Boolean isRecommended;
 
 	private List<FoodOptionRequestDto> foodOptions;
 
