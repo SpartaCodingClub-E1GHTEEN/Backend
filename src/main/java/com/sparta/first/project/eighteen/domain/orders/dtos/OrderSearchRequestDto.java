@@ -2,28 +2,36 @@ package com.sparta.first.project.eighteen.domain.orders.dtos;
 
 import java.time.LocalDateTime;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import com.sparta.first.project.eighteen.model.orders.OrderStatus;
 import com.sparta.first.project.eighteen.model.orders.SortType;
 
+import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
 @Getter
 public class OrderSearchRequestDto {
-    private String storeId;
 
-    private String userId;
+	private String storeId;
 
-    private LocalDateTime dateStart;
+	private String userId;
 
-    private LocalDateTime dateEnd;
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+	private LocalDateTime dateStart;
 
-    private OrderStatus status;
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+	private LocalDateTime dateEnd;
 
-    private Integer currentPage;
+	private OrderStatus status;
 
-    private Integer pageSize;
+	@Min(0)
+	private Integer currentPage;
 
-    private SortType sort;
+	@Min(1)
+	private Integer pageSize;
+	
+	private SortType sort;
 }
