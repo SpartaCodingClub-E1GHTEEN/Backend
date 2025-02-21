@@ -15,6 +15,5 @@ public interface ReviewRepository extends JpaRepository<Reviews, UUID>, ReviewRe
 
 	int countByStoreId(Stores storeId);
 
-	List<Integer> findReviewRatingByStoreId(Stores storeId);
-
+	List<Reviews> findReviewRatingByStoreId(Stores storeId);
 }

@@ -1,5 +1,6 @@
 package com.sparta.first.project.eighteen.model.stores;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import com.sparta.first.project.eighteen.common.BaseEntity;
@@ -9,6 +10,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -64,7 +66,20 @@ public class Stores extends BaseEntity {
 	private double storeRating;
 
 	// 회원 ID (식당 주인)
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
 	private Users userId;
+
+	/**
+	 * 식당 내용 수정
+	 * @param updateStore : 수정할 식당의 내용
+	 */
+	public void updateStore(Stores updateStore) {
+		Optional.ofNullable(updateStore.getStoreName()).ifPresent(storeName -> this.storeName = storeName);
+		Optional.ofNullable(updateStore.getStoreDesc()).ifPresent(storeDesc -> this.storeDesc = storeDesc);
+		Optional.ofNullable(updateStore.getStoreRegion()).ifPresent(storeRegion -> this.storeRegion = storeRegion);
+		Optional.ofNullable(updateStore.getStoreCategory()).ifPresent(storeCategory -> this.storeCategory = storeCategory);
+		Optional.ofNullable(updateStore.getStoreDeliveryPrice()).ifPresent(storeDeliveryPrice -> this.storeDeliveryPrice = storeDeliveryPrice);
+		Optional.ofNullable(updateStore.getStoreImgUrl()).ifPresent(storeImgUrl -> this.storeImgUrl = storeImgUrl);
+	}
 }

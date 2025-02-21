@@ -1,16 +1,15 @@
 package com.sparta.first.project.eighteen.domain.stores;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.apache.tomcat.util.bcel.Const;
+import org.springframework.data.web.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -18,10 +17,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sparta.first.project.eighteen.common.constants.Constant;
 import com.sparta.first.project.eighteen.common.dto.ApiResponse;
+import com.sparta.first.project.eighteen.common.exception.BaseException;
+import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreListResponseDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreRequestDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreResponseDto;
+import com.sparta.first.project.eighteen.domain.stores.dtos.StoreSearchDto;
+import com.sparta.first.project.eighteen.domain.stores.dtos.StoreUpdateRequestDto;
 import com.sparta.first.project.eighteen.model.users.Role;
 
 import lombok.RequiredArgsConstructor;
@@ -43,14 +47,12 @@ public class StoreController {
 	 */
 	@PostMapping
 	public ResponseEntity<ApiResponse<StoreResponseDto>> createStore (
-		@AuthenticationPrincipal UserDetails userDetails,
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestBody StoreRequestDto storeRequestDto) {
 
-		// userDetails 담긴 유저는 MASTER 이어야만 함
-		// MASTER 만 가게 생성 가능 (가게 생성 시 OWNER를 넣어주는 방식으로 진행)
-		if (storeService.findUserRole(userDetails.getUsername()) != Role.MANAGER) {
-			log.info("MANAGER가 아닌 사용자");
-			throw new IllegalArgumentException("해당 사용자는 식당을 생성할 수 없습니다.");
+		if (storeService.findUserRole(userDetails.getUsername()) != Role.MASTER) {
+			log.info("MASTER가 아닌 사용자");
+			throw new BaseException("식당을 생성할 수 없는 사용자", Constant.Code.STORE_ERROR, HttpStatus.FORBIDDEN);
 		}
 
 		StoreResponseDto responseDto = storeService.createStore(storeRequestDto);
@@ -62,8 +64,11 @@ public class StoreController {
 	 * @return : 식당 목록 반환
 	 */
 	@GetMapping
-	public ResponseEntity<ApiResponse<Page<StoreListResponseDto>>> getStores(Pageable pageable){
-		Page<StoreListResponseDto> responseDtos = storeService.getStores(pageable);
+	public ResponseEntity<ApiResponse<PagedModel<StoreListResponseDto>>> getStores(
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
+		@ModelAttribute StoreSearchDto searchDto){
+		log.info("getStores 요청 들어옴");
+		PagedModel<StoreListResponseDto> responseDtos = storeService.getStores(userDetails.getUsername(), searchDto);
 		return ResponseEntity.ok(ApiResponse.ok("성공", responseDtos));
 	}
 
@@ -89,12 +94,14 @@ public class StoreController {
 	@PutMapping("/{storeId}")
 	public ResponseEntity<ApiResponse<StoreResponseDto>> updateStore (
 		@PathVariable UUID storeId,
-		@AuthenticationPrincipal UserDetails userDetails,
-		@RequestBody StoreRequestDto storeRequestDto) {
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
+		@RequestBody StoreUpdateRequestDto storeRequestDto) {
 
-		if (storeService.findUserRole(userDetails.getUsername()) == Role.CUSTOMER) {
-			log.info("CUSTOMER인 사용자가 수정하려고 함");
-			throw new IllegalArgumentException("고객은 식당의 정보를 수정할 수 없습니다.");
+		Role role = storeService.findUserRole(userDetails.getUsername());
+
+		if (role == Role.CUSTOMER || role == Role.RIDER ) {
+			log.info("권한 없는 사용자가 수정하려고 함");
+			throw new BaseException("식당을 생성할 수 없는 사용자", Constant.Code.STORE_ERROR, HttpStatus.FORBIDDEN);
 		}
 
 		log.info("storeId: " + storeId);
@@ -110,12 +117,14 @@ public class StoreController {
 	 */
 	@DeleteMapping("/{storeId}")
 	public ResponseEntity<ApiResponse> deleteStore (
-		@AuthenticationPrincipal UserDetails userDetails,
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId){
 
-		if (storeService.findUserRole(userDetails.getUsername()) == Role.CUSTOMER) {
-			log.info("CUSTOMER인 사용자가 삭제하려고 함");
-			throw new IllegalArgumentException("고객은 식당을 삭제할 수 없습니다.");
+		Role role = storeService.findUserRole(userDetails.getUsername());
+
+		if (role == Role.CUSTOMER || role == Role.RIDER ) {
+			log.info("권한 없는 사용자가 수정하려고 함");
+			throw new BaseException("식당을 생성할 수 없는 사용자", Constant.Code.STORE_ERROR, HttpStatus.FORBIDDEN);
 		}
 
 		log.info("storeId: " + storeId);
