@@ -1,6 +1,7 @@
 package com.sparta.first.project.eighteen.common.security.jwt;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +17,7 @@ import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 import com.sparta.first.project.eighteen.common.security.UserDetailsServiceImpl;
 import com.sparta.first.project.eighteen.model.users.Role;
 import com.sparta.first.project.eighteen.model.users.Users;
+import com.sparta.first.project.eighteen.utils.UserUtils;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -57,6 +59,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 		// 2. JWT에서 아이디 추출 & 권한 추출
 		String userId = jwtUtil.getUserUUID(token);
 		Role userRole = jwtUtil.getUserRole(token);
+		LocalDateTime issuedAt = jwtUtil.getIssuedAt(token);
+
+		UserUtils.checkAccessTokenBlocked(UUID.fromString(userId), issuedAt);
 
 		setAuthentication(userId, userRole);
 		filterChain.doFilter(request, response);

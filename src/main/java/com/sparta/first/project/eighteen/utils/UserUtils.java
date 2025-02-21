@@ -11,6 +11,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.sparta.first.project.eighteen.common.exception.UserException;
 import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 
+import lombok.extern.slf4j.Slf4j;
+
 // @Component
 
 /**
@@ -19,6 +21,7 @@ import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
  * - 이 경우 @Value 어노테이션 활용 yml 파일에서 값 주입 받을 수 있음.
  *
  */
+@Slf4j(topic = "액세스 토큰 발급 시점 검증")
 public class UserUtils {
 	// TODO: 추후 권한 변경이나 삭제의 경우 AOP로 변경
 	private static final ConcurrentHashMap<UUID, LocalDateTime> isUserModified = new ConcurrentHashMap<>();
@@ -48,6 +51,7 @@ public class UserUtils {
 		LocalDateTime modifiedAt = isUserModified.getOrDefault(userUUID, null);
 		//
 		if (modifiedAt != null && issuedAt.isBefore(modifiedAt)) {
+			log.error("[ERROR] 권한 변경 / 탈퇴 이전에 발급된 토큰입니다.");
 			throw new UserException.UserNotFound();
 		}
 
@@ -69,6 +73,7 @@ public class UserUtils {
 			return;
 		}
 
+		log.info("now = {}, 변경 시점 + 만료기간 = {}", now, modifiedAtPlusAccessTokenExp);
 		// 현재 시점이 변경 시점 + 만료 기간 보다 이후라면 아무리 빨리 발급해도 변경 시점 이후에 발급한 것.
 		isUserModified.remove(userUUID);
 

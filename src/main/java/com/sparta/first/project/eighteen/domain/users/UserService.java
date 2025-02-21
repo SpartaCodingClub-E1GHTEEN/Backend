@@ -11,6 +11,7 @@ import com.sparta.first.project.eighteen.common.exception.BaseException;
 import com.sparta.first.project.eighteen.domain.users.dtos.UserResponseDto;
 import com.sparta.first.project.eighteen.domain.users.dtos.UserUpdateRequestDto;
 import com.sparta.first.project.eighteen.model.users.Users;
+import com.sparta.first.project.eighteen.utils.UserUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -45,6 +46,11 @@ public class UserService {
 	@Transactional
 	public void deleteUser(UUID userId) {
 		Users users = findUsers(userId);
+
+		// 유저의 탈퇴 시 변경 시점 기록
+		// TODO: 추후 해당 메서드에서 예외 발생 시 AOP로 기록한 아이디 취소하는 방법 고려
+		UserUtils.markUserModified(userId);
+
 		users.delete(true, userId.toString());
 	}
 
