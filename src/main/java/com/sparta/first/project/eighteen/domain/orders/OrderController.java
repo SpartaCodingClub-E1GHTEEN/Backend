@@ -124,7 +124,7 @@ public class OrderController {
 	 * @return  : 주문 정보
 	 */
 	@PreAuthorize("hasAnyRole('OWNER','RIDER')")
-	@PatchMapping("/{id}")
+	@PatchMapping("/{id}/status")
 	public ResponseEntity<ApiResponse<OrderResponseDto>> updateOrderStatus(@PathVariable String id,
 		@RequestParam OrderStatus status) {
 		OrderResponseDto responseDto = orderService.updateOrderStatus(id, status);
