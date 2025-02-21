@@ -12,9 +12,13 @@ import lombok.Setter;
 @Setter
 public class OrderDetailsResponseDto {
 	private String orderDetailsId;
+
 	private String productId;
+
 	private String productName;
+
 	private int amount;
+
 	private List<OrderDetailsOptionResponseDto> options;
 
 	public OrderDetailsResponseDto(OrderDetails orderDetails) {

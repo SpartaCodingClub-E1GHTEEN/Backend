@@ -23,6 +23,7 @@ import com.sparta.first.project.eighteen.domain.orders.dtos.OrderSearchRequestDt
 import com.sparta.first.project.eighteen.domain.orders.dtos.OrderUpdateRequestDto;
 import com.sparta.first.project.eighteen.model.orders.OrderStatus;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -41,7 +42,7 @@ public class OrderController {
 	 */
 	@PreAuthorize("hasAnyRole('OWNER','CUSTOMER')")
 	@PostMapping
-	public ResponseEntity<ApiResponse<Void>> createOrder(@RequestBody OrderCreateRequestDto requestDto,
+	public ResponseEntity<ApiResponse<Void>> createOrder(@Valid @RequestBody OrderCreateRequestDto requestDto,
 		@AuthenticationPrincipal UserDetailsImpl user) {
 		orderService.createOrder(requestDto, user.getUserUUID());
 		return ResponseEntity.ok(ApiResponse.ok("주문이 완료되었습니다.", null));
@@ -68,7 +69,7 @@ public class OrderController {
 	@PreAuthorize("hasAnyRole('MASTER','MANAGER','OWNER')")
 	@GetMapping
 	public ResponseEntity<ApiResponse<PagedModel<OrderResponseDto>>> searchOrder(
-		@ModelAttribute OrderSearchRequestDto requestDto) {
+		@Valid @ModelAttribute OrderSearchRequestDto requestDto) {
 		PagedModel<OrderResponseDto> responseDto = orderService.searchOrder(requestDto);
 		return ResponseEntity.ok(ApiResponse.ok("주문 목록을 조회했습니다", responseDto));
 	}
@@ -83,7 +84,7 @@ public class OrderController {
 	@PreAuthorize("hasRole('MANAGER')")
 	@PatchMapping("/{id}")
 	public ResponseEntity<ApiResponse<OrderResponseDto>> updateOrder(@PathVariable String id,
-		@RequestBody OrderUpdateRequestDto requestDto) {
+		@Valid @RequestBody OrderUpdateRequestDto requestDto) {
 		OrderResponseDto responseDto = orderService.updateOrder(requestDto, id);
 		return ResponseEntity.ok(ApiResponse.ok("주문을 수정했습니다.", responseDto));
 	}

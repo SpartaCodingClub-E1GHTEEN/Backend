@@ -18,5 +18,6 @@ public class Constant {
 
 	public static class ErrorMessage {
 		public static final String OK = "";
+		public static final String NOTE_IS_TOO_LONG = "최대 50자 이하의 요청사항을 작성해주세요";
 	}
 }
