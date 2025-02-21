@@ -1,5 +1,6 @@
 package com.sparta.first.project.eighteen.common.security.jwt;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -99,5 +100,9 @@ public class JwtUtil {
 	 */
 	public Role getUserRole(String accessToken) {
 		return Role.from(parseClaims(accessToken).get(AUTHORIZATION_KEY, String.class));
+	}
+	
+	public LocalDateTime getIssuedAt(String accessToken) {
+		return LocalDateTime.from(parseClaims(accessToken).getIssuedAt().toInstant());
 	}
 }
