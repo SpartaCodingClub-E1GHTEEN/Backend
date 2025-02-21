@@ -1,8 +1,6 @@
 package com.sparta.first.project.eighteen.domain.stores;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,7 +21,6 @@ import com.sparta.first.project.eighteen.domain.stores.dtos.StoreResponseDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreSearchDto;
 import com.sparta.first.project.eighteen.domain.stores.dtos.StoreUpdateRequestDto;
 import com.sparta.first.project.eighteen.domain.users.UserRepository;
-import com.sparta.first.project.eighteen.model.reviews.Reviews;
 import com.sparta.first.project.eighteen.model.stores.Stores;
 import com.sparta.first.project.eighteen.model.users.Role;
 import com.sparta.first.project.eighteen.model.users.Users;
@@ -88,11 +85,12 @@ public class StoreService {
 	 */
 	@Transactional(readOnly = true)
 	public StoreResponseDto getOneStore(UUID storeId) {
-		try {
-			return storeRepository.getOneStoreById(storeId);
-		} catch (Exception e) {
-			throw new BaseException(e.getMessage(), Constant.Code.STORE_ERROR, HttpStatus.BAD_REQUEST);
-		}
+		Stores store = findStore(storeId);
+
+		long storeReviewCnt = reviewRepository.getCntReviews(store.getId());
+		double storeRating = reviewRepository.getAvgReviewRatings(store.getId());
+
+		return StoreResponseDto.fromEntityReview(store, storeReviewCnt, storeRating);
 	}
 
 	/**
@@ -111,16 +109,15 @@ public class StoreService {
 		if (user.getRole() == Role.OWNER &&
 			!user.getUserId().equals(store.getUserId().getUserId())) {
 			log.info(user.getUserId().toString());
-			log.info(store.getUserId().getUserId().toString());
-			throw new IllegalArgumentException("해당 식당의 주인이 아닙니다.");
+			throw new BaseException("해당 식당의 주인이 아닙니다.", Constant.Code.STORE_ERROR, HttpStatus.FORBIDDEN);
 		}
 
 		// 식당 내용 update
 		Stores updateStore = storeRequestDto.toEntity();
 		store.updateStore(updateStore);
 
-		int storeReviewCnt = getStoreReviewCnt(store);
-		double storeRating = getStoreReviewSum(store, storeReviewCnt);
+		long storeReviewCnt = reviewRepository.getCntReviews(store.getId());
+		double storeRating = reviewRepository.getAvgReviewRatings(store.getId());
 
 		return StoreResponseDto.fromEntityReview(store, storeReviewCnt, storeRating);
 	}
@@ -139,7 +136,7 @@ public class StoreService {
 
 		if (user.getRole() == Role.OWNER &&
 			!user.getUserId().equals(store.getUserId().getUserId())) {
-			throw new IllegalArgumentException("해당 식당의 주인이 아닙니다.");
+			throw new BaseException("해당 식당의 주인이 아닙니다.", Constant.Code.STORE_ERROR, HttpStatus.FORBIDDEN);
 		}
 
 		// 식당 삭제
@@ -147,39 +144,6 @@ public class StoreService {
 		storeRepository.save(store);
 		log.info("삭제 여부 : " + store.getIsDeleted());
 		return ApiResponse.ok("삭제 성공", "식당명 : " + store.getStoreName());
-	}
-
-	/**
-	 * 식당에 존재하는 리뷰의 개수
-	 * @param storeId : 리뷰를 가져올 식당의 ID
-	 * @return : 식당에 존재하는 리뷰 개수
-	 */
-	public int getStoreReviewCnt(Stores storeId) {
-		return reviewRepository.countByStoreId(storeId);
-	}
-
-	/**
-	 * 식당 리뷰 평점 계산
-	 * @param store : 평점을 계산할 식당
-	 * @param storeReviewCnt : 식당의 리뷰 개수
-	 * @return : 식당의 리뷰 평점
-	 */
-	private double getStoreReviewSum(Stores store, int storeReviewCnt) {
-		List<Integer> list = reviewRepository.findReviewRatingByStoreId(store)
-			.stream()
-			.map(Reviews::getReviewRating)
-			.collect(Collectors.toList());
-
-		if (list.isEmpty() || list == null || storeReviewCnt == 0) {
-			return 0;
-		}
-		
-		int sum = 0;
-		for (Integer i : list) {
-			sum += i;
-		}
-
-		return sum / storeReviewCnt;
 	}
 
 	/**
@@ -198,7 +162,7 @@ public class StoreService {
 	 * @return : 조회한 사용자
 	 */
 	public Users findStoreOwner(String username) {
-		return userRepository.findByUsername(username).orElseThrow(
+		return userRepository.findByUsername(username).filter(s -> s.getIsDeleted() == false).orElseThrow(
 			() -> new BaseException("존재하지 않는 유저", -1, HttpStatus.NOT_FOUND));
 	}
 
@@ -208,7 +172,7 @@ public class StoreService {
 	 * @return : 조회한 사용자의 권한
 	 */
 	public Role findUserRole(String username) {
-		return userRepository.findByUsername(username).orElseThrow(
+		return userRepository.findByUsername(username).filter(s -> s.getIsDeleted() == false).orElseThrow(
 			() -> new BaseException("존재하지 않는 유저", -1, HttpStatus.NOT_FOUND)).getRole();
 	}
 }
