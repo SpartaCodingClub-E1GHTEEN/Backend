@@ -58,7 +58,10 @@ jobs:
         run: |
           cd src/main/resources
           touch ./application-secret.yml
+          touch ./application.yml
+          
           echo "${{ secrets.APPLICATION_SECRET_YML }}" >> ./application-secret.yml
+          echo "${{ secrets.APPLICATION_YML }}" >> ./application.yml
 
       - name: Grant execution permission to gradle
         run: chmod +x gradlew
