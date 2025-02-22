@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sparta.first.project.eighteen.common.dto.ApiResponse;
+import com.sparta.first.project.eighteen.common.exception.BaseException;
 import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 import com.sparta.first.project.eighteen.common.security.UserDetailsServiceImpl;
 import com.sparta.first.project.eighteen.model.users.Role;
@@ -61,7 +64,14 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 		Role userRole = jwtUtil.getUserRole(token);
 		LocalDateTime issuedAt = jwtUtil.getIssuedAt(token);
 
-		UserUtils.checkAccessTokenBlocked(UUID.fromString(userId), issuedAt);
+		try {
+			UserUtils.checkAccessTokenBlocked(UUID.fromString(userId), issuedAt);
+		} catch (BaseException e) {
+			setContentTypeAndEncoding(response);
+			response.setStatus(e.getStatus().value());
+			response.getWriter().write(new ObjectMapper().writeValueAsString(ApiResponse.fail(e)));
+			return;
+		}
 
 		setAuthentication(userId, userRole);
 		filterChain.doFilter(request, response);
@@ -109,6 +119,11 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 			null,
 			userDetails.getAuthorities()
 		);
+	}
+
+	private void setContentTypeAndEncoding(HttpServletResponse response) {
+		response.setCharacterEncoding("utf-8");
+		response.setContentType("application/json");
 	}
 
 }
