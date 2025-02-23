@@ -1,6 +1,7 @@
 package com.sparta.first.project.eighteen.domain.payments;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,6 +30,7 @@ public class PaymentController {
 
 	private final PaymentService paymentService;
 
+	@PreAuthorize("hasAnyRole('OWNER', 'CUSTOMER')")
 	@GetMapping
 	public ResponseEntity<ApiResponse<String>> requestPayment(@RequestParam String orderId,
 		@RequestParam PaymentMethod paymentMethod,
@@ -37,6 +39,7 @@ public class PaymentController {
 		return ResponseEntity.ok(ApiResponse.ok("결제가 요청되었습니다.", requestUrl));
 	}
 
+	@PreAuthorize("hasAnyRole('OWNER', 'CUSTOMER')")
 	@PostMapping
 	public ResponseEntity<ApiResponse<PaymentResponseDto>> createPayment(
 		@Validated @RequestBody PaymentCreateRequestDto requestDto,
@@ -45,12 +48,14 @@ public class PaymentController {
 		return ResponseEntity.ok(ApiResponse.ok("결제 내역이 생성되었습니다.", responseDto));
 	}
 
+	@PreAuthorize("hasAnyRole('MASTER', 'MANAGER','OWNER', 'CUSTOMER')")
 	@GetMapping("/{id}")
 	public ResponseEntity<ApiResponse<PaymentResponseDto>> readPayment(@PathVariable String id) {
 		PaymentResponseDto responseDto = paymentService.readPayment(id);
 		return ResponseEntity.ok(ApiResponse.ok("결제 내역이 조회되었습니다.", responseDto));
 	}
 
+	@PreAuthorize("hasAnyRole('MASTER', 'MANAGER','OWNER', 'CUSTOMER')")
 	@PatchMapping("/{id}")
 	public ResponseEntity<ApiResponse<PaymentResponseDto>> updatePayment(@PathVariable String id,
 		@RequestParam PaymentStatus status) {
@@ -58,6 +63,7 @@ public class PaymentController {
 		return ResponseEntity.ok(ApiResponse.ok("결제 내역이 수정되었습니다.", responseDto));
 	}
 
+	@PreAuthorize("hasRole('MASTER')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ApiResponse<Void>> deletePayment(@PathVariable String id,
 		@AuthenticationPrincipal UserDetailsImpl user) {
