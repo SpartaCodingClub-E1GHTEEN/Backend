@@ -18,20 +18,30 @@ import lombok.Setter;
 @Getter
 @Setter
 public class OrderResponseDto {
-	String id;
+	private String id;
 
-	String storeId;
+	private String storeId;
 
-	String storeName;
+	private String storeName;
 
-	String userId;
+	private String userId;
 
-	String userName;
-	LocalDateTime orderTime;
-	boolean isStoreOrder;
-	OrderStatus status;
-	String noteToStore;
-	String noteToDelivery;
+	private String userName;
+
+	private LocalDateTime orderTime;
+
+	private boolean isStoreOrder;
+
+	private OrderStatus status;
+
+	private String noteToStore;
+
+	private String noteToDelivery;
+
+	private int totalPrice;
+
+	private int totalCount;
+
 	List<OrderDetailsResponseDto> orderDetails;
 
 	public static OrderResponseDto fromEntity(Orders orders) {
@@ -46,6 +56,8 @@ public class OrderResponseDto {
 			.status(orders.getStatus())
 			.noteToStore(orders.getNoteToStore())
 			.noteToDelivery(orders.getNoteToDelivery())
+			.totalPrice(orders.getTotalPrice())
+			.totalCount(orders.getTotalCount())
 			.orderDetails(
 				orders.getOrderDetails()
 					.stream()
