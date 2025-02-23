@@ -9,5 +9,5 @@ import com.sparta.first.project.eighteen.model.foods.FoodOptions;
 import com.sparta.first.project.eighteen.model.foods.Foods;
 
 public interface FoodOptionsRepository extends JpaRepository<FoodOptions, UUID> {
-	List<FoodOptions> findByFood(Foods food);
+	List<FoodOptions> findByFoodAndIsDeletedFalse(Foods food);
 }
