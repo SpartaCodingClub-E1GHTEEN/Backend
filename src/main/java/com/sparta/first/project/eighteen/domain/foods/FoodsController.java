@@ -139,7 +139,7 @@ public class FoodsController {
 	 * @param foodId : 옵션을 조회할 메뉴 ID
 	 * @return : 메뉴의 옵션 List
 	 */
-	@GetMapping("foods/{foodId}/options")
+	@GetMapping("/foods/{foodId}/options")
 	public ResponseEntity<ApiResponse<List<FoodOptionResponseDto>>> getFoodOption(@PathVariable UUID foodId) {
 
 		List<FoodOptionResponseDto> responseDto = foodsService.getFoodOption(foodId);
