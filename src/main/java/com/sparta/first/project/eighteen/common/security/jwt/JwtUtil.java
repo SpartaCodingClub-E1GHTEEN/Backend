@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import com.sparta.first.project.eighteen.common.exception.BaseException;
+import com.sparta.first.project.eighteen.model.users.TokenStatus;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -56,21 +57,33 @@ public class JwtUtil {
 			.compact();
 	}
 
-	public void validateAccessToken(String token) {
+	/**
+	 * 토큰 상태 검증 메서드
+	 * @param token : 전달받은 JWT 토큰
+	 * @return
+	 * - IS_VALID : 액세스 토큰 정상, 사용 가능 <br>
+	 * - IS_EXPIRED : 액세스 토큰 만료됨, 재발급 필요 <br>
+	 * - IS_NOT_VALID : 액세스 토큰 사용 불가능, 재인증 필요
+	 */
+	public TokenStatus validateAccessToken(String token) {
 		try {
 			Jwts.parser()
 				.verifyWith(secretKey)
 				.build()
 				.parseSignedClaims(token);
+
+			return TokenStatus.IS_VALID;
 		} catch (SignatureException | MalformedJwtException e) {
 			log.error("잘못된 JWT 서명입니다.");
 		} catch (ExpiredJwtException e) {
-			log.error("만료된 JWT 서명입니다.");
+			log.error("만료된 JWT 서명입니다. 토큰 재발급이 필요합니다.");
+			return TokenStatus.IS_EXPIRED;
 		} catch (UnsupportedJwtException e) {
 			log.error("지원되지 않는 JWT 서명입니다.");
 		} catch (IllegalArgumentException e) {
 			log.error("JWT 토큰이 잘못 되었습니다.");
 		}
+		return TokenStatus.IS_NOT_VALID;
 	}
 
 	// 데이터 추출

@@ -8,4 +8,11 @@ public class UserException {
 			super("사용자 정보가 없습니다", -402, HttpStatus.BAD_REQUEST);
 		}
 	}
+
+	public static class AccessTokenExpired extends BaseException {
+		public AccessTokenExpired() {
+			super("토큰이 만료되었습니다.", -101, HttpStatus.UNAUTHORIZED);
+		}
+	}
+
 }
