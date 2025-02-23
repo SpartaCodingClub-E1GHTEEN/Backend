@@ -31,6 +31,12 @@ import lombok.extern.slf4j.Slf4j;
 public class FoodsController {
 	private final FoodsService foodsService;
 
+	/**
+	 * 메뉴 생성
+	 *
+	 * @param requestDto : 메뉴 정보
+	 * @return
+	 */
 	// USER_ROLE -> OWNER
 	@PreAuthorize("hasAnyRole('Master', 'MANAGER', 'OWNER')")
 	@PostMapping("/foods")
@@ -41,6 +47,13 @@ public class FoodsController {
 		return ResponseEntity.ok(ApiResponse.ok("메뉴가 성공적으로 생성되었습니다.", responseDto));
 	}
 
+	/**
+	 * 메뉴 검색
+	 *
+	 * @param storeId : 메뉴가 있는 가게 ID
+	 * @param requestDto : 검색 조건
+	 * @return : 메뉴에 있는 메뉴 정보
+	 */
 	// USER_ROLE -> ANYONE
 	@GetMapping("/stores/{storeId}/foods")
 	public ResponseEntity<ApiResponse<PagedModel<FoodResponseDto>>> searchFood(
@@ -52,6 +65,12 @@ public class FoodsController {
 		return ResponseEntity.ok(ApiResponse.ok("메뉴 검색 결과", responseDto));
 	}
 
+	/**
+	 * 특정 메뉴 조회
+	 *
+	 * @param foodId : 조회할 메뉴 ID
+	 * @return : 조회할 메뉴 정보
+	 */
 	// USER_ROLE -> ANYONE
 	@GetMapping("/foods/{foodId}")
 	public ResponseEntity<ApiResponse<FoodResponseDto>> getFood(@PathVariable UUID foodId) {
@@ -61,6 +80,13 @@ public class FoodsController {
 		return ResponseEntity.ok(ApiResponse.ok("메뉴를 성공적으로 조회했습니다.", responseDto));
 	}
 
+	/**
+	 * 메뉴 수정
+	 *
+	 * @param foodId : 수정할 메뉴 ID
+	 * @param requestDto : 수정할 메뉴 정보
+	 * @return
+	 */
 	// USER_ROLE -> OWNER
 	@PreAuthorize("hasAnyRole('Master', 'MANAGER', 'OWNER')")
 	@PutMapping("/foods/{foodId}")
@@ -72,6 +98,12 @@ public class FoodsController {
 		return ResponseEntity.ok(ApiResponse.ok("메뉴를 성공적으로 수정했습니다.", responseDto));
 	}
 
+	/**
+	 * 메뉴 삭제
+	 *
+	 * @param foodId : 삭제할 메뉴 ID
+	 * @return
+	 */
 	// USER_ROLE -> OWNER
 	@PreAuthorize("hasAnyRole('Master', 'MANAGER', 'OWNER')")
 	@DeleteMapping("/foods/{foodId}")
