@@ -38,4 +38,8 @@ public class Payments extends BaseEntity {
 	private PaymentMethod paymentMethod;
 
 	private int amount;
+
+	public void updateStatus(PaymentStatus status) {
+		this.status = status;
+	}
 }
