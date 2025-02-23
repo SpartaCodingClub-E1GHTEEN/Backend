@@ -57,6 +57,7 @@ public class NaverPayApiClient {
 
 		HttpEntity<NaverPayReservationRequestDto> entity = new HttpEntity<>(requestDto, headers);
 
+		//TODO: error 반환되는 경우 처리
 		ResponseEntity<NaverPayApiResponse> response = restTemplate.exchange(
 			apiDomain + partnerId + reserveUri,
 			HttpMethod.POST,

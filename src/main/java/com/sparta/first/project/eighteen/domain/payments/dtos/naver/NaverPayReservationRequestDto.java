@@ -63,7 +63,7 @@ public class NaverPayReservationRequestDto {
 			.productName(order.getOrderDetails().get(0).getFoodName())
 			.productCount(order.getTotalCount())
 			.totalPayAmount(order.getTotalPrice())
-			.returnUrl("")
+			.returnUrl("https://test-m.pay.naver.com/z/payments/")
 			.taxExScopeAmount(order.getTotalPrice())
 			.productItems(
 				order.getOrderDetails().stream()
