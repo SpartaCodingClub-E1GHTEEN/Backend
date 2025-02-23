@@ -106,4 +106,14 @@ public class FoodsService {
 
 		return FoodOptionResponseDto.fromEntityList(foodOptions);
 	}
+
+	public List<FoodOptionResponseDto> getFoodOption(UUID foodId) {
+
+		Foods food = foodsRepository.findById(foodId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 음식을 찾을 수 없습니다."));
+
+		List<FoodOptions> foodOptions = foodOptionsRepository.findByFood(food);
+
+		return FoodOptionResponseDto.fromEntityList(foodOptions);
+	}
 }

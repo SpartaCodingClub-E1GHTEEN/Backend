@@ -132,4 +132,18 @@ public class FoodsController {
 
 		return ResponseEntity.ok(ApiResponse.ok("메뉴 옵션을 성공적으로 생성했습니다.", responseDto));
 	}
+
+	/**
+	 * 메뉴 옵션 조회
+	 *
+	 * @param foodId : 옵션을 조회할 메뉴 ID
+	 * @return : 메뉴의 옵션 List
+	 */
+	@GetMapping("foods/{foodId}/options")
+	public ResponseEntity<ApiResponse<List<FoodOptionResponseDto>>> getFoodOption(@PathVariable UUID foodId) {
+
+		List<FoodOptionResponseDto> responseDto = foodsService.getFoodOption(foodId);
+
+		return ResponseEntity.ok(ApiResponse.ok("메뉴 옵션을 성공적으로 조회했습니다.", responseDto));
+	}
 }
