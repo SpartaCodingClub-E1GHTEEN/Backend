@@ -1,8 +1,11 @@
 package com.sparta.first.project.eighteen.domain.payments.dtos.naver;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.format.annotation.DateTimeFormat;
+
+import com.sparta.first.project.eighteen.model.orders.Orders;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -53,5 +56,20 @@ public class NaverPayReservationRequestDto {
 	private List<NaverPayProductItem> productItems;
 
 	private NaverPaySubMerchantInfo subMerchantInfo;
+
+	public static NaverPayReservationRequestDto fromOrders(Orders order) {
+		return NaverPayReservationRequestDto.builder()
+			.merchantPayKey("mpaykey")
+			.productName(order.getOrderDetails().get(0).getFoodName())
+			.productCount(order.getTotalCount())
+			.totalPayAmount(order.getTotalPrice())
+			.returnUrl("")
+			.taxExScopeAmount(order.getTotalPrice())
+			.productItems(
+				order.getOrderDetails().stream()
+					.map(detail -> NaverPayProductItem.fromOrderDetail(detail))
+					.collect(Collectors.toList()))
+			.build();
+	}
 
 }
