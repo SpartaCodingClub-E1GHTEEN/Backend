@@ -1,5 +1,6 @@
 package com.sparta.first.project.eighteen.domain.foods;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.web.PagedModel;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.first.project.eighteen.common.dto.ApiResponse;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodCreateRequestDto;
+import com.sparta.first.project.eighteen.domain.foods.dtos.FoodOptionRequestDto;
+import com.sparta.first.project.eighteen.domain.foods.dtos.FoodOptionResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodSearchRequestDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodUpdateRequestDto;
@@ -112,5 +115,21 @@ public class FoodsController {
 		foodsService.deleteFood(foodId);
 
 		return ResponseEntity.ok(ApiResponse.ok("메뉴를 성공적으로 삭제했습니다.", null));
+	}
+
+	/**
+	 * 메뉴 옵션 생성
+	 *
+	 * @param foodId : 옵션을 추가할 메뉴 ID
+	 * @param requestDto : 옵션 정보
+	 * @return
+	 */
+	@PostMapping("/foods/{foodId}/options")
+	public ResponseEntity<ApiResponse<List<FoodOptionResponseDto>>> createFoodOption(
+		@PathVariable UUID foodId, @RequestBody List<FoodOptionRequestDto> requestDto) {
+
+		List<FoodOptionResponseDto> responseDto = foodsService.createFoodOption(foodId, requestDto);
+
+		return ResponseEntity.ok(ApiResponse.ok("메뉴 옵션을 성공적으로 생성했습니다.", responseDto));
 	}
 }

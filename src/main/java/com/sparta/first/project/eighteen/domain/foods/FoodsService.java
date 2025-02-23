@@ -1,5 +1,6 @@
 package com.sparta.first.project.eighteen.domain.foods;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -9,10 +10,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodCreateRequestDto;
+import com.sparta.first.project.eighteen.domain.foods.dtos.FoodOptionRequestDto;
+import com.sparta.first.project.eighteen.domain.foods.dtos.FoodOptionResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodSearchRequestDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodUpdateRequestDto;
 import com.sparta.first.project.eighteen.domain.stores.StoreRepository;
+import com.sparta.first.project.eighteen.model.foods.FoodOptions;
 import com.sparta.first.project.eighteen.model.foods.Foods;
 import com.sparta.first.project.eighteen.model.stores.Stores;
 import com.sparta.first.project.eighteen.utils.GeminiApiClient;
@@ -87,5 +91,19 @@ public class FoodsService {
 		Foods food = foodsRepository.findById(foodId).orElseThrow(() -> new RuntimeException("해당 음식을 찾을 수 없습니다."));
 
 		food.delete(true, "food-test");
+	}
+
+	public List<FoodOptionResponseDto> createFoodOption(UUID foodId, List<FoodOptionRequestDto> requestDto) {
+
+		Foods food = foodsRepository.findById(foodId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 음식을 찾을 수 없습니다."));
+
+		List<FoodOptions> foodOptions = requestDto.stream()
+			.map(optionDto -> optionDto.toEntity(food))
+			.toList();
+
+		foodOptionsRepository.saveAll(foodOptions);
+
+		return FoodOptionResponseDto.fromEntityList(foodOptions);
 	}
 }
