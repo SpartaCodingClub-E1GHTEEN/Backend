@@ -112,8 +112,24 @@ public class FoodsService {
 		Foods food = foodsRepository.findById(foodId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 음식을 찾을 수 없습니다."));
 
-		List<FoodOptions> foodOptions = foodOptionsRepository.findByFood(food);
+		List<FoodOptions> foodOptions = foodOptionsRepository.findByFoodAndIsDeletedFalse(food);
 
 		return FoodOptionResponseDto.fromEntityList(foodOptions);
+	}
+
+	@Transactional
+	public void deleteFoodOption(UUID foodId, UUID optionId) {
+
+		Foods food = foodsRepository.findById(foodId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 음식을 찾을 수 없습니다."));
+
+		FoodOptions option = foodOptionsRepository.findById(optionId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 음식 옵션을 찾을 수 없습니다."));
+
+		if (option.getIsDeleted()) {
+			throw new IllegalStateException("이미 삭제된 옵션입니다.");
+		}
+
+		option.delete(true, "food-test");
 	}
 }

@@ -146,4 +146,19 @@ public class FoodsController {
 
 		return ResponseEntity.ok(ApiResponse.ok("메뉴 옵션을 성공적으로 조회했습니다.", responseDto));
 	}
+
+	/**
+	 * 메뉴 옵션 삭제
+	 *
+	 * @param foodId : 옵션이 존재하는 메뉴 ID
+	 * @param optionId : 삭제할 옵션 ID
+	 * @return
+	 */
+	@DeleteMapping("/foods/{foodId}/options/{optionId}")
+	public ResponseEntity<ApiResponse<Void>> deleteFoodOption(@PathVariable UUID foodId, @PathVariable UUID optionId) {
+
+		foodsService.deleteFoodOption(foodId, optionId);
+
+		return ResponseEntity.ok(ApiResponse.ok("메뉴 옵션을 성공적으로 삭제했습니다.", null));
+	}
 }
