@@ -49,8 +49,7 @@ public class ReviewController {
 	public ResponseEntity<ApiResponse<ReviewResponseDto>> createReview(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestBody @Valid ReviewCreateRequestDto requestDto) {
-
-		ReviewResponseDto responseDto = reviewService.createReview(userDetails.getUsername(), requestDto);
+		ReviewResponseDto responseDto = reviewService.createReview(userDetails.getUserUUID(), requestDto);
 		return ResponseEntity.ok(ApiResponse.ok("성공", responseDto));
 	}
 
@@ -64,7 +63,7 @@ public class ReviewController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId, @ModelAttribute ReviewSearchDto searchDto) {
 		log.info("ReviewController - getAllReviews | storeId - " + storeId);
-		PagedModel<ReviewResponseDto> responseDtos = reviewService.getAllReviews(storeId, searchDto, userDetails.getUsername());
+		PagedModel<ReviewResponseDto> responseDtos = reviewService.getAllReviews(storeId, searchDto, userDetails.getUserUUID());
 		return ResponseEntity.ok(ApiResponse.ok("성공", responseDtos));
 	}
 
@@ -96,13 +95,13 @@ public class ReviewController {
 
 		log.info("ReviewController - updateReview | reviewId - " + reviewId);
 
-		Role role = reviewService.findUserRole(userDetails.getUsername());
+		Role role = reviewService.findUserRole(userDetails.getUserUUID());
 
 		if (role.equals(Role.OWNER) || role.equals(Role.RIDER)) {
-			throw new BaseException("리뷰를 삭제 권한이 없습니다", Constant.Code.REVIEW_ERROR, HttpStatus.BAD_GATEWAY);
+			throw new BaseException("리뷰를 수정할 권한이 없습니다", Constant.Code.REVIEW_ERROR, HttpStatus.BAD_GATEWAY);
 		}
 
-		ReviewResponseDto responseDto = reviewService.updateReview(userDetails.getUsername(), reviewId, requestDto);
+		ReviewResponseDto responseDto = reviewService.updateReview(userDetails.getUserUUID(), reviewId, requestDto);
 		return ResponseEntity.ok(ApiResponse.ok("성공", responseDto));
 	}
 
@@ -119,13 +118,13 @@ public class ReviewController {
 
 		log.info("ReviewController - deleteReview | reviewId - " + reviewId);
 
-		Role role = reviewService.findUserRole(userDetails.getUsername());
+		Role role = reviewService.findUserRole(userDetails.getUserUUID());
 
 		if (role.equals(Role.OWNER) || role.equals(Role.RIDER)) {
-			throw new BaseException("리뷰를 삭제 권한이 없습니다", Constant.Code.REVIEW_ERROR, HttpStatus.BAD_GATEWAY);
+			throw new BaseException("리뷰를 삭제할 권한이 없습니다", Constant.Code.REVIEW_ERROR, HttpStatus.BAD_GATEWAY);
 		}
 
-		ApiResponse apiResponse = reviewService.deleteReview(userDetails.getUsername(), reviewId);
+		ApiResponse apiResponse = reviewService.deleteReview(userDetails.getUserUUID(), reviewId);
 		return ResponseEntity.ok(ApiResponse.ok("성공", apiResponse));
 	}
 
