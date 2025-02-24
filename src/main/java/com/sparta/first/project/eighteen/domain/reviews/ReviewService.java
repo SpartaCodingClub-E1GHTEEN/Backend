@@ -1,7 +1,5 @@
 package com.sparta.first.project.eighteen.domain.reviews;
 
-import static org.springframework.transaction.annotation.Propagation.*;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +24,7 @@ import com.sparta.first.project.eighteen.domain.reviews.dtos.ReviewSearchDto;
 import com.sparta.first.project.eighteen.domain.reviews.dtos.ReviewUpdateRequestDto;
 import com.sparta.first.project.eighteen.domain.stores.StoreRepository;
 import com.sparta.first.project.eighteen.domain.users.UserRepository;
+import com.sparta.first.project.eighteen.model.orders.OrderDetails;
 import com.sparta.first.project.eighteen.model.orders.OrderStatus;
 import com.sparta.first.project.eighteen.model.orders.Orders;
 import com.sparta.first.project.eighteen.model.reviews.Reviews;
@@ -48,15 +47,15 @@ public class ReviewService {
 
 	/**
 	 * 리뷰 작성
-	 * @param username : 리뷰를 작성하고자 하는 사용자명
+	 * @param userId : 리뷰를 작성하고자 하는 사용자명
 	 * @param requestDto : 리뷰 내용
 	 * @return : 작성한 리뷰
 	 */
-	public ReviewResponseDto createReview(String username, ReviewCreateRequestDto requestDto) {
+	public ReviewResponseDto createReview(UUID userId, ReviewCreateRequestDto requestDto) {
 		// 주문 탐색
 		Orders order = findOrders(requestDto.getOrderId());
 		Stores store = findStore(order.getStore().getId());
-		Users user = findReviewer(username);
+		Users user = findReviewerById(userId);
 
 		// 주문 상태 확인
 		if (!order.getStatus().equals(OrderStatus.DELIVERED)) {
@@ -68,7 +67,9 @@ public class ReviewService {
 			throw new BaseException("사용자의 주문 내역이 아닙니다.", Constant.Code.REVIEW_ERROR, HttpStatus.BAD_REQUEST);
 		}
 
-		Reviews review = requestDto.toEntity(store, order, user);
+		List<OrderDetails> orderDetails = order.getOrderDetails();
+
+		Reviews review = requestDto.toEntity(store, order, user, orderDetails);
 		Reviews newReview = reviewRepository.save(review);
 		return ReviewResponseDto.fromEntity(newReview);
 	}
@@ -77,15 +78,15 @@ public class ReviewService {
 	 * 식당에 있는 리뷰들 전체 조회
 	 * @param storeId : 조회할 식당 ID
 	 * @param searchDto : 검색할 정보
-	 * @param username : 검색하는 사용자
+	 * @param userId : 검색하는 사용자
 	 * @return : 조회한 리뷰들
 	 */
 	@Transactional(readOnly = true)
-	public PagedModel<ReviewResponseDto> getAllReviews(UUID storeId, ReviewSearchDto searchDto, String username) {
+	public PagedModel<ReviewResponseDto> getAllReviews(UUID storeId, ReviewSearchDto searchDto, UUID userId) {
 		Role role = Role.CUSTOMER;
 
-		if (username != null) {
-			role = findUserRole(username);
+		if (userId != null) {
+			role = findUserRole(userId);
 		}
 
 		try {
@@ -96,10 +97,6 @@ public class ReviewService {
 
 			Page<ReviewResponseDto> reviews = reviewRepository.searchReviews(
 				searchDto, pageable, role, storeId);
-
-			if (reviews.getContent().size() != 0) {
-				getReviewFoodName(reviews);
-			}
 
 			return new PagedModel<>(reviews);
 		} catch (Exception e) {
@@ -120,15 +117,15 @@ public class ReviewService {
 
 	/**
 	 * 리뷰 수정
-	 * @param username : 수정하려는 사용자명
+	 * @param userId : 수정하려는 사용자명
 	 * @param reviewId : 수정할 리뷰 ID
 	 * @param requestDto : 수정할 리뷰 내용
 	 * @return : 수정한 리뷰
 	 */
 	@Transactional
-	public ReviewResponseDto updateReview(String username, UUID reviewId, ReviewUpdateRequestDto requestDto) {
+	public ReviewResponseDto updateReview(UUID userId, UUID reviewId, ReviewUpdateRequestDto requestDto) {
 		Reviews review = findReview(reviewId);
-		Users user = findReviewer(username);
+		Users user = findReviewerById(userId);
 
 		// 리뷰 작성자거나 마스터나 매니저만 가능
 		if (user.getRole().equals(Role.CUSTOMER) &&
@@ -143,14 +140,14 @@ public class ReviewService {
 
 	/**
 	 * 리뷰 삭제
-	 * @param username : 리뷰를 삭제할 사용자명
+	 * @param userId : 리뷰를 삭제할 사용자명
 	 * @param reviewId : 삭제할 리뷰 ID
 	 * @return : 삭제한 리뷰 상태
 	 */
 	@Transactional
-	public ApiResponse deleteReview(String username, UUID reviewId) {
+	public ApiResponse deleteReview(UUID userId, UUID reviewId) {
 		Reviews review = findReview(reviewId);
-		Users user = findReviewer(username);
+		Users user = findReviewerById(userId);
 
 		// 리뷰 작성자거나 마스터나 매니저만 가능
 		if (user.getRole().equals(Role.CUSTOMER) &&
@@ -162,22 +159,6 @@ public class ReviewService {
 		reviewRepository.save(review);
 		log.info("삭제 여부 : " + review.getIsDeleted());
 		return ApiResponse.ok("삭제 성공", "식당명 : " + review.getReviewContent());
-	}
-
-	/**
-	 * 리뷰의 메뉴 이름을 반환하는 메서드
-	 * @param responseDtos : 가져온 리뷰들 내용
-	 * @return : 메뉴 이름을 넣은 리뷰 내용 반환
-	 */
-	@Transactional(propagation = REQUIRES_NEW)
-	public PagedModel<ReviewResponseDto> getReviewFoodName(Page<ReviewResponseDto> responseDtos) {
-		for (ReviewResponseDto r : responseDtos.getContent()) {
-			Orders orders = findOrders(UUID.fromString(r.getOrderId()));
-			String foodName = ReviewResponseDto.getOrderFoodName(orders.getOrderDetails());
-			r.setReviewOrders(foodName);
-		}
-
-		return new PagedModel<>(responseDtos);
 	}
 
 	/**
@@ -212,21 +193,21 @@ public class ReviewService {
 
 	/**
 	 * 리뷰 작성자 탐색
-	 * @param username : 리뷰를 작성하거나 수정할 사용자
+	 * @param userId : 리뷰를 작성하거나 수정할 사용자
 	 * @return : 조회한 사용자
 	 */
-	public Users findReviewer(String username) {
-		return userRepository.findByUsername(username).orElseThrow(
+	public Users findReviewerById(UUID userId) {
+		return userRepository.findById(userId).orElseThrow(
 			() -> new UserException.UserNotFound());
 	}
 
 	/**
 	 * 사용자 권한 탐색
-	 * @param username : 식당을 차릴 사용자명
+	 * @param userId : 식당을 차릴 사용자명
 	 * @return : 조회한 사용자
 	 */
-	public Role findUserRole(String username) {
-		return userRepository.findByUsername(username).orElseThrow(
+	public Role findUserRole(UUID userId) {
+		return userRepository.findById(userId).orElseThrow(
 			() -> new UserException.UserNotFound()).getRole();
 	}
 
