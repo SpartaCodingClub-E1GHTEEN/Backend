@@ -56,9 +56,11 @@ jobs:
         run: |
           mkdir -p src/main/resources
           cd src/main/resources
+          touch ./application.yml
           touch ./application-dev.yml
           touch ./application-secret.yml
           
+          echo "${{ secrets.APPLICATION_YML }}" >> ./application.yml
           echo "${{ secrets.APPLICATION_DEV_YML }}" >> ./application-dev.yml
           echo "${{ secrets.APPLICATION_SECRET_YML }}" >> ./application-secret.yml
 
