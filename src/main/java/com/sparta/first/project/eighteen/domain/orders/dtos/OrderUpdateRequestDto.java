@@ -1,9 +1,6 @@
 package com.sparta.first.project.eighteen.domain.orders.dtos;
 
-import java.util.List;
-
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,13 +8,11 @@ import lombok.Setter;
 @Getter
 public class OrderUpdateRequestDto {
 
-	@NotBlank
-	String status;
-
 	String noteToStore;
 
 	String noteToDelivery;
 
-	@NotNull
-	List<OrderDetailsUpdateRequestDto> orderDetails;
+	@Min(10)
+	int totalPrice;
+
 }
