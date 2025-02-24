@@ -124,6 +124,8 @@ public class FoodsController {
 	 * @param requestDto : 옵션 정보
 	 * @return
 	 */
+	// USER_ROLE -> OWNER
+	@PreAuthorize("hasAnyRole('Master', 'MANAGER', 'OWNER')")
 	@PostMapping("/foods/{foodId}/options")
 	public ResponseEntity<ApiResponse<List<FoodOptionResponseDto>>> createFoodOption(
 		@PathVariable UUID foodId, @RequestBody List<FoodOptionRequestDto> requestDto) {
@@ -139,6 +141,7 @@ public class FoodsController {
 	 * @param foodId : 옵션을 조회할 메뉴 ID
 	 * @return : 메뉴의 옵션 List
 	 */
+	// USER_ROLE -> ANYONE
 	@GetMapping("/foods/{foodId}/options")
 	public ResponseEntity<ApiResponse<List<FoodOptionResponseDto>>> getFoodOption(@PathVariable UUID foodId) {
 
@@ -155,6 +158,8 @@ public class FoodsController {
 	 * @param requestDto : 수정할 옵션 정보
 	 * @return
 	 */
+	// USER_ROLE -> OWNER
+	@PreAuthorize("hasAnyRole('Master', 'MANAGER', 'OWNER')")
 	@PutMapping("/foods/{foodId}/options/{optionId}")
 	public ResponseEntity<ApiResponse<FoodOptionResponseDto>> updateFoodOption(@PathVariable UUID foodId,
 		@PathVariable UUID optionId, @RequestBody FoodOptionRequestDto requestDto) {
@@ -171,6 +176,8 @@ public class FoodsController {
 	 * @param optionId : 삭제할 옵션 ID
 	 * @return
 	 */
+	// USER_ROLE -> OWNER
+	@PreAuthorize("hasAnyRole('Master', 'MANAGER', 'OWNER')")
 	@DeleteMapping("/foods/{foodId}/options/{optionId}")
 	public ResponseEntity<ApiResponse<Void>> deleteFoodOption(@PathVariable UUID foodId, @PathVariable UUID optionId) {
 
