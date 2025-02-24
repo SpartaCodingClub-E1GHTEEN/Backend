@@ -148,6 +148,23 @@ public class FoodsController {
 	}
 
 	/**
+	 * 메뉴 옵션 수정
+	 *
+	 * @param foodId : 옵션이 존재하는 메뉴 ID
+	 * @param optionId : 수정할 옵션 ID
+	 * @param requestDto : 수정할 옵션 정보
+	 * @return
+	 */
+	@PutMapping("/foods/{foodId}/options/{optionId}")
+	public ResponseEntity<ApiResponse<FoodOptionResponseDto>> updateFoodOption(@PathVariable UUID foodId,
+		@PathVariable UUID optionId, @RequestBody FoodOptionRequestDto requestDto) {
+
+		FoodOptionResponseDto responseDto = foodsService.updateFoodOption(foodId, optionId, requestDto);
+
+		return ResponseEntity.ok(ApiResponse.ok("메뉴 옵션을 성공적으로 수정했습니다.", responseDto));
+	}
+
+	/**
 	 * 메뉴 옵션 삭제
 	 *
 	 * @param foodId : 옵션이 존재하는 메뉴 ID

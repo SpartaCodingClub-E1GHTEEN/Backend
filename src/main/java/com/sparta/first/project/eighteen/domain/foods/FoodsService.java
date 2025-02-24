@@ -118,6 +118,20 @@ public class FoodsService {
 	}
 
 	@Transactional
+	public FoodOptionResponseDto updateFoodOption(UUID foodId, UUID optionId, FoodOptionRequestDto requestDto) {
+
+		Foods food = foodsRepository.findById(foodId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 음식을 찾을 수 없습니다."));
+
+		FoodOptions option = foodOptionsRepository.findById(optionId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 음식 옵션을 찾을 수 없습니다."));
+
+		option.updateFoodOption(requestDto);
+
+		return FoodOptionResponseDto.fromEntity(option);
+	}
+
+	@Transactional
 	public void deleteFoodOption(UUID foodId, UUID optionId) {
 
 		Foods food = foodsRepository.findById(foodId)
