@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -37,17 +36,14 @@ public class LoginTest {
 	@MockitoBean
 	JwtUtil jwtUtil;
 
-	@Autowired
-	PasswordEncoder passwordEncoder;
-
 	ObjectMapper objectMapper = new ObjectMapper();
 
 	@ParameterizedTest
 	@DisplayName("로그인 성공 테스트")
 	@CsvSource(value = {
-		"customer:customer:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJmY2NmMzQ0OC0wM2M3LTQ3YTQtYTEwOC1jZTZjMzk4MTVhMzciLCJhdXRoIjoiUk9MRV9DVVNUT01FUiIsImlzcyI6ImVpZ2h0ZWVuIiwiaWF0IjoxNzQxMDA5NTYzfQ.DFavV8v-1o3wyui2W8tnASsRU-DpT9FRc6yImHVWD7pem0SWmnuRL5gOfWky51WiDXZ0aN2WT8J24UngPABxpQ",
-		"owner:owner:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIzYTUwM2NkOS04M2IyLTQzNzQtOTQwNS1lMmRlZThjNTZiMWMiLCJhdXRoIjoiUk9MRV9PV05FUiIsImlzcyI6ImVpZ2h0ZWVuIiwiaWF0IjoxNzQxMDA5NTk1fQ.y7cTaynw75ksi2vuPMQpg2TCobPMVW1YYhdIYGZxauLnRohRnFjxx03_7ZFOotSLQa7VX78jto-1QxctrD02gQ",
-		"manager:manager:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJmYWUwNzZlMy01ODQyLTQyMWYtYTExOS1iNjQ2NjYwM2I5NjQiLCJhdXRoIjoiUk9MRV9NQU5BR0VSIiwiaXNzIjoiZWlnaHRlZW4iLCJpYXQiOjE3NDEwMDk1MDV9.Hv0871zRgqaOMofrlaxJ8agxOCPSQ5J_g8dLba8yI0sNB5GxYxU7n8dTURnlXOnUezNRPsXfYbhus79XsY_inA"
+		"customer:customer:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJmY2NmMzQ0OC0wM2M3LTQ3YTQtYTEwOC1jZTZjMzk4MTVhMzciLCJhdXRoIjoiUk9MRV9DVVNUT01FUiIsImlzcyI6ImVpZ2h0ZWVuIiwiaWF0IjoxNzQwMjAzMTg2LCJleHAiOjE3NDE0MTI3ODZ9.vjC1_y3msUKVlaZqQhAkHL7LwoVFvSJ6mkt2jDn-OnY5J-eH2Rrp1lkqNGWe2SH275AQUwUQFzqOD-g0C6XOGw",
+		"owner:owner:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIzYTUwM2NkOS04M2IyLTQzNzQtOTQwNS1lMmRlZThjNTZiMWMiLCJhdXRoIjoiUk9MRV9PV05FUiIsImlzcyI6ImVpZ2h0ZWVuIiwiaWF0IjoxNzQwMjAzMjQ3LCJleHAiOjE3NDE0MTI4NDd9.HAadDH7zBcWmjSQm9E4M4GPjRHMeB52Wcn5bJt04cM9cIWDsGrdHJ2VI25hFEj4WMv3KuqiVW_OCMjUul7BQtw",
+		"manager:manager:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJmYWUwNzZlMy01ODQyLTQyMWYtYTExOS1iNjQ2NjYwM2I5NjQiLCJhdXRoIjoiUk9MRV9NQU5BR0VSIiwiaXNzIjoiZWlnaHRlZW4iLCJpYXQiOjE3NDAyMDMyODEsImV4cCI6MTc0MTQxMjg4MX0.e3qGQH0qM8RX2rSzo3oF-5PauvQq1XV9kHKLxgSDl5e1GURIn3a8_Mww7Y5HRcYZlBxq3I-ilglyt7DMBLbdlg"
 	}, delimiter = ':')
 	public void loginSuccessTest(String username, String password, String accToken) throws Exception {
 		// given

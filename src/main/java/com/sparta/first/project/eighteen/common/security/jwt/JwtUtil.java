@@ -1,5 +1,7 @@
 package com.sparta.first.project.eighteen.common.security.jwt;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -9,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import com.sparta.first.project.eighteen.common.exception.BaseException;
+import com.sparta.first.project.eighteen.model.users.Role;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -51,7 +54,8 @@ public class JwtUtil {
 			.subject(userUUID)
 			.claim(AUTHORIZATION_KEY, authorities)
 			.issuer(ISSUER)
-			.issuedAt(Date.from(now.toInstant().plusMillis(accessTokenExp * 1_000L)))
+			.issuedAt(now)
+			.expiration(Date.from(now.toInstant().plusMillis(accessTokenExp * 1_000L)))
 			.signWith(secretKey, Jwts.SIG.HS512)
 			.compact();
 	}
@@ -91,11 +95,20 @@ public class JwtUtil {
 		return parseClaims(accessToken).getSubject();
 	}
 
-	// user 권한 추출
-	// public List<? extends GrantedAuthority> getUserRole(String accessToken) {
-	// 	return List.of(
-	// 		new SimpleGrantedAuthority(parseClaims(accessToken).get(AUTHORIZATION_KEY, String.class))
-	// 	);
-	//
-	// }
+	/**
+	 * Jwt 토큰 내의 auth 클레임을 기준으로 사용자 역할 부여
+	 * @param accessToken
+	 * @return 부여받은 역할군
+	 */
+	public Role getUserRole(String accessToken) {
+		return Role.from(parseClaims(accessToken).get(AUTHORIZATION_KEY, String.class));
+	}
+
+	public LocalDateTime getIssuedAt(String accessToken) {
+		Date issuedAt = parseClaims(accessToken).getIssuedAt();
+
+		return issuedAt.toInstant()
+			.atZone(ZoneId.systemDefault())
+			.toLocalDateTime();
+	}
 }

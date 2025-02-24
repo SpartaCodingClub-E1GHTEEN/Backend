@@ -15,6 +15,7 @@ import com.sparta.first.project.eighteen.domain.users.dtos.AdminUserSearchReques
 import com.sparta.first.project.eighteen.domain.users.dtos.AdminUserSearchResponseDto;
 import com.sparta.first.project.eighteen.domain.users.dtos.AdminUserUpdateRequestDto;
 import com.sparta.first.project.eighteen.model.users.Users;
+import com.sparta.first.project.eighteen.utils.UserUtils;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class AdminService {
 
 		Page<AdminUserSearchResponseDto> users = userRepository.searchUser(requestDto, pageable)
 			.map(AdminUserSearchResponseDto::from);
-		
+
 		return new PagedModel<>(users);
 
 	}
@@ -41,6 +42,12 @@ public class AdminService {
 		Users origin = userRepository.findById(UUID.fromString(userId))
 			.orElseThrow(() -> new BaseException("유저를 찾을 수 없습니다", -1, HttpStatus.NOT_FOUND));
 
+		// 유저의 권한 변경할 때 변경 시점 기록
+		// TODO: 추후 해당 메서드에서 예외 발생 시 AOP로 기록한 아이디 취소하는 방법 고려
+		if (userRequestDto.getRole() != null) {
+			UserUtils.markUserModified(UUID.fromString(userId));
+		}
+		
 		Users updated = userRequestDto.toEntity();
 
 		origin.adminUserUpdate(updated);
