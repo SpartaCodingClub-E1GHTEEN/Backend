@@ -49,7 +49,7 @@ public class StoreController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestBody StoreCreateRequestDto storeCreateRequestDto) {
 
-		if (storeService.findUserRole(userDetails.getUsername()) != Role.MASTER) {
+		if (storeService.findUserRole(userDetails.getUserUUID()) != Role.MASTER) {
 			log.info("MASTER가 아닌 사용자");
 			throw new BaseException("식당을 생성할 수 없는 사용자", Constant.Code.STORE_ERROR, HttpStatus.FORBIDDEN);
 		}
@@ -67,7 +67,7 @@ public class StoreController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@ModelAttribute StoreSearchDto searchDto){
 		log.info("getStores 요청 들어옴");
-		PagedModel<StoreListResponseDto> responseDtos = storeService.getStores(userDetails.getUsername(), searchDto);
+		PagedModel<StoreListResponseDto> responseDtos = storeService.getStores(userDetails.getUserUUID(), searchDto);
 		return ResponseEntity.ok(ApiResponse.ok("성공", responseDtos));
 	}
 
@@ -96,7 +96,7 @@ public class StoreController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestBody StoreUpdateRequestDto storeRequestDto) {
 
-		Role role = storeService.findUserRole(userDetails.getUsername());
+		Role role = storeService.findUserRole(userDetails.getUserUUID());
 
 		if (role == Role.CUSTOMER || role == Role.RIDER ) {
 			log.info("권한 없는 사용자가 수정하려고 함");
@@ -104,7 +104,7 @@ public class StoreController {
 		}
 
 		log.info("storeId: " + storeId);
-		StoreResponseDto responseDto = storeService.updateStore(storeId, userDetails.getUsername(), storeRequestDto);
+		StoreResponseDto responseDto = storeService.updateStore(storeId, userDetails.getUserUUID(), storeRequestDto);
 		return ResponseEntity.ok(ApiResponse.ok("성공", responseDto));
 	}
 
@@ -119,7 +119,7 @@ public class StoreController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID storeId){
 
-		Role role = storeService.findUserRole(userDetails.getUsername());
+		Role role = storeService.findUserRole(userDetails.getUserUUID());
 
 		if (role == Role.CUSTOMER || role == Role.RIDER ) {
 			log.info("권한 없는 사용자가 수정하려고 함");
@@ -127,7 +127,7 @@ public class StoreController {
 		}
 
 		log.info("storeId: " + storeId);
-		ApiResponse apiResponse = storeService.deleteStore(storeId, userDetails.getUsername());
+		ApiResponse apiResponse = storeService.deleteStore(storeId, userDetails.getUserUUID());
 		return ResponseEntity.ok(apiResponse);
 	}
 
