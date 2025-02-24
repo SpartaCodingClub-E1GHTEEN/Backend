@@ -1,6 +1,5 @@
 package com.sparta.first.project.eighteen.domain.foods.dtos;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,13 +31,11 @@ public class FoodResponseDto {
 
 	public static FoodResponseDto fromEntity(Foods food) {
 
-		List<FoodOptionResponseDto> optionsDto = new ArrayList<>();
-
-		if (food.getFoodOptions() != null) {
-			optionsDto = food.getFoodOptions().stream()
-				.map(FoodOptionResponseDto::fromEntity)
-				.toList();
-		}
+		List<FoodOptionResponseDto> optionsDto = (food.getFoodOptions() != null)
+			? food.getFoodOptions().stream()
+			.map(FoodOptionResponseDto::fromEntity)
+			.toList()
+			: List.of();
 
 		return FoodResponseDto.builder()
 			.id(food.getId())

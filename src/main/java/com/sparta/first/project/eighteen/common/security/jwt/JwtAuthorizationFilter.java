@@ -1,6 +1,7 @@
 package com.sparta.first.project.eighteen.common.security.jwt;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -13,10 +14,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sparta.first.project.eighteen.common.dto.ApiResponse;
+import com.sparta.first.project.eighteen.common.exception.BaseException;
+import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 import com.sparta.first.project.eighteen.common.exception.BaseException;
 import com.sparta.first.project.eighteen.common.exception.UserException;
 import com.sparta.first.project.eighteen.common.security.UserDetailsServiceImpl;
+import com.sparta.first.project.eighteen.model.users.Role;
+import com.sparta.first.project.eighteen.model.users.Users;
+import com.sparta.first.project.eighteen.utils.UserUtils;
 import com.sparta.first.project.eighteen.model.users.Role;
 import com.sparta.first.project.eighteen.model.users.Users;
 import com.sparta.first.project.eighteen.model.users.TokenStatus;
@@ -71,6 +79,16 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 		// 2. JWT에서 아이디 추출 & 권한 추출
 		String userId = jwtUtil.getUserUUID(token);
 		Role userRole = jwtUtil.getUserRole(token);
+		LocalDateTime issuedAt = jwtUtil.getIssuedAt(token);
+
+		try {
+			UserUtils.checkAccessTokenBlocked(UUID.fromString(userId), issuedAt);
+		} catch (BaseException e) {
+			setContentTypeAndEncoding(response);
+			response.setStatus(e.getStatus().value());
+			response.getWriter().write(new ObjectMapper().writeValueAsString(ApiResponse.fail(e)));
+			return;
+		}
 
 		setAuthentication(userId, userRole);
 		filterChain.doFilter(request, response);
@@ -118,6 +136,11 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 			null,
 			userDetails.getAuthorities()
 		);
+	}
+
+	private void setContentTypeAndEncoding(HttpServletResponse response) {
+		response.setCharacterEncoding("utf-8");
+		response.setContentType("application/json");
 	}
 
 }

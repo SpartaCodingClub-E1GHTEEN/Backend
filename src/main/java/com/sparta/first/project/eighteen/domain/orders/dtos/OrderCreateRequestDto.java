@@ -37,6 +37,9 @@ public class OrderCreateRequestDto {
 	@Min(100)
 	private int totalPrice;
 
+	@Min(1)
+	private int totalCount;
+
 	@NotNull
 	private List<OrderDetailsRequestDto> orderDetails;
 
@@ -50,6 +53,7 @@ public class OrderCreateRequestDto {
 			.noteToStore(this.noteToStore)
 			.noteToDelivery(this.noteToDelivery)
 			.totalPrice(this.totalPrice)
+			.totalCount(this.totalCount)
 			.build();
 	}
 }

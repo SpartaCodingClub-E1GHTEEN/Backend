@@ -1,7 +1,9 @@
 package com.sparta.first.project.eighteen.domain.foods;
 
+import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,10 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.first.project.eighteen.common.dto.ApiResponse;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodCreateRequestDto;
-import com.sparta.first.project.eighteen.domain.foods.dtos.FoodGetResponseDto;
+import com.sparta.first.project.eighteen.domain.foods.dtos.FoodOptionRequestDto;
+import com.sparta.first.project.eighteen.domain.foods.dtos.FoodOptionResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodSearchRequestDto;
-import com.sparta.first.project.eighteen.domain.foods.dtos.FoodSingleResponseDto;
 import com.sparta.first.project.eighteen.domain.foods.dtos.FoodUpdateRequestDto;
 
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,12 @@ import lombok.extern.slf4j.Slf4j;
 public class FoodsController {
 	private final FoodsService foodsService;
 
+	/**
+	 * 메뉴 생성
+	 *
+	 * @param requestDto : 메뉴 정보
+	 * @return
+	 */
 	// USER_ROLE -> OWNER
 	@PreAuthorize("hasAnyRole('Master', 'MANAGER', 'OWNER')")
 	@PostMapping("/foods")
@@ -42,34 +50,63 @@ public class FoodsController {
 		return ResponseEntity.ok(ApiResponse.ok("메뉴가 성공적으로 생성되었습니다.", responseDto));
 	}
 
+	/**
+	 * 메뉴 검색
+	 *
+	 * @param storeId : 메뉴가 있는 가게 ID
+	 * @param requestDto : 검색 조건
+	 * @return : 메뉴에 있는 메뉴 정보
+	 */
 	// USER_ROLE -> ANYONE
 	@GetMapping("/stores/{storeId}/foods")
-	public ResponseEntity<ApiResponse<FoodGetResponseDto>> searchFood(@PathVariable UUID storeId,
+	public ResponseEntity<ApiResponse<PagedModel<FoodResponseDto>>> searchFood(
+		@PathVariable UUID storeId,
 		@ModelAttribute FoodSearchRequestDto requestDto) {
 
-		FoodGetResponseDto responseDto = foodsService.searchFood(storeId, requestDto);
+		PagedModel<FoodResponseDto> responseDto = foodsService.searchFood(storeId, requestDto);
 
 		return ResponseEntity.ok(ApiResponse.ok("메뉴 검색 결과", responseDto));
 	}
 
+	/**
+	 * 특정 메뉴 조회
+	 *
+	 * @param foodId : 조회할 메뉴 ID
+	 * @return : 조회할 메뉴 정보
+	 */
 	// USER_ROLE -> ANYONE
 	@GetMapping("/foods/{foodId}")
-	public ResponseEntity<ApiResponse<FoodSingleResponseDto>> getFood(@PathVariable UUID foodId) {
+	public ResponseEntity<ApiResponse<FoodResponseDto>> getFood(@PathVariable UUID foodId) {
 
-		FoodSingleResponseDto responseDto = foodsService.getFood(foodId);
+		FoodResponseDto responseDto = foodsService.getFood(foodId);
 
 		return ResponseEntity.ok(ApiResponse.ok("메뉴를 성공적으로 조회했습니다.", responseDto));
 	}
 
+	/**
+	 * 메뉴 수정
+	 *
+	 * @param foodId : 수정할 메뉴 ID
+	 * @param requestDto : 수정할 메뉴 정보
+	 * @return
+	 */
 	// USER_ROLE -> OWNER
 	@PreAuthorize("hasAnyRole('Master', 'MANAGER', 'OWNER')")
 	@PutMapping("/foods/{foodId}")
-	public ResponseEntity<ApiResponse<FoodResponseDto>> updateFood(@PathVariable String foodId,
+	public ResponseEntity<ApiResponse<FoodResponseDto>> updateFood(@PathVariable UUID foodId,
 		@RequestBody FoodUpdateRequestDto requestDto) {
 
-		return null;
+		FoodResponseDto responseDto = foodsService.updateFood(foodId, requestDto);
+
+		return ResponseEntity.ok(ApiResponse.ok("메뉴를 성공적으로 수정했습니다.", responseDto));
 	}
 
+	/**
+	 * 메뉴 삭제
+	 *
+	 * @param foodId : 삭제할 메뉴 ID
+	 * @return
+	 */
 	// USER_ROLE -> OWNER
 	@PreAuthorize("hasAnyRole('Master', 'MANAGER', 'OWNER')")
 	@DeleteMapping("/foods/{foodId}")
@@ -78,5 +115,74 @@ public class FoodsController {
 		foodsService.deleteFood(foodId);
 
 		return ResponseEntity.ok(ApiResponse.ok("메뉴를 성공적으로 삭제했습니다.", null));
+	}
+
+	/**
+	 * 메뉴 옵션 생성
+	 *
+	 * @param foodId : 옵션을 추가할 메뉴 ID
+	 * @param requestDto : 옵션 정보
+	 * @return
+	 */
+	// USER_ROLE -> OWNER
+	@PreAuthorize("hasAnyRole('Master', 'MANAGER', 'OWNER')")
+	@PostMapping("/foods/{foodId}/options")
+	public ResponseEntity<ApiResponse<List<FoodOptionResponseDto>>> createFoodOption(
+		@PathVariable UUID foodId, @RequestBody List<FoodOptionRequestDto> requestDto) {
+
+		List<FoodOptionResponseDto> responseDto = foodsService.createFoodOption(foodId, requestDto);
+
+		return ResponseEntity.ok(ApiResponse.ok("메뉴 옵션을 성공적으로 생성했습니다.", responseDto));
+	}
+
+	/**
+	 * 메뉴 옵션 조회
+	 *
+	 * @param foodId : 옵션을 조회할 메뉴 ID
+	 * @return : 메뉴의 옵션 List
+	 */
+	// USER_ROLE -> ANYONE
+	@GetMapping("/foods/{foodId}/options")
+	public ResponseEntity<ApiResponse<List<FoodOptionResponseDto>>> getFoodOption(@PathVariable UUID foodId) {
+
+		List<FoodOptionResponseDto> responseDto = foodsService.getFoodOption(foodId);
+
+		return ResponseEntity.ok(ApiResponse.ok("메뉴 옵션을 성공적으로 조회했습니다.", responseDto));
+	}
+
+	/**
+	 * 메뉴 옵션 수정
+	 *
+	 * @param foodId : 옵션이 존재하는 메뉴 ID
+	 * @param optionId : 수정할 옵션 ID
+	 * @param requestDto : 수정할 옵션 정보
+	 * @return
+	 */
+	// USER_ROLE -> OWNER
+	@PreAuthorize("hasAnyRole('Master', 'MANAGER', 'OWNER')")
+	@PutMapping("/foods/{foodId}/options/{optionId}")
+	public ResponseEntity<ApiResponse<FoodOptionResponseDto>> updateFoodOption(@PathVariable UUID foodId,
+		@PathVariable UUID optionId, @RequestBody FoodOptionRequestDto requestDto) {
+
+		FoodOptionResponseDto responseDto = foodsService.updateFoodOption(foodId, optionId, requestDto);
+
+		return ResponseEntity.ok(ApiResponse.ok("메뉴 옵션을 성공적으로 수정했습니다.", responseDto));
+	}
+
+	/**
+	 * 메뉴 옵션 삭제
+	 *
+	 * @param foodId : 옵션이 존재하는 메뉴 ID
+	 * @param optionId : 삭제할 옵션 ID
+	 * @return
+	 */
+	// USER_ROLE -> OWNER
+	@PreAuthorize("hasAnyRole('Master', 'MANAGER', 'OWNER')")
+	@DeleteMapping("/foods/{foodId}/options/{optionId}")
+	public ResponseEntity<ApiResponse<Void>> deleteFoodOption(@PathVariable UUID foodId, @PathVariable UUID optionId) {
+
+		foodsService.deleteFoodOption(foodId, optionId);
+
+		return ResponseEntity.ok(ApiResponse.ok("메뉴 옵션을 성공적으로 삭제했습니다.", null));
 	}
 }

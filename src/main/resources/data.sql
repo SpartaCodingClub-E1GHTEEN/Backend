@@ -57,14 +57,15 @@ INSERT INTO p_food_options
 VALUES (false, 500, now(), null, null, '330ba338-0b1d-48cd-93f8-5bd53046ba90', '60a79ba2-1f93-44f8-9933-ca81de421d89',
         '3a503cd9-83b2-4374-9405-e2dee8c56b1c', '', '', '시럽 추가');
 
-INSERT INTO p_orders (is_deleted, is_store_order, total_price, created_at, deleted_at, modified_at, order_time,
+INSERT INTO p_orders (is_deleted, is_store_order, total_price, total_count, created_at, deleted_at, modified_at,
+                      order_time,
                       id, store_id, user_id, created_by, deleted_by, modified_by, note_to_delivery,
                       note_to_store, status)
-VALUES (false, false, 0, now(), NULL, now(), now(),
+VALUES (false, false, 4700, 1, now(), NULL, now(), now(),
         '4314ce28-3ea1-4fe5-b0b3-8e6394b18c2e', '15e584b0-8bbf-4fa6-aee2-cd14e71ec23e',
         'fccf3448-03c7-47a4-a108-ce6c39815a37', 'fccf3448-03c7-47a4-a108-ce6c39815a37', NULL,
         'fccf3448-03c7-47a4-a108-ce6c39815a37', '빨리 와주세요', '맛있게 해주세요', 'PENDING'),
-       (false, false, 0, now(), NULL, now(), now(),
+       (false, false, 5000, 1, now(), NULL, now(), now(),
         '3cc47522-6d78-425c-bf4e-0b58d43fdec5', '15e584b0-8bbf-4fa6-aee2-cd14e71ec23e',
         'fccf3448-03c7-47a4-a108-ce6c39815a37', 'fccf3448-03c7-47a4-a108-ce6c39815a37', NULL,
         'fccf3448-03c7-47a4-a108-ce6c39815a37', '문고리에 걸어주세요', '따뜻하게 주세요', 'PENDING');
