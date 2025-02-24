@@ -78,13 +78,5 @@ public class Foods extends BaseEntity {
 		this.foodImageUrl = requestDto.getFoodImageUrl();
 		this.foodStatus = requestDto.getFoodStatus();
 		this.isRecommended = requestDto.getIsRecommended();
-
-		if (requestDto.getFoodOptions() != null) {
-			this.foodOptions.clear();
-			List<FoodOptions> updatedOptions = requestDto.getFoodOptions().stream()
-				.map(optionDto -> optionDto.toEntity(this))
-				.toList();
-			this.foodOptions.addAll(updatedOptions);
-		}
 	}
 }
