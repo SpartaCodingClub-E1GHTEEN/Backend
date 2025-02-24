@@ -5,11 +5,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-
 import com.sparta.first.project.eighteen.common.exception.UserException;
-import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,7 +48,7 @@ public class UserUtils {
 		//
 		if (modifiedAt != null && issuedAt.isBefore(modifiedAt)) {
 			log.error("[ERROR] 권한 변경 / 탈퇴 이전에 발급된 토큰입니다.");
-			throw new UserException.UserNotFound();
+			throw new UserException.UserModified();
 		}
 
 		if (modifiedAt != null) {
@@ -77,14 +73,5 @@ public class UserUtils {
 		// 현재 시점이 변경 시점 + 만료 기간 보다 이후라면 아무리 빨리 발급해도 변경 시점 이후에 발급한 것.
 		isUserModified.remove(userUUID);
 
-	}
-
-	/**
-	 * 로그인 이후 상황에서 인증 주체 가져오는 메서드
-	 * @return 인증에 성공한 UserDetailsImpl
-	 */
-	public static UserDetailsImpl getUserDetails() {
-		SecurityContext context = SecurityContextHolder.getContext();
-		return (UserDetailsImpl)context.getAuthentication().getPrincipal();
 	}
 }
