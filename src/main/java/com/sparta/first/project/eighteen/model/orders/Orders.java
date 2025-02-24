@@ -58,6 +58,8 @@ public class Orders extends BaseEntity {
 
 	private int totalPrice;
 
+	private int totalCount;
+
 	@OneToMany(mappedBy = "order")
 	private List<OrderDetails> orderDetails;
 
