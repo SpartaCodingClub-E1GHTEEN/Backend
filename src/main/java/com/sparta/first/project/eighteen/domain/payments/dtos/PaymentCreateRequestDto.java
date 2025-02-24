@@ -9,6 +9,7 @@ import com.sparta.first.project.eighteen.model.payments.Payments;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,7 +20,7 @@ public class PaymentCreateRequestDto {
 	@NotBlank
 	private String orderId;
 
-	@NotBlank
+	@NotNull
 	private PaymentMethod paymentMethod;
 
 	@NotBlank
@@ -28,7 +29,7 @@ public class PaymentCreateRequestDto {
 	@Min(10)
 	private int amount;
 
-	@NotBlank
+	@NotNull
 	private PaymentStatus status;
 
 	public Payments toEntity() {
