@@ -3,9 +3,11 @@ package com.sparta.first.project.eighteen.common.security.jwt;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -16,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.first.project.eighteen.common.dto.ApiResponse;
 import com.sparta.first.project.eighteen.common.exception.BaseException;
 import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
+import com.sparta.first.project.eighteen.domain.users.RefreshTokenRepository;
 import com.sparta.first.project.eighteen.domain.users.dtos.LoginRequestDto;
 
 import jakarta.annotation.PostConstruct;
@@ -31,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	private final JwtUtil jwtUtil;
 	private final ObjectMapper objectMapper = new ObjectMapper();
+	private final RefreshTokenRepository refreshTokenRepository;
 
 	@PostConstruct
 	public void init() {
@@ -59,10 +63,23 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 			.map(GrantedAuthority::getAuthority)
 			.collect(Collectors.joining(","));
 
-		String token = jwtUtil.generateAccessToken(userUUID, authorities);
-		ApiResponse<Map<String, String>> tokenResponse = ApiResponse.ok("로그인 성공",
-			Collections.singletonMap("token", token));
+		String accessToken = jwtUtil.generateAccessToken(userUUID, authorities);
+		RefreshToken refreshToken = jwtUtil.generateRefreshToken(userUUID, authorities);
 
+		refreshTokenRepository.save(UUID.fromString(userUUID), refreshToken.getRefreshToken());
+
+		ApiResponse<Map<String, String>> tokenResponse = ApiResponse.ok("로그인 성공",
+			Collections.singletonMap("accessToken", accessToken));
+
+		ResponseCookie cookie = ResponseCookie.from("RefreshToken", refreshToken.getRefreshToken())
+			.path("/")
+			.secure(true)
+			.httpOnly(true)
+			.maxAge(refreshToken.getExpiresIn())
+			.sameSite("None")
+			.build();
+
+		response.setHeader("Set-Cookie", cookie.toString());
 		setContentTypeAndEncoding(response);
 
 		response.getWriter().write(objectMapper.writeValueAsString(tokenResponse));
