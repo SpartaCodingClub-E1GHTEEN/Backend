@@ -52,19 +52,19 @@ public class StoreResponseDto {
 
 	public static StoreResponseDto fromEntity(Stores stores) {
 		return StoreResponseDto.builder()
-			// .id(stores.getId().toString())
+			.id(stores.getId().toString())
 			.userName(stores.getUserId().getUsername())
 			.storeName(stores.getStoreName())
 			.storeDesc(stores.getStoreDesc())
 			.storeRegion(stores.getStoreRegion())
 			.storeCategory(stores.getStoreCategory())
-			.storeRating(stores.getStoreRating())
+			.storeImgUrl(stores.getStoreImgUrl())
 			.storeDeliveryPrice(stores.getStoreDeliveryPrice())
-			// .createdAt(stores.getCreatedAt().toString())
+			.createdAt(stores.getCreatedAt().toString())
 			.build();
 	}
 
-	public static StoreResponseDto fromEntityReview(Stores stores, int storeReviewCnt, double storeRating) {
+	public static StoreResponseDto fromEntityReview(Stores stores, long storeReviewCnt, double storeRating) {
 		return StoreResponseDto.builder()
 			.id(stores.getId().toString())
 			.userName(stores.getUserId().getUsername())
@@ -74,6 +74,7 @@ public class StoreResponseDto {
 			.storeCategory(stores.getStoreCategory())
 			.storeRating(stores.getStoreRating())
 			.storeDeliveryPrice(stores.getStoreDeliveryPrice())
+			.storeImgUrl(stores.getStoreImgUrl())
 			.storeReviewCnt(storeReviewCnt)
 			.storeRating(storeRating)
 			.createdAt(stores.getCreatedAt().toString())

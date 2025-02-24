@@ -45,7 +45,6 @@ public class StoreRepositoryCustomImpl implements StoreRepositoryCustom {
 	@Override
 	public Page<StoreListResponseDto> searchStores(StoreSearchDto searchDto, Pageable pageable, Role role) {
 		List<OrderSpecifier<?>> orders = getAllOrderSpecifiers(pageable);
-		log.info("pageNum : " + pageable.getOffset() + " pageSize : " + pageable.getPageSize());
 
 		// 삭제된 리뷰는 계산에 포함되지 않음(역할에 관계없이)
 		List<StoreListResponseDto> results = queryFactory
@@ -77,41 +76,7 @@ public class StoreRepositoryCustomImpl implements StoreRepositoryCustom {
 			.fetch();
 
 		// 개수만 조회해서 가져오기
-		long totalCount = totalPageElementCnt(role, searchDto);
-
-		return new PageImpl<>(results, pageable, totalCount);
-	}
-
-	@Override
-	public StoreResponseDto getOneStoreById(UUID storeId) {
-		StoreResponseDto result = queryFactory
-			.select(Projections.fields(
-				StoreResponseDto.class,
-				Expressions.stringTemplate("CAST({0} AS string)", stores.id).as("id"),
-				stores.userId.username.as("userName"),
-				stores.storeName.as("storeName"),
-				stores.storeDesc.as("storeDesc"),
-				stores.storeRegion.as("storeRegion"),
-				stores.storeCategory.as("storeCategory"),
-				QReviews.reviews.reviewRating.avg().coalesce(0.0).as("storeRating"),
-				QReviews.reviews.count().as("storeReviewCnt"),
-				stores.storeImgUrl.as("storeImgUrl"),
-				stores.storeDeliveryPrice.as("storeDeliveryPrice"),
-				Expressions.stringTemplate("CAST({0} AS string)", stores.createdAt).as("createdAt")
-			))
-			.from(stores)
-			.leftJoin(QReviews.reviews)
-			.on(QReviews.reviews.storeId.id.eq(stores.id)
-				.and(QReviews.reviews.isDeleted.eq(false)))
-			.where(stores.id.eq(storeId))
-			.groupBy(stores.id)
-			.fetchOne();
-
-		if (result == null) {
-			throw new EntityNotFoundException("해당 가게는 존재하지 않거나, 삭제되었습니다.");
-		}
-
-		return result;
+		return new PageImpl<>(results, pageable, results.size());
 	}
 
 	/**
@@ -129,31 +94,7 @@ public class StoreRepositoryCustomImpl implements StoreRepositoryCustom {
 		}
 	}
 
-	/**
-	 * 페이지의 총 데이터 개수를 반환하는 메서드
-	 * @param role : 역할
-	 * @param searchDto : 데이터 검색 내용
-	 * @return : 총 데이터 개수
-	 */
-	private long totalPageElementCnt(Role role, StoreSearchDto searchDto) {
-		return queryFactory
-			.select(stores.count())
-			.from(stores)
-			.leftJoin(QReviews.reviews)
-			.on(QReviews.reviews.storeId.id.eq(stores.id)
-				.and(QReviews.reviews.isDeleted.eq(false)))
-			.where(
-				confirmDeletedByRole(role),
-				storeNameContains(searchDto.getStoreName()),
-				storeRegion(searchDto.getStoreRegion()),
-				storeCategory(searchDto.getStoreCategory()),
-				deliveryPriceBetween(searchDto.getMinDeliveryPrice(), searchDto.getMaxDeliveryPrice())
-			)
-			.groupBy(stores.id)
-			.having(reviewRatingBetween(searchDto.getMinReviewRating(), searchDto.getMaxReviewRating()))
-			.fetchCount();
-	}
-
+	// Where 조건
 	/**
 	 * 리뷰 평점 계산
 	 * @param minReviewRating : 리뷰 평점 최솟값
@@ -238,6 +179,7 @@ public class StoreRepositoryCustomImpl implements StoreRepositoryCustom {
 		}
 	}
 
+	// Order 조건
 	/**
 	 * 정렬 조건을 기반으로 OrderSpecifier 리스트 생성
 	 * @param pageable : 정렬 조건을 포함한 Pageable 객체

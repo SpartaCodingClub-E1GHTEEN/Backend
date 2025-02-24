@@ -12,7 +12,4 @@ import com.sparta.first.project.eighteen.model.users.Role;
 
 public interface StoreRepositoryCustom {
 	Page<StoreListResponseDto> searchStores(StoreSearchDto searchDto, Pageable pageable, Role role);
-
-	StoreResponseDto getOneStoreById(UUID storeId);
-
 }
