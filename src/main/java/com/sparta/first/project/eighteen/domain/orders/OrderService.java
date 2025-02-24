@@ -42,7 +42,7 @@ public class OrderService {
 	private final UserRepository userRepository;
 	private final FoodsRepository foodsRepository;
 
-	public void createOrder(OrderCreateRequestDto requestDto, UUID userId) {
+	public String createOrder(OrderCreateRequestDto requestDto, UUID userId) {
 		Stores store = storeRepository.findById(UUID.fromString(requestDto.getStoreId()))
 			.orElseThrow(() -> new StoreException.StoreNotFound());
 
@@ -74,6 +74,8 @@ public class OrderService {
 				orderDetailsOptionsRepository.save(orderDetailsOptions);
 			}
 		}
+
+		return order.getId().toString();
 	}
 
 	@Transactional(readOnly = true)
@@ -97,6 +99,7 @@ public class OrderService {
 			.orElseThrow(() -> new OrderException.OrderNotFound());
 
 		orders.update(requestDto);
+		
 		return OrderResponseDto.fromEntity(orders);
 	}
 
