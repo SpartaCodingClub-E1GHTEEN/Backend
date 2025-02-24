@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sparta.first.project.eighteen.common.BaseEntity;
+import com.sparta.first.project.eighteen.domain.foods.dtos.FoodUpdateRequestDto;
 import com.sparta.first.project.eighteen.model.stores.Stores;
 
 import jakarta.persistence.CascadeType;
@@ -70,4 +71,12 @@ public class Foods extends BaseEntity {
 	@JoinColumn(name = "store_id", referencedColumnName = "id", nullable = false)
 	private Stores store;
 
+	public void updateFood(FoodUpdateRequestDto requestDto, String foodDesc) {
+		this.foodName = requestDto.getFoodName();
+		this.foodDesc = foodDesc;
+		this.foodPrice = requestDto.getFoodPrice();
+		this.foodImageUrl = requestDto.getFoodImageUrl();
+		this.foodStatus = requestDto.getFoodStatus();
+		this.isRecommended = requestDto.getIsRecommended();
+	}
 }

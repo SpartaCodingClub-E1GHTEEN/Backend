@@ -3,6 +3,7 @@ package com.sparta.first.project.eighteen.model.foods;
 import java.util.UUID;
 
 import com.sparta.first.project.eighteen.common.BaseEntity;
+import com.sparta.first.project.eighteen.domain.foods.dtos.FoodOptionRequestDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,4 +41,8 @@ public class FoodOptions extends BaseEntity {
 	@JoinColumn(name = "food_id", referencedColumnName = "id")
 	private Foods food;
 
+	public void updateFoodOption(FoodOptionRequestDto foodOptions) {
+		this.optionName = foodOptions.getOptionName();
+		this.optionPrice = foodOptions.getOptionPrice();
+	}
 }

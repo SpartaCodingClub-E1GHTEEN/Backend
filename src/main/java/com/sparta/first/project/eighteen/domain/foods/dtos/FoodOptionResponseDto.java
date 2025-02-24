@@ -1,5 +1,6 @@
 package com.sparta.first.project.eighteen.domain.foods.dtos;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.sparta.first.project.eighteen.model.foods.FoodOptions;
@@ -25,5 +26,11 @@ public class FoodOptionResponseDto {
 			.optionName(option.getOptionName())
 			.optionPrice(option.getOptionPrice())
 			.build();
+	}
+
+	public static List<FoodOptionResponseDto> fromEntityList(List<FoodOptions> option) {
+		return option.stream()
+			.map(FoodOptionResponseDto::fromEntity)
+			.toList();
 	}
 }
