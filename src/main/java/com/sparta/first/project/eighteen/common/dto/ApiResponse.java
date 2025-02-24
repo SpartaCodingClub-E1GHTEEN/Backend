@@ -4,8 +4,10 @@ import com.sparta.first.project.eighteen.common.exception.BaseException;
 
 import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
+@Getter
 public class ApiResponse<T> {
 
 	private int code;
