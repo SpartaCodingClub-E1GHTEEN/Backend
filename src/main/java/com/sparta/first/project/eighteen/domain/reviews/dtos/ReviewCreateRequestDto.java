@@ -1,7 +1,9 @@
 package com.sparta.first.project.eighteen.domain.reviews.dtos;
 
+import java.util.List;
 import java.util.UUID;
 
+import com.sparta.first.project.eighteen.model.orders.OrderDetails;
 import com.sparta.first.project.eighteen.model.orders.Orders;
 import com.sparta.first.project.eighteen.model.reviews.Reviews;
 import com.sparta.first.project.eighteen.model.stores.Stores;
@@ -34,7 +36,7 @@ public class ReviewCreateRequestDto {
 	// 리뷰 이미지
 	private String reviewImgUrl;
 
-	public Reviews toEntity(Stores store, Orders order, Users user) {
+	public Reviews toEntity(Stores store, Orders order, Users user, List<OrderDetails> foodNames) {
 		return Reviews.builder()
 			.storeId(store)
 			.orderId(order)
@@ -42,6 +44,7 @@ public class ReviewCreateRequestDto {
 			.reviewContent(this.reviewContent)
 			.reviewRating(this.reviewRating)
 			.reviewImgUrl(this.reviewImgUrl)
+			.orderDetails(foodNames)
 			.build();
 	}
 
