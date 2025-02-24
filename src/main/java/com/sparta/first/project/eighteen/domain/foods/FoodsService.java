@@ -34,6 +34,12 @@ public class FoodsService {
 	private final StoreRepository storesRepository;
 	private final GeminiApiClient geminiApiClient;
 
+	/**
+	 * 메뉴 생성
+	 *
+	 * @param requestDto : 메뉴 정보
+	 * @return
+	 */
 	@Transactional
 	public FoodResponseDto createFood(FoodCreateRequestDto requestDto) {
 
@@ -49,6 +55,13 @@ public class FoodsService {
 		return FoodResponseDto.fromEntity(food);
 	}
 
+	/**
+	 * 메뉴
+	 *
+	 * @param storeId : 메뉴가 있는 가게 ID
+	 * @param requestDto : 검색 조건
+	 * @return : 메뉴에 있는 메뉴 정보
+	 */
 	@Transactional(readOnly = true)
 	public PagedModel<FoodResponseDto> searchFood(UUID storeId, FoodSearchRequestDto requestDto) {
 
@@ -61,6 +74,12 @@ public class FoodsService {
 		return new PagedModel<>(foodPage);
 	}
 
+	/**
+	 * 특정 메뉴 조회
+	 *
+	 * @param foodId : 조회할 메뉴 ID
+	 * @return : 조회할 메뉴 정보
+	 */
 	@Transactional(readOnly = true)
 	public FoodResponseDto getFood(UUID foodId) {
 
@@ -70,6 +89,13 @@ public class FoodsService {
 		return FoodResponseDto.fromEntity(food);
 	}
 
+	/**
+	 * 메뉴 수정
+	 *
+	 * @param foodId : 수정할 메뉴 ID
+	 * @param requestDto : 수정할 메뉴 정보
+	 * @return
+	 */
 	@Transactional
 	public FoodResponseDto updateFood(UUID foodId, FoodUpdateRequestDto requestDto) {
 
@@ -85,6 +111,11 @@ public class FoodsService {
 		return FoodResponseDto.fromEntity(food);
 	}
 
+	/**
+	 * 메뉴 삭제
+	 *
+	 * @param foodId : 삭제할 메뉴 ID
+	 */
 	@Transactional
 	public void deleteFood(UUID foodId) {
 
@@ -93,6 +124,13 @@ public class FoodsService {
 		food.delete(true, "food-test");
 	}
 
+	/**
+	 * 메뉴 옵션 생성
+	 *
+	 * @param foodId : 옵션을 추가할 메뉴 ID
+	 * @param requestDto : 옵션 정보
+	 * @return
+	 */
 	public List<FoodOptionResponseDto> createFoodOption(UUID foodId, List<FoodOptionRequestDto> requestDto) {
 
 		Foods food = foodsRepository.findById(foodId)
@@ -107,6 +145,12 @@ public class FoodsService {
 		return FoodOptionResponseDto.fromEntityList(foodOptions);
 	}
 
+	/**
+	 * 메뉴 옵션 조회
+	 *
+	 * @param foodId : 옵션을 조회할 메뉴 ID
+	 * @return : 메뉴의 옵션 List
+	 */
 	public List<FoodOptionResponseDto> getFoodOption(UUID foodId) {
 
 		Foods food = foodsRepository.findById(foodId)
@@ -117,6 +161,14 @@ public class FoodsService {
 		return FoodOptionResponseDto.fromEntityList(foodOptions);
 	}
 
+	/**
+	 * 메뉴 옵션 수정
+	 *
+	 * @param foodId : 옵션이 존재하는 메뉴 ID
+	 * @param optionId : 수정할 옵션 ID
+	 * @param requestDto : 수정할 옵션 정보
+	 * @return
+	 */
 	@Transactional
 	public FoodOptionResponseDto updateFoodOption(UUID foodId, UUID optionId, FoodOptionRequestDto requestDto) {
 
@@ -131,6 +183,13 @@ public class FoodsService {
 		return FoodOptionResponseDto.fromEntity(option);
 	}
 
+	/**
+	 * 메뉴 옵션 삭제
+	 *
+	 * @param foodId : 옵션이 존재하는 메뉴 ID
+	 * @param optionId : 삭제할 옵션 ID
+	 * @return
+	 */
 	@Transactional
 	public void deleteFoodOption(UUID foodId, UUID optionId) {
 
