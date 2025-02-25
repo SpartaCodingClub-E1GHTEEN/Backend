@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.web.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -79,6 +80,11 @@ public class FoodsController {
 	public ResponseEntity<ApiResponse<FoodResponseDto>> getFood(@PathVariable UUID foodId) {
 
 		FoodResponseDto responseDto = foodsService.getFood(foodId);
+
+		if (responseDto == null) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+				.body(ApiResponse.ok("해당 음식이 존재하지 않습니다.", null));
+		}
 
 		return ResponseEntity.ok(ApiResponse.ok("메뉴를 성공적으로 조회했습니다.", responseDto));
 	}

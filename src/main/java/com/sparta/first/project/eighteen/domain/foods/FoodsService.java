@@ -83,10 +83,9 @@ public class FoodsService {
 	@Transactional(readOnly = true)
 	public FoodResponseDto getFood(UUID foodId) {
 
-		Foods food = foodsRepository.findById(foodId)
-			.orElseThrow(() -> new RuntimeException("해당 음식을 찾을 수 없습니다."));
-
-		return FoodResponseDto.fromEntity(food);
+		return foodsRepository.findByIdAndIsDeletedFalse(foodId)
+			.map(FoodResponseDto::fromEntity)
+			.orElse(null);
 	}
 
 	/**
