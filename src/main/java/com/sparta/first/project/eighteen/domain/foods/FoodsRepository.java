@@ -12,5 +12,5 @@ import com.sparta.first.project.eighteen.model.foods.Foods;
 public interface FoodsRepository extends JpaRepository<Foods, UUID>, FoodsCustomRepository {
 	Page<Foods> findByStore_IdAndFoodNameContainingIgnoreCase(UUID storeId, String keyword, Pageable pageable);
 
-	Optional<Foods> findByIdAndIsDeletedIsFalse(UUID id);
+	Optional<Foods> findByIdAndIsDeletedFalse(UUID foodId);
 }
