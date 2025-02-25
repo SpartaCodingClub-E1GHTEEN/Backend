@@ -223,6 +223,10 @@ jwt:
 </div>
 
 ------------
+### 👨‍💻 아키텍처
+![architecture_v1 0](https://github.com/user-attachments/assets/0469db11-0232-4ba1-8752-9c6c47f9a1bc)
+
+
 ### 📃 ERD 테이블
 [ERD 테이블](https://www.erdcloud.com/d/YAeKeeCFY7MhbHR8W)
 <details>
