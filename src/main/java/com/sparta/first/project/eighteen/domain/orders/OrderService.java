@@ -54,7 +54,7 @@ public class OrderService {
 		for (OrderDetailsRequestDto orderDetail : requestDto.getOrderDetails()) {
 			String id = orderDetail.getProductId();
 			UUID uuid = UUID.fromString(id);
-			Foods food = foodsRepository.findByIdAndIsDeletedIsFalse(UUID.fromString(orderDetail.getProductId()))
+			Foods food = foodsRepository.findByIdAndIsDeletedFalse(UUID.fromString(orderDetail.getProductId()))
 				.orElseThrow(() -> new FoodException.FoodNotFound());
 
 			OrderDetails orderDetailsEntity = orderDetailsRepository.save(
