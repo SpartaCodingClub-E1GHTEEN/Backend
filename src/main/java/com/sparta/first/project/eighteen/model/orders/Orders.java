@@ -64,9 +64,9 @@ public class Orders extends BaseEntity {
 	private List<OrderDetails> orderDetails;
 
 	public void update(OrderUpdateRequestDto requestDto) {
-		this.status = OrderStatus.valueOf(requestDto.getStatus());
 		this.noteToStore = requestDto.getNoteToStore();
 		this.noteToDelivery = requestDto.getNoteToDelivery();
+		this.totalPrice = requestDto.getTotalPrice();
 	}
 
 	public void cancel() {

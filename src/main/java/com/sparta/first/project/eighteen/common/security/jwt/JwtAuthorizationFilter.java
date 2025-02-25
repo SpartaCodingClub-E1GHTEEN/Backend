@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -16,9 +17,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.first.project.eighteen.common.dto.ApiResponse;
 import com.sparta.first.project.eighteen.common.exception.BaseException;
+import com.sparta.first.project.eighteen.common.exception.UserException;
 import com.sparta.first.project.eighteen.common.security.UserDetailsImpl;
 import com.sparta.first.project.eighteen.common.security.UserDetailsServiceImpl;
 import com.sparta.first.project.eighteen.model.users.Role;
+import com.sparta.first.project.eighteen.model.users.TokenStatus;
 import com.sparta.first.project.eighteen.model.users.Users;
 import com.sparta.first.project.eighteen.utils.UserUtils;
 
@@ -57,7 +60,17 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 		}
 
 		token = token.substring(BEARER_PREFIX.length());
-		jwtUtil.validateAccessToken(token);
+		TokenStatus tokenStatus = jwtUtil.validateAccessToken(token);
+
+		// 토큰이 정상적이지 않을 경우
+		if (tokenStatus == TokenStatus.IS_NOT_VALID) {
+			throw new BaseException("다시 로그인해주세요.", -1, HttpStatus.UNAUTHORIZED);
+		}
+
+		// 토큰이 만료 -> 재발급 필요
+		if (tokenStatus == TokenStatus.IS_EXPIRED) {
+			throw new UserException.AccessTokenExpired();
+		}
 
 		// 2. JWT에서 아이디 추출 & 권한 추출
 		String userId = jwtUtil.getUserUUID(token);

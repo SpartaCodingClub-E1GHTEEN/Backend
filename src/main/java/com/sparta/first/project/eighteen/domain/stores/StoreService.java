@@ -44,7 +44,7 @@ public class StoreService {
 	 */
 	public StoreResponseDto createStore(StoreCreateRequestDto storeCreateRequestDto) {
 		// 식당을 만들 유저 검색
-		Users storeOwner = findStoreOwner(storeCreateRequestDto.getStoreOwnerName());
+		Users storeOwner = findStoreOwnerByUsername(storeCreateRequestDto.getStoreOwnerName());
 		// 식당 생성 및 저장
 		Stores store = storeCreateRequestDto.toEntity(storeOwner);
 		Stores newStore = storeRepository.save(store);
@@ -54,19 +54,19 @@ public class StoreService {
 
 	/**
 	 * 식당 전체 조회
-	 * @param username : 조회할 사용자명
+	 * @param userId : 조회할 사용자의 ID
 	 * @param searchDto : 조회할 내용
 	 * @return : 조회한 식당의 정보들을 반환
 	 */
-	public PagedModel<StoreListResponseDto> getStores(String username, StoreSearchDto searchDto) {
+	public PagedModel<StoreListResponseDto> getStores(UUID userId, StoreSearchDto searchDto) {
 		try {
 			log.info("Service로 getStores 요청 넘어옴");
 			Pageable pageable = PageRequest.of(searchDto.getPage(), searchDto.getSize(),
 				searchDto.getDirection(), searchDto.getSortBy());
 
 			Role role = Role.CUSTOMER;
-			if (username != null) {
-				role = findUserRole(username);
+			if (userId != null) {
+				role = findUserRole(userId);
 			}
 
 			log.info("role: " + role.toString());
@@ -97,14 +97,14 @@ public class StoreService {
 	/**
 	 * 식당 수정
 	 * @param storeId : 수정할 식당의 ID
-	 * @param username : 식당 내용을 수정하려는 사용자명
+	 * @param userId : 식당 내용을 수정하려는 사용자의 ID
 	 * @param storeRequestDto : 수정하려는 식당 내용
 	 * @return : 수정을 완료한 식당 정보
 	 */
 	@Transactional
-	public StoreResponseDto updateStore(UUID storeId, String username, StoreUpdateRequestDto storeRequestDto) {
+	public StoreResponseDto updateStore(UUID storeId, UUID userId, StoreUpdateRequestDto storeRequestDto) {
 		// 유저의 권한이 OWNER 라면, store에 저장된 유저와 일치하는지 확인해야 함
-		Users user = findStoreOwner(username);
+		Users user = findStoreOwner(userId);
 		Stores store = findStore(storeId);
 
 		if (user.getRole() == Role.OWNER &&
@@ -126,13 +126,13 @@ public class StoreService {
 	/**
 	 * 식당 삭제
 	 * @param storeId : 삭제할 식당의 ID
-	 * @param username : 식당 내용을 삭제하려는 사용자명
+	 * @param userId : 식당 내용을 삭제하려는 사용자의 ID
 	 * @return : 삭제 상황
 	 */
 	@Transactional
-	public ApiResponse deleteStore(UUID storeId, String username) {
+	public ApiResponse deleteStore(UUID storeId, UUID userId) {
 		// 유저의 권한이 OWNER 라면, store에 저장된 유저와 일치하는지 확인해야 함
-		Users user = findStoreOwner(username);
+		Users user = findStoreOwner(userId);
 		Stores store = findStore(storeId);
 
 		if (user.getRole() == Role.OWNER &&
@@ -153,27 +153,38 @@ public class StoreService {
 	 * @return : 조회한 식당
 	 */
 	public Stores findStore(UUID storeId) {
-		return storeRepository.findById(storeId).filter(s -> s.getIsDeleted() == false)
+		return storeRepository.findById(storeId).filter(s -> !s.getIsDeleted())
 			.orElseThrow(() -> new StoreException.StoreNotFound());
 	}
 
 	/**
 	 * 식당 주인 탐색
-	 * @param username : 식당을 차릴 사용자명
+	 * @param userId : 식당의 주인 ID
 	 * @return : 조회한 사용자
 	 */
-	public Users findStoreOwner(String username) {
-		return userRepository.findByUsername(username).filter(s -> s.getIsDeleted() == false).orElseThrow(
+	public Users findStoreOwner(UUID userId) {
+		return userRepository.findById(userId).filter(s -> !s.getIsDeleted()).orElseThrow(
 			() -> new BaseException("존재하지 않는 유저", -1, HttpStatus.NOT_FOUND));
 	}
 
 	/**
+	 * 사용자명으로 식당 주인 탐색
+	 * @param username : 식당을 차릴 사용자명
+	 * @return : 조회한 사용자
+	 */
+	public Users findStoreOwnerByUsername(String username) {
+		return userRepository.findByUsername(username).filter(s -> !s.getIsDeleted()).orElseThrow(
+			() -> new BaseException("존재하지 않는 유저", -1, HttpStatus.NOT_FOUND));
+	}
+
+
+	/**
 	 * 사용자 권한 탐색
-	 * @param username : 권한을 보려는 사용자명
+	 * @param userId : 권한을 보려는 사용자명
 	 * @return : 조회한 사용자의 권한
 	 */
-	public Role findUserRole(String username) {
-		return userRepository.findByUsername(username).filter(s -> s.getIsDeleted() == false).orElseThrow(
+	public Role findUserRole(UUID userId) {
+		return userRepository.findById(userId).filter(s -> !s.getIsDeleted()).orElseThrow(
 			() -> new BaseException("존재하지 않는 유저", -1, HttpStatus.NOT_FOUND)).getRole();
 	}
 }

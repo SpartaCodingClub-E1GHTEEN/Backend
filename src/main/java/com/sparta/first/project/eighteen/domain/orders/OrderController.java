@@ -42,10 +42,10 @@ public class OrderController {
 	 */
 	@PreAuthorize("hasAnyRole('OWNER','CUSTOMER')")
 	@PostMapping
-	public ResponseEntity<ApiResponse<Void>> createOrder(@Valid @RequestBody OrderCreateRequestDto requestDto,
+	public ResponseEntity<ApiResponse<String>> createOrder(@Valid @RequestBody OrderCreateRequestDto requestDto,
 		@AuthenticationPrincipal UserDetailsImpl user) {
-		orderService.createOrder(requestDto, user.getUserUUID());
-		return ResponseEntity.ok(ApiResponse.ok("주문이 완료되었습니다.", null));
+		String orderId = orderService.createOrder(requestDto, user.getUserUUID());
+		return ResponseEntity.ok(ApiResponse.ok("주문이 완료되었습니다.", orderId));
 	}
 
 	/**

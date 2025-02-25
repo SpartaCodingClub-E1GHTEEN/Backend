@@ -51,6 +51,7 @@ public class OrdersRepositoryImpl implements OrdersCustomRepository {
 		Sort sort = Sort.by(requestDto.getSort().getSortDirection(), requestDto.getSort().getProperties());
 		cq.select(cb.construct(OrderResponseDto.class, orders))
 			.where(cb.and(criteria.toArray(new Predicate[0])))
+			.where(cb.equal(orders.get("isDeleted"), false))
 			.orderBy(QueryUtils.toOrders(sort, orders, cb));
 
 		List<OrderResponseDto> data = em.createQuery(cq)
