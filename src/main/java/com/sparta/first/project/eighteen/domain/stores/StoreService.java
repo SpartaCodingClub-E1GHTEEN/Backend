@@ -1,7 +1,9 @@
 package com.sparta.first.project.eighteen.domain.stores;
 
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+import com.sparta.first.project.eighteen.config.S3ManageConfig;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,7 @@ import com.sparta.first.project.eighteen.model.users.Users;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -36,18 +39,35 @@ public class StoreService {
 	private final StoreRepository storeRepository;
 	private final UserRepository userRepository;
 	private final ReviewRepository reviewRepository;
+	private final S3ManageConfig s3UploadConfig;
 
 	/**
 	 * 식당 생성
 	 * @param storeCreateRequestDto : 생성할 식당의 내용
 	 * @return : 생성 완료한 식당의 정보
 	 */
-	public StoreResponseDto createStore(StoreCreateRequestDto storeCreateRequestDto) {
+	public StoreResponseDto createStore(StoreCreateRequestDto storeCreateRequestDto, MultipartFile storeImage) {
 		// 식당을 만들 유저 검색
 		Users storeOwner = findStoreOwnerByUsername(storeCreateRequestDto.getStoreOwnerName());
+
 		// 식당 생성 및 저장
-		Stores store = storeCreateRequestDto.toEntity(storeOwner);
+		Stores store;
+
+		try {
+			if (storeImage != null) {
+				String storeImg = s3UploadConfig.uploadImage(storeImage);
+				storeCreateRequestDto.setStoreImgUrl(storeImg);
+				store = storeCreateRequestDto.toEntity(storeOwner);
+			} else {
+				storeCreateRequestDto.setStoreImgUrl("-");
+				throw new Exception(); // 강제로 예외 발생
+			}
+		} catch (Exception e) {
+			store = storeCreateRequestDto.toEntity(storeOwner);
+		}
+
 		Stores newStore = storeRepository.save(store);
+
 		// 식당 반환
 		return StoreResponseDto.fromEntity(newStore);
 	}
@@ -96,13 +116,15 @@ public class StoreService {
 
 	/**
 	 * 식당 수정
-	 * @param storeId : 수정할 식당의 ID
-	 * @param userId : 식당 내용을 수정하려는 사용자의 ID
+	 *
+	 * @param storeId         : 수정할 식당의 ID
+	 * @param userId          : 식당 내용을 수정하려는 사용자의 ID
 	 * @param storeRequestDto : 수정하려는 식당 내용
+	 * @param storeImage
 	 * @return : 수정을 완료한 식당 정보
 	 */
 	@Transactional
-	public StoreResponseDto updateStore(UUID storeId, UUID userId, StoreUpdateRequestDto storeRequestDto) {
+	public StoreResponseDto updateStore(UUID storeId, UUID userId, StoreUpdateRequestDto storeRequestDto, MultipartFile storeImage) {
 		// 유저의 권한이 OWNER 라면, store에 저장된 유저와 일치하는지 확인해야 함
 		Users user = findStoreOwner(userId);
 		Stores store = findStore(storeId);
@@ -114,7 +136,31 @@ public class StoreService {
 		}
 
 		// 식당 내용 update
-		Stores updateStore = storeRequestDto.toEntity();
+		Stores updateStore;
+		String storeImgUrl = null;
+
+		try {
+			if (storeImage != null) {
+				String storeImg = s3UploadConfig.uploadImage(storeImage);
+				storeRequestDto.setStoreImgUrl(storeImg);
+				updateStore = storeRequestDto.toEntity();
+				storeImgUrl = store.getStoreImgUrl();
+			} else {
+				throw new Exception(); // 강제로 예외 발생
+			}
+		} catch (Exception e) {
+			updateStore = storeRequestDto.toEntity();
+		}
+
+		// 이미지 삭제 요청 보내기
+		if (storeImgUrl != null) {
+			try {
+				s3UploadConfig.deleteImage(storeImgUrl);
+			} catch (Exception e) {
+				throw new BaseException("식당 이미지 삭제 실패", Constant.Code.STORE_ERROR, HttpStatus.FORBIDDEN);
+			}
+		}
+
 		store.updateStore(updateStore);
 
 		long storeReviewCnt = reviewRepository.getCntReviews(store.getId());
