@@ -3,6 +3,7 @@ package com.sparta.first.project.eighteen.common.security.jwt;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.UUID;
 
 import javax.crypto.SecretKey;
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sparta.first.project.eighteen.common.exception.BaseException;
 import com.sparta.first.project.eighteen.model.users.Role;
+import com.sparta.first.project.eighteen.model.users.TokenStatus;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -60,21 +62,81 @@ public class JwtUtil {
 			.compact();
 	}
 
-	public void validateAccessToken(String token) {
+	// generation - 생성
+	public RefreshToken generateRefreshToken(String userUUID, String authorities) {
+		Date now = new Date();
+
+		String tokenValue = Jwts.builder()
+			.subject(userUUID)
+			.claim(AUTHORIZATION_KEY, authorities)
+			.issuer(ISSUER)
+			.issuedAt(Date.from(now.toInstant().plusMillis(refreshTokenExp * 1_000L)))
+			.signWith(secretKey, Jwts.SIG.HS512)
+			.compact();
+
+		return RefreshToken.builder()
+			.refreshToken(tokenValue)
+			.userUUID(UUID.fromString(userUUID))
+			.expiresIn(refreshTokenExp)
+			.build();
+	}
+
+	/**
+	 * 토큰 상태 검증 메서드
+	 * @param token : 전달받은 JWT 토큰
+	 * @return
+	 * - IS_VALID : 액세스 토큰 정상, 사용 가능 <br>
+	 * - IS_EXPIRED : 액세스 토큰 만료됨, 재발급 필요 <br>
+	 * - IS_NOT_VALID : 액세스 토큰 사용 불가능, 재인증 필요
+	 */
+	public TokenStatus validateAccessToken(String token) {
 		try {
 			Jwts.parser()
 				.verifyWith(secretKey)
 				.build()
 				.parseSignedClaims(token);
+
+			return TokenStatus.IS_VALID;
 		} catch (SignatureException | MalformedJwtException e) {
 			log.error("잘못된 JWT 서명입니다.");
 		} catch (ExpiredJwtException e) {
-			log.error("만료된 JWT 서명입니다.");
+			log.error("만료된 JWT 서명입니다. 토큰 재발급이 필요합니다.");
+			return TokenStatus.IS_EXPIRED;
 		} catch (UnsupportedJwtException e) {
 			log.error("지원되지 않는 JWT 서명입니다.");
 		} catch (IllegalArgumentException e) {
 			log.error("JWT 토큰이 잘못 되었습니다.");
 		}
+		return TokenStatus.IS_NOT_VALID;
+	}
+
+	/**
+	 * 토큰 상태 검증 메서드
+	 * @param token : 전달받은 JWT 토큰
+	 * @return
+	 * - IS_VALID : 리프레시 토큰 정상, 사용 가능 <br>
+	 * - IS_EXPIRED : 리프레시 토큰 만료됨, 재발급 필요 <br>
+	 * - IS_NOT_VALID : 리프레시 토큰 사용 불가능, 재인증 필요
+	 */
+	public TokenStatus validateRefreshToken(String token) {
+		try {
+			Jwts.parser()
+				.verifyWith(secretKey)
+				.build()
+				.parseSignedClaims(token);
+
+			return TokenStatus.IS_VALID;
+		} catch (SignatureException | MalformedJwtException e) {
+			log.error("잘못된 JWT 서명입니다.");
+		} catch (ExpiredJwtException e) {
+			log.error("만료된 JWT 서명입니다. 토큰 재발급이 필요합니다.");
+			return TokenStatus.IS_EXPIRED;
+		} catch (UnsupportedJwtException e) {
+			log.error("지원되지 않는 JWT 서명입니다.");
+		} catch (IllegalArgumentException e) {
+			log.error("JWT 토큰이 잘못 되었습니다.");
+		}
+		return TokenStatus.IS_NOT_VALID;
 	}
 
 	// 데이터 추출

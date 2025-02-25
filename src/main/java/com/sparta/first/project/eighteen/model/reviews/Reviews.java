@@ -1,9 +1,12 @@
 package com.sparta.first.project.eighteen.model.reviews;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import com.sparta.first.project.eighteen.common.BaseEntity;
+import com.sparta.first.project.eighteen.model.orders.OrderDetails;
 import com.sparta.first.project.eighteen.model.orders.Orders;
 import com.sparta.first.project.eighteen.model.stores.Stores;
 import com.sparta.first.project.eighteen.model.users.Users;
@@ -16,6 +19,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -48,6 +52,11 @@ public class Reviews extends BaseEntity {
 	// 리뷰 이미지
 	@Column
 	private String reviewImgUrl;
+
+	// 리뷰에 포함될 음식 명
+	@OneToMany
+	@JoinColumn(name = "order_detail_id", referencedColumnName = "id")
+	private List<OrderDetails> orderDetails = new ArrayList<>();
 
 	// 주문 ID (해당 주문에 대한 리뷰)
 	@OneToOne(fetch = FetchType.LAZY)

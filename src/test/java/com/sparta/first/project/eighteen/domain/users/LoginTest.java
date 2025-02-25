@@ -3,10 +3,12 @@ package com.sparta.first.project.eighteen.domain.users;
 import static org.mockito.BDDMockito.*;
 
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +23,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.first.project.eighteen.common.dto.ApiResponse;
 import com.sparta.first.project.eighteen.common.security.jwt.JwtUtil;
+import com.sparta.first.project.eighteen.common.security.jwt.RefreshToken;
 import com.sparta.first.project.eighteen.domain.users.dtos.LoginRequestDto;
 
 import lombok.extern.slf4j.Slf4j;
@@ -48,8 +51,14 @@ public class LoginTest {
 	public void loginSuccessTest(String username, String password, String accToken) throws Exception {
 		// given
 		LoginRequestDto requestDto = new LoginRequestDto(username, password);
-		ApiResponse<Map<String, String>> apiResponse = ApiResponse.ok("로그인 성공", Map.of("token", accToken));
+		ApiResponse<Map<String, String>> apiResponse = ApiResponse.ok("로그인 성공", Map.of("accessToken", accToken));
 		given(jwtUtil.generateAccessToken(anyString(), anyString())).willReturn(accToken);
+		RefreshToken testToken = RefreshToken.builder()
+			.expiresIn(10)
+			.userUUID(UUID.randomUUID())
+			.refreshToken("testToken")
+			.build();
+		BDDMockito.given(jwtUtil.generateRefreshToken(anyString(), anyString())).willReturn(testToken);
 
 		// when
 		ResultActions perform = mockMvc.perform(
