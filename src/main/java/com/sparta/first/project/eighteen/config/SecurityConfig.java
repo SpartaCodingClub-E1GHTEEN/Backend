@@ -17,6 +17,7 @@ import com.sparta.first.project.eighteen.common.security.UserDetailsServiceImpl;
 import com.sparta.first.project.eighteen.common.security.jwt.JwtAuthenticationFilter;
 import com.sparta.first.project.eighteen.common.security.jwt.JwtAuthorizationFilter;
 import com.sparta.first.project.eighteen.common.security.jwt.JwtUtil;
+import com.sparta.first.project.eighteen.domain.users.RefreshTokenRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +30,7 @@ public class SecurityConfig {
 	private final JwtUtil jwtUtil;
 	private final UserDetailsServiceImpl userDetailsService;
 	private final AuthenticationConfiguration configuration;
+	private final RefreshTokenRepository refreshTokenRepository;
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -42,7 +44,7 @@ public class SecurityConfig {
 
 	@Bean
 	JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-		JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtil);
+		JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtil, refreshTokenRepository);
 		jwtAuthenticationFilter.setAuthenticationManager(authenticationManager(configuration));
 		return jwtAuthenticationFilter;
 	}
