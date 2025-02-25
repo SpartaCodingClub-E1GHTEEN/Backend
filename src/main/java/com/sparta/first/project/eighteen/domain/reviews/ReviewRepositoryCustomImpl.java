@@ -2,11 +2,8 @@ package com.sparta.first.project.eighteen.domain.reviews;
 
 import static com.sparta.first.project.eighteen.model.reviews.QReviews.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -126,8 +123,8 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
 				reviewOrders.getOrDefault(tuple.get(reviews.id), new ArrayList<>()).toString(),
 				tuple.get(reviews.reviewContent),
 				tuple.get(reviews.reviewRating),
-				tuple.get(reviews.reviewImgUrl),
-				tuple.get(reviews.createdAt.stringValue())
+				Optional.ofNullable(tuple.get(reviews.reviewImgUrl)).orElse("-"),
+				String.valueOf(tuple.get(reviews.createdAt))
 			))
 			.distinct()
 			.collect(Collectors.toList());

@@ -50,7 +50,7 @@ public class ReviewResponseDto {
 			.reviewOrders(getOrderFoodName(review.getOrderDetails()))
 			.reviewContent(review.getReviewContent())
 			.reviewRating(review.getReviewRating())
-			.reviewImgUrl(review.getReviewImgUrl())
+			.reviewImgUrl(review.getReviewImgUrl() == null ? "-" : review.getReviewImgUrl())
 			.createdAt(review.getCreatedAt().toString())
 			.build();
 	}
