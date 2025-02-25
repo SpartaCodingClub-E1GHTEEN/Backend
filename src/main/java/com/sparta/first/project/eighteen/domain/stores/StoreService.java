@@ -1,9 +1,18 @@
 package com.sparta.first.project.eighteen.domain.stores;
 
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
-
+import com.sparta.first.project.eighteen.common.constants.Constant;
+import com.sparta.first.project.eighteen.common.dto.ApiResponse;
+import com.sparta.first.project.eighteen.common.exception.BaseException;
+import com.sparta.first.project.eighteen.common.exception.StoreException;
 import com.sparta.first.project.eighteen.config.S3ManageConfig;
+import com.sparta.first.project.eighteen.domain.reviews.ReviewRepository;
+import com.sparta.first.project.eighteen.domain.stores.dtos.*;
+import com.sparta.first.project.eighteen.domain.users.UserRepository;
+import com.sparta.first.project.eighteen.model.stores.Stores;
+import com.sparta.first.project.eighteen.model.users.Role;
+import com.sparta.first.project.eighteen.model.users.Users;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,25 +20,9 @@ import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.sparta.first.project.eighteen.common.constants.Constant;
-import com.sparta.first.project.eighteen.common.dto.ApiResponse;
-import com.sparta.first.project.eighteen.common.exception.BaseException;
-import com.sparta.first.project.eighteen.common.exception.StoreException;
-import com.sparta.first.project.eighteen.domain.reviews.ReviewRepository;
-import com.sparta.first.project.eighteen.domain.stores.dtos.StoreListResponseDto;
-import com.sparta.first.project.eighteen.domain.stores.dtos.StoreCreateRequestDto;
-import com.sparta.first.project.eighteen.domain.stores.dtos.StoreResponseDto;
-import com.sparta.first.project.eighteen.domain.stores.dtos.StoreSearchDto;
-import com.sparta.first.project.eighteen.domain.stores.dtos.StoreUpdateRequestDto;
-import com.sparta.first.project.eighteen.domain.users.UserRepository;
-import com.sparta.first.project.eighteen.model.stores.Stores;
-import com.sparta.first.project.eighteen.model.users.Role;
-import com.sparta.first.project.eighteen.model.users.Users;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -39,7 +32,7 @@ public class StoreService {
 	private final StoreRepository storeRepository;
 	private final UserRepository userRepository;
 	private final ReviewRepository reviewRepository;
-	private final S3ManageConfig s3UploadConfig;
+	private final S3ManageConfig s3ManageConfig;
 
 	/**
 	 * 식당 생성
@@ -55,7 +48,7 @@ public class StoreService {
 
 		try {
 			if (storeImage != null) {
-				String storeImg = s3UploadConfig.uploadImage(storeImage);
+				String storeImg = s3ManageConfig.uploadImage(storeImage);
 				storeCreateRequestDto.setStoreImgUrl(storeImg);
 				store = storeCreateRequestDto.toEntity(storeOwner);
 			} else {
@@ -141,7 +134,7 @@ public class StoreService {
 
 		try {
 			if (storeImage != null) {
-				String storeImg = s3UploadConfig.uploadImage(storeImage);
+				String storeImg = s3ManageConfig.uploadImage(storeImage);
 				storeRequestDto.setStoreImgUrl(storeImg);
 				updateStore = storeRequestDto.toEntity();
 				storeImgUrl = store.getStoreImgUrl();
@@ -155,7 +148,7 @@ public class StoreService {
 		// 이미지 삭제 요청 보내기
 		if (storeImgUrl != null) {
 			try {
-				s3UploadConfig.deleteImage(storeImgUrl);
+				s3ManageConfig.deleteImage(storeImgUrl);
 			} catch (Exception e) {
 				throw new BaseException("식당 이미지 삭제 실패", Constant.Code.STORE_ERROR, HttpStatus.FORBIDDEN);
 			}
