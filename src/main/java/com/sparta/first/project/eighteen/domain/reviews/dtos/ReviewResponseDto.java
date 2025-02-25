@@ -47,10 +47,10 @@ public class ReviewResponseDto {
 			.id(review.getId().toString())
 			.reviewNickname(review.getUsersId().getUsername())
 			.orderId(review.getOrderId().getId().toString())
-			.reviewOrders(getOrderFoodName(review.getOrderId().getOrderDetails()))
+			.reviewOrders(getOrderFoodName(review.getOrderDetails()))
 			.reviewContent(review.getReviewContent())
 			.reviewRating(review.getReviewRating())
-			.reviewImgUrl(review.getReviewImgUrl())
+			.reviewImgUrl(review.getReviewImgUrl() == null ? "-" : review.getReviewImgUrl())
 			.createdAt(review.getCreatedAt().toString())
 			.build();
 	}

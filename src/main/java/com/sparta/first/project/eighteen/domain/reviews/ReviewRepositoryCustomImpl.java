@@ -2,24 +2,23 @@ package com.sparta.first.project.eighteen.domain.reviews;
 
 import static com.sparta.first.project.eighteen.model.reviews.QReviews.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PagedModel;
+import org.springframework.security.core.parameters.P;
 
-import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.first.project.eighteen.domain.reviews.dtos.ReviewResponseDto;
 import com.sparta.first.project.eighteen.domain.reviews.dtos.ReviewSearchDto;
+import com.sparta.first.project.eighteen.model.orders.QOrderDetails;
 import com.sparta.first.project.eighteen.model.orders.QOrders;
 import com.sparta.first.project.eighteen.model.reviews.QReviews;
 import com.sparta.first.project.eighteen.model.users.QUsers;
@@ -46,20 +45,22 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
 	public Page<ReviewResponseDto> searchReviews(ReviewSearchDto searchDto, Pageable pageable, Role role, UUID storeId) {
 		List<OrderSpecifier<?>> orders = getAllOrderSpecifiers(pageable);
 
-		List<ReviewResponseDto> results = queryFactory
-			.select(Projections.fields(
-				ReviewResponseDto.class,
-				Expressions.stringTemplate("CAST({0} AS string)", reviews.id).as("id"),
-				Expressions.stringTemplate("CAST({0} AS string)", reviews.orderId.id).as("orderId"),
-				reviews.usersId.userNickname.as("reviewNickname"),
-				reviews.reviewContent.as("reviewContent"),
-				reviews.reviewRating.as("reviewRating"),
-				reviews.reviewImgUrl.as("reviewImgUrl"),
-				Expressions.stringTemplate("CAST({0} AS string)", reviews.createdAt).as("createdAt")
-			))
+		// 실행할 쿼리문
+		List<Tuple> tuples = queryFactory
+			.select(
+				reviews.id,
+				reviews.orderId.id,
+				reviews.usersId.userNickname,
+				QOrderDetails.orderDetails.foodName, // orderDetails와 조인해서 개별적으로 가져오기
+				reviews.reviewContent,
+				reviews.reviewRating,
+				reviews.reviewImgUrl,
+				reviews.createdAt
+			)
 			.from(reviews)
 			.leftJoin(reviews.orderId, QOrders.orders)
 			.leftJoin(reviews.usersId, QUsers.users)
+			.leftJoin(reviews.orderDetails, QOrderDetails.orderDetails)
 			.where(
 				whichStore(storeId),
 				reviewRating(searchDto.getReviewRatings()),
@@ -71,8 +72,62 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
 			.limit(pageable.getPageSize())
 			.fetch();
 
-		long total = getAllReviewCnt(storeId, searchDto);
+		// foodName이 여러개라면 Map으로 그룹핑
+		Map<UUID, List<String>> reviewOrders = getFoodNames(tuples);
+
+		// Dto로 변환 (중복은 제거)
+		List<ReviewResponseDto> results = changeIntoResponseDtos(tuples, reviewOrders);
+
+		// 전체 데이터 개수 반환
+		Long total = null;
+		try {
+			total = getAllReviewCnt(storeId, searchDto);
+		} catch (Exception e) {
+			total = Long.valueOf(results.size());
+		}
+
 		return new PageImpl<>(results, pageable, total);
+	}
+
+	/**
+	 * Review에 맞는 음식명들을 Map으로 반환
+	 * @param tuples : tuples 리스트
+	 * @return : 리뷰에 해당하는 음식명들을 Map으로 반환
+	 */
+	private Map<UUID, List<String>> getFoodNames(List<Tuple> tuples) {
+		// 하나의 Review가 여러 개의 foodName을 가질 수 있는 형태 (리뷰 ID가 Key)
+		Map<UUID, List<String>> reviewOrders = new HashMap<>();
+		for (Tuple tuple : tuples) {
+			// Tuple에서 값 추출
+			UUID reviewId = tuple.get(reviews.id);
+			String foodName = tuple.get(QOrderDetails.orderDetails.foodName);
+
+			reviewOrders.computeIfAbsent(reviewId, k -> new ArrayList<>()).add(foodName);
+		}
+
+		return reviewOrders;
+	}
+
+	/**
+	 * ResponseDto 리스트로 변환하는 메서드
+	 * @param tuples : 튜플 리스트
+	 * @param reviewOrders : 음식명들을 담은 Map 데이터
+	 * @return : responseDto로 변환한 리스트
+	 */
+	private List<ReviewResponseDto> changeIntoResponseDtos(List<Tuple> tuples, Map<UUID, List<String>> reviewOrders) {
+		return tuples.stream()
+			.map(tuple -> new ReviewResponseDto(
+				String.valueOf(tuple.get(reviews.id)),
+				String.valueOf(tuple.get(reviews.orderId.id)),
+				tuple.get(reviews.usersId.userNickname),
+				reviewOrders.getOrDefault(tuple.get(reviews.id), new ArrayList<>()).toString(),
+				tuple.get(reviews.reviewContent),
+				tuple.get(reviews.reviewRating),
+				Optional.ofNullable(tuple.get(reviews.reviewImgUrl)).orElse("-"),
+				String.valueOf(tuple.get(reviews.createdAt))
+			))
+			.distinct()
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -81,7 +136,7 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
 	 * @param searchDto : 검색 내용
 	 * @return : 리뷰 개수 반환
 	 */
-	private long getAllReviewCnt(UUID storeId, ReviewSearchDto searchDto) {
+	private Long getAllReviewCnt(UUID storeId, ReviewSearchDto searchDto) {
 		return queryFactory
 			.select(reviews.count())
 			.from(reviews)
