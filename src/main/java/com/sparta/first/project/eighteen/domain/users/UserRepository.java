@@ -9,4 +9,6 @@ import com.sparta.first.project.eighteen.model.users.Users;
 
 public interface UserRepository extends JpaRepository<Users, UUID>, UserSearchRepository {
 	Optional<Users> findByUsername(String username);
+
+	Optional<Users> findByUserIdAndIsDeletedIsFalse(UUID userId);
 }
