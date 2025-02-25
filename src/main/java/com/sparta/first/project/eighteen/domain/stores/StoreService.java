@@ -153,7 +153,7 @@ public class StoreService {
 	 * @return : 조회한 식당
 	 */
 	public Stores findStore(UUID storeId) {
-		return storeRepository.findById(storeId).filter(s -> s.getIsDeleted() == false)
+		return storeRepository.findById(storeId).filter(s -> !s.getIsDeleted())
 			.orElseThrow(() -> new StoreException.StoreNotFound());
 	}
 
@@ -163,7 +163,7 @@ public class StoreService {
 	 * @return : 조회한 사용자
 	 */
 	public Users findStoreOwner(UUID userId) {
-		return userRepository.findById(userId).filter(s -> s.getIsDeleted() == false).orElseThrow(
+		return userRepository.findById(userId).filter(s -> !s.getIsDeleted()).orElseThrow(
 			() -> new BaseException("존재하지 않는 유저", -1, HttpStatus.NOT_FOUND));
 	}
 
@@ -173,7 +173,7 @@ public class StoreService {
 	 * @return : 조회한 사용자
 	 */
 	public Users findStoreOwnerByUsername(String username) {
-		return userRepository.findByUsername(username).filter(s -> s.getIsDeleted() == false).orElseThrow(
+		return userRepository.findByUsername(username).filter(s -> !s.getIsDeleted()).orElseThrow(
 			() -> new BaseException("존재하지 않는 유저", -1, HttpStatus.NOT_FOUND));
 	}
 
@@ -184,7 +184,7 @@ public class StoreService {
 	 * @return : 조회한 사용자의 권한
 	 */
 	public Role findUserRole(UUID userId) {
-		return userRepository.findById(userId).filter(s -> s.getIsDeleted() == false).orElseThrow(
+		return userRepository.findById(userId).filter(s -> !s.getIsDeleted()).orElseThrow(
 			() -> new BaseException("존재하지 않는 유저", -1, HttpStatus.NOT_FOUND)).getRole();
 	}
 }

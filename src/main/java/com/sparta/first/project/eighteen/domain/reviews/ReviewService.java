@@ -197,7 +197,7 @@ public class ReviewService {
 	 * @return : 조회한 사용자
 	 */
 	public Users findReviewerById(UUID userId) {
-		return userRepository.findById(userId).orElseThrow(
+		return userRepository.findById(userId).filter(u -> !u.getIsDeleted()).orElseThrow(
 			() -> new UserException.UserNotFound());
 	}
 
@@ -207,7 +207,7 @@ public class ReviewService {
 	 * @return : 조회한 사용자
 	 */
 	public Role findUserRole(UUID userId) {
-		return userRepository.findById(userId).orElseThrow(
+		return userRepository.findById(userId).filter(u -> !u.getIsDeleted()).orElseThrow(
 			() -> new UserException.UserNotFound()).getRole();
 	}
 
