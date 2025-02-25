@@ -43,10 +43,10 @@ public class OrderService {
 	private final FoodsRepository foodsRepository;
 
 	public String createOrder(OrderCreateRequestDto requestDto, UUID userId) {
-		Stores store = storeRepository.findById(UUID.fromString(requestDto.getStoreId()))
+		Stores store = storeRepository.findByIdAndDeletedAtIsFalse(UUID.fromString(requestDto.getStoreId()))
 			.orElseThrow(() -> new StoreException.StoreNotFound());
 
-		Users customer = userRepository.findById(userId)
+		Users customer = userRepository.findByUserIdAndIsDeletedIsFalse(userId)
 			.orElseThrow(() -> new UserException.UserNotFound());
 
 		Orders order = ordersRepository.save(requestDto.toEntity(store, customer));
@@ -54,7 +54,7 @@ public class OrderService {
 		for (OrderDetailsRequestDto orderDetail : requestDto.getOrderDetails()) {
 			String id = orderDetail.getProductId();
 			UUID uuid = UUID.fromString(id);
-			Foods food = foodsRepository.findById(UUID.fromString(orderDetail.getProductId()))
+			Foods food = foodsRepository.findByIdAndIsDeletedFalse(UUID.fromString(orderDetail.getProductId()))
 				.orElseThrow(() -> new FoodException.FoodNotFound());
 
 			OrderDetails orderDetailsEntity = orderDetailsRepository.save(
@@ -80,7 +80,7 @@ public class OrderService {
 
 	@Transactional(readOnly = true)
 	public OrderResponseDto readOrder(String id) {
-		Orders orders = ordersRepository.findById(UUID.fromString(id))
+		Orders orders = ordersRepository.findByIdAndIsDeletedIsFalse(UUID.fromString(id))
 			.orElseThrow(() -> new OrderException.OrderNotFound());
 
 		return OrderResponseDto.fromEntity(orders);
@@ -95,17 +95,17 @@ public class OrderService {
 
 	@Transactional
 	public OrderResponseDto updateOrder(OrderUpdateRequestDto requestDto, String id) {
-		Orders orders = ordersRepository.findById(UUID.fromString(id))
+		Orders orders = ordersRepository.findByIdAndIsDeletedIsFalse(UUID.fromString(id))
 			.orElseThrow(() -> new OrderException.OrderNotFound());
 
 		orders.update(requestDto);
-		
+
 		return OrderResponseDto.fromEntity(orders);
 	}
 
 	@Transactional
 	public OrderResponseDto cancelOrder(String id) {
-		Orders orders = ordersRepository.findById(UUID.fromString(id))
+		Orders orders = ordersRepository.findByIdAndIsDeletedIsFalse(UUID.fromString(id))
 			.orElseThrow(() -> new OrderException.OrderNotFound());
 
 		orders.cancel();
@@ -114,7 +114,7 @@ public class OrderService {
 	}
 
 	public void deleteOrder(String id, String userId) {
-		Orders orders = ordersRepository.findById(UUID.fromString(id))
+		Orders orders = ordersRepository.findByIdAndIsDeletedIsFalse(UUID.fromString(id))
 			.orElseThrow(() -> new OrderException.OrderNotFound());
 
 		orders.delete(true, userId);

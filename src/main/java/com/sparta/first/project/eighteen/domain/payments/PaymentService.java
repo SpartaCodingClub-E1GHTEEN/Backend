@@ -27,7 +27,7 @@ public class PaymentService {
 	private final PGService pgService;
 
 	public PaymentResponseDto createPayment(PaymentCreateRequestDto requestDto) {
-		Orders orders = ordersRepository.findById(UUID.fromString(requestDto.getOrderId()))
+		Orders orders = ordersRepository.findByIdAndIsDeletedIsFalse(UUID.fromString(requestDto.getOrderId()))
 			.orElseThrow(OrderException.OrderNotFound::new);
 
 		Payments payment = paymentsRepository.save(requestDto.toEntity());
@@ -36,7 +36,7 @@ public class PaymentService {
 	}
 
 	public String requestPayment(String orderId, PaymentMethod paymentMethod) {
-		Orders orders = ordersRepository.findById(UUID.fromString(orderId))
+		Orders orders = ordersRepository.findByIdAndIsDeletedIsFalse(UUID.fromString(orderId))
 			.orElseThrow(OrderException.OrderNotFound::new);
 
 		return pgService.requestPayment(orders, paymentMethod);
@@ -44,14 +44,14 @@ public class PaymentService {
 
 	@Transactional(readOnly = true)
 	public PaymentResponseDto readPayment(String id) {
-		Payments payment = paymentsRepository.findById(UUID.fromString(id))
+		Payments payment = paymentsRepository.findByIdAndIsDeletedIsFalse(UUID.fromString(id))
 			.orElseThrow(PaymentException.PaymentNotFound::new);
 
 		return PaymentResponseDto.fromEntity(payment);
 	}
 
 	public PaymentResponseDto updatePayment(String id, PaymentStatus status) {
-		Payments payment = paymentsRepository.findById(UUID.fromString(id))
+		Payments payment = paymentsRepository.findByIdAndIsDeletedIsFalse(UUID.fromString(id))
 			.orElseThrow(PaymentException.PaymentNotFound::new);
 
 		payment.updateStatus(status);
@@ -60,7 +60,7 @@ public class PaymentService {
 	}
 
 	public void deletePayment(String id, String userId) {
-		Payments payment = paymentsRepository.findById(UUID.fromString(id))
+		Payments payment = paymentsRepository.findByIdAndIsDeletedIsFalse(UUID.fromString(id))
 			.orElseThrow(PaymentException.PaymentNotFound::new);
 
 		payment.delete(true, userId);

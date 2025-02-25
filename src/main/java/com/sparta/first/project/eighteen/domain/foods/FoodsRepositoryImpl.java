@@ -36,7 +36,8 @@ public class FoodsRepositoryImpl implements FoodsCustomRepository {
 			.from(foods)
 			.leftJoin(foods.foodOptions, foodOptions).fetchJoin()
 			.where(
-				keywordContains(requestDto.getKeyword())
+				keywordContains(requestDto.getKeyword()),
+				foods.isDeleted.eq(false)
 			)
 			.orderBy(getSortedColumn(requestDto))
 			.offset(pageable.getOffset())

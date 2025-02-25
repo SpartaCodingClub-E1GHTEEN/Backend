@@ -83,3 +83,9 @@ VALUES (100, '5041f782-dd83-4574-b6bd-01c56959c174', 'e9dba50f-d537-4600-ad6c-63
         '64790350-de55-45db-8942-0adfb374b908', '아이스로 변경'),
        (500, '60a79ba2-1f93-44f8-9933-ca81de421d89', '1d14bb1d-7bd0-47d3-a468-58fd1b5fbf1b',
         '64790350-de55-45db-8942-0adfb374b908', '시럽 추가');
+
+INSERT INTO p_payments (amount, is_deleted, payment_method, status, created_at, deleted_at, modified_at,
+                        payment_time, id, order_id, created_by, deleted_by, modified_by, pg_payment_id)
+VALUES (100, false, 2, 1, '2025-02-24 15:27:03.251784', null, '2025-02-24 15:27:03.251784',
+        '2025-02-24 15:27:03.248779', '5f81d576-338e-4d96-a042-0a71f8a7e0cf', '4314ce28-3ea1-4fe5-b0b3-8e6394b18c2e',
+        'fccf3448-03c7-47a4-a108-ce6c39815a37', null, 'fccf3448-03c7-47a4-a108-ce6c39815a37', '20250224NP1194451878');
