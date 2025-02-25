@@ -54,8 +54,7 @@ public class SecurityConfig {
 			.csrf(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
-			.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.cors(AbstractHttpConfigurer::disable);
+			.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		// 필터 관리
 		http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class)
