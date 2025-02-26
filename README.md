@@ -224,7 +224,7 @@ jwt:
 
 ------------
 ### 👨‍💻 아키텍처
-<p align="center"><img src="https://github.com/user-attachments/assets/0469db11-0232-4ba1-8752-9c6c47f9a1bc" width="600"/></p>
+<p align="center"><img src="https://github.com/user-attachments/assets/91d6d5a2-002d-44bc-8764-c545c43e5ffe" width="600"/></p>
 
 <br>
 
