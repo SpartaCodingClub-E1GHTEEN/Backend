@@ -7,15 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.sparta.first.project.eighteen.common.constants.Constant;
 import com.sparta.first.project.eighteen.common.dto.ApiResponse;
@@ -30,6 +22,7 @@ import com.sparta.first.project.eighteen.model.users.Role;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -48,8 +41,9 @@ public class ReviewController {
 	@PostMapping("/reviews")
 	public ResponseEntity<ApiResponse<ReviewResponseDto>> createReview(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@RequestBody @Valid ReviewCreateRequestDto requestDto) {
-		ReviewResponseDto responseDto = reviewService.createReview(userDetails.getUserUUID(), requestDto);
+		@RequestParam(value = "reviewImage") MultipartFile reviewImage,
+		@ModelAttribute @Valid ReviewCreateRequestDto requestDto) {
+		ReviewResponseDto responseDto = reviewService.createReview(userDetails.getUserUUID(), requestDto, reviewImage);
 		return ResponseEntity.ok(ApiResponse.ok("성공", responseDto));
 	}
 
@@ -91,7 +85,8 @@ public class ReviewController {
 	public ResponseEntity<ApiResponse<ReviewResponseDto>> updateReview(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable UUID reviewId,
-		@RequestBody @Valid ReviewUpdateRequestDto requestDto) {
+		@RequestParam(value = "reviewImage") MultipartFile reviewImage,
+		@ModelAttribute @Valid ReviewUpdateRequestDto requestDto) {
 
 		log.info("ReviewController - updateReview | reviewId - " + reviewId);
 
@@ -101,7 +96,7 @@ public class ReviewController {
 			throw new BaseException("리뷰를 수정할 권한이 없습니다", Constant.Code.REVIEW_ERROR, HttpStatus.BAD_GATEWAY);
 		}
 
-		ReviewResponseDto responseDto = reviewService.updateReview(userDetails.getUserUUID(), reviewId, requestDto);
+		ReviewResponseDto responseDto = reviewService.updateReview(userDetails.getUserUUID(), reviewId, requestDto, reviewImage);
 		return ResponseEntity.ok(ApiResponse.ok("성공", responseDto));
 	}
 

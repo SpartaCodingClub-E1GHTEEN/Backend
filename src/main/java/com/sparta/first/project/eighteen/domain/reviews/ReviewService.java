@@ -3,6 +3,7 @@ package com.sparta.first.project.eighteen.domain.reviews;
 import java.util.List;
 import java.util.UUID;
 
+import com.sparta.first.project.eighteen.config.S3ManageConfig;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +35,7 @@ import com.sparta.first.project.eighteen.model.users.Users;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -44,14 +46,17 @@ public class ReviewService {
 	private final StoreRepository storeRepository;
 	private final OrdersRepository ordersRepository;
 	private final ReviewRepository reviewRepository;
+	private final S3ManageConfig s3ManageConfig;
 
 	/**
 	 * 리뷰 작성
-	 * @param userId : 리뷰를 작성하고자 하는 사용자명
-	 * @param requestDto : 리뷰 내용
+	 *
+	 * @param userId      : 리뷰를 작성하고자 하는 사용자명
+	 * @param requestDto  : 리뷰 내용
+	 * @param reviewImage
 	 * @return : 작성한 리뷰
 	 */
-	public ReviewResponseDto createReview(UUID userId, ReviewCreateRequestDto requestDto) {
+	public ReviewResponseDto createReview(UUID userId, ReviewCreateRequestDto requestDto, MultipartFile reviewImage) {
 		// 주문 탐색
 		Orders order = findOrders(requestDto.getOrderId());
 		Stores store = findStore(order.getStore().getId());
@@ -69,7 +74,21 @@ public class ReviewService {
 
 		List<OrderDetails> orderDetails = order.getOrderDetails();
 
-		Reviews review = requestDto.toEntity(store, order, user, orderDetails);
+		Reviews review;
+
+		try {
+			if (reviewImage != null) {
+				String reviewImg = s3ManageConfig.uploadImage(reviewImage);
+				requestDto.setReviewImgUrl(reviewImg);
+				review = requestDto.toEntity(store, order, user, orderDetails);
+			} else {
+				requestDto.setReviewImgUrl("-");
+				throw new Exception(); // 강제로 예외 발생
+			}
+		} catch (Exception e) {
+			review = requestDto.toEntity(store, order, user, orderDetails);
+		}
+
 		Reviews newReview = reviewRepository.save(review);
 		return ReviewResponseDto.fromEntity(newReview);
 	}
@@ -117,13 +136,15 @@ public class ReviewService {
 
 	/**
 	 * 리뷰 수정
-	 * @param userId : 수정하려는 사용자명
-	 * @param reviewId : 수정할 리뷰 ID
-	 * @param requestDto : 수정할 리뷰 내용
+	 *
+	 * @param userId      : 수정하려는 사용자명
+	 * @param reviewId    : 수정할 리뷰 ID
+	 * @param requestDto  : 수정할 리뷰 내용
+	 * @param reviewImage
 	 * @return : 수정한 리뷰
 	 */
 	@Transactional
-	public ReviewResponseDto updateReview(UUID userId, UUID reviewId, ReviewUpdateRequestDto requestDto) {
+	public ReviewResponseDto updateReview(UUID userId, UUID reviewId, ReviewUpdateRequestDto requestDto, MultipartFile reviewImage) {
 		Reviews review = findReview(reviewId);
 		Users user = findReviewerById(userId);
 
@@ -133,7 +154,32 @@ public class ReviewService {
 			throw new BaseException("리뷰 작성자가 아닙니다.", Constant.Code.REVIEW_ERROR, HttpStatus.NOT_FOUND.FORBIDDEN);
 		}
 
-		Reviews updateReview = requestDto.toEntity();
+		// 식당 내용 update
+		Reviews updateReview;
+		String reviewImgUrl = null;
+
+		try {
+			if (reviewImage != null) {
+				String reviewImg = s3ManageConfig.uploadImage(reviewImage);
+				requestDto.setReviewImgUrl(reviewImg);
+				updateReview = requestDto.toEntity();
+				reviewImgUrl = review.getReviewImgUrl();
+			} else {
+				throw new Exception(); // 강제로 예외 발생
+			}
+		} catch (Exception e) {
+			updateReview = requestDto.toEntity();
+		}
+
+		// 이미지 삭제 요청 보내기
+		if (reviewImgUrl != null) {
+			try {
+				s3ManageConfig.deleteImage(reviewImgUrl);
+			} catch (Exception e) {
+				throw new BaseException("식당 이미지 삭제 실패", Constant.Code.STORE_ERROR, HttpStatus.FORBIDDEN);
+			}
+		}
+
 		review.updateReview(updateReview);
 		return ReviewResponseDto.fromEntity(review);
 	}
